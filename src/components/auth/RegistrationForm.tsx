@@ -5,8 +5,9 @@ import { z } from "zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Button, Spinner } from "@nextui-org/react";
 import { api } from "../../helpers/api"; 
-import { useUserStore } from "../../store/userStore";
+import { useUserStore, generateRandomAvatar } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 
 // Zod Schema for Form Validation
@@ -27,9 +28,11 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 const RegistrationForm = () => {
   const setUser = useUserStore((state) => state.setUser);
+  const setAddress = useUserStore((state) => state.setAddress);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const avatarPicture = generateRandomAvatar();
 
   const {
     register,
@@ -51,8 +54,9 @@ const RegistrationForm = () => {
       });
 
       const { user, token } = response.data;
+      user.profilePicture = user.profilePicture || avatarPicture;
       setUser(user, token);
-      alert("Registration successful!");
+
       setSubmissionError(null);
       router.push("/dashboard");
     } catch (error: any) {
@@ -181,13 +185,14 @@ const RegistrationForm = () => {
 
         {/* Submit Button */}
         <div className="flex flex-col items-center justify-center mt-6">
-          <button
+          <Button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline"
-            disabled={loading}
+            color="primary"
+            isDisabled={loading}
+            className="w-full max-w-[200px] flex justify-center"
           >
-            {loading ? "Registering..." : "Register"}
-          </button>
+            {loading ? <Spinner size="sm" color="white" /> : "Register"}
+          </Button>
         </div>
 
         {/* Login Link */}

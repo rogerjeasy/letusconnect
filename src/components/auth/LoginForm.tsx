@@ -5,11 +5,10 @@ import { z } from "zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Spinner } from "@nextui-org/react";
-import { useUserStore } from "../../store/userStore";
+import { Spinner, Button } from "@nextui-org/react";
+import { useUserStore, generateRandomAvatar } from "../../store/userStore";
 import { api } from "../../helpers/api";
 import { useRouter } from "next/navigation";
-
 
 // Zod Schema for Form Validation
 const loginSchema = z.object({
@@ -24,6 +23,7 @@ const LoginForm = () => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const avatarPicture = generateRandomAvatar();
 
   const {
     register,
@@ -40,8 +40,9 @@ const LoginForm = () => {
 
       if (response.status === 200) {
         const { user, token } = response.data;
+        user.profilePicture = user.profilePicture || avatarPicture;
         setUser(user, token);
-        alert(response.data.message);
+
         setSubmissionError(null);
         router.push("/dashboard");
       }
@@ -106,13 +107,14 @@ const LoginForm = () => {
 
         {/* Submit Button with Spinner */}
         <div className="flex flex-col items-center justify-center mt-6">
-          <button
+          <Button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline flex items-center justify-center"
-            disabled={loading} // Disable button while loading
+            color="primary"
+            isDisabled={loading}
+            className="w-full max-w-[200px] flex justify-center"
           >
             {loading ? <Spinner size="sm" color="white" /> : "Login"}
-          </button>
+          </Button>
         </div>
 
         {/* Register Link */}

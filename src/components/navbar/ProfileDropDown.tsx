@@ -10,10 +10,11 @@ import {
   User,
 } from "@nextui-org/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
 import ViewUserProfile from "../userprofile/ViewProfile";
 import Logout from "../userprofile/Logout";
+import { useFetchAddress } from "../../store/useFetchAddress";
 
 type ProfileDropDownProps = {
   type: "avatar" | "user";
@@ -22,14 +23,23 @@ type ProfileDropDownProps = {
     email: string;
     username?: string;
     avatarUrl: string;
+    token?: string;
   };
 };
 
 const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) => {
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
   const profileItems: DropdownContentItem[] = menuOptions.Profile;
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  const token = localStorage.getItem("token");
+
+  // Address state management
+  const {
+    address,
+    setAddress,
+    fetchAddress,
+  } = useFetchAddress(token!);
 
   const handleViewProfile = () => {
     setProfileModalOpen(true);
@@ -39,8 +49,9 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
     setLogoutModalOpen(true);
   };
 
-  const handleSettingsRedirect = () => {
-    router.push("/settings"); // Redirect to the settings page
+  const handleSettingsRedirect = async () => {
+    await fetchAddress();
+    router.push("/settings");
   };
 
   return (

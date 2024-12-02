@@ -25,7 +25,7 @@ export default function UserSelection({
   defaultValue?: string | string[];
   onChange?: (value: string | string[]) => void;
 }) {
-  const { countries, setCountries, setSelectedCountry } = useCountryStore();
+  const { countries, setCountries } = useCountryStore();
   const {
     languages,
     phoneCodes,
@@ -83,12 +83,17 @@ export default function UserSelection({
     }
   }, [countries, setCountries, languages, setLanguages, phoneCodes.length, setPhoneCodes]);
 
-  const handleSelect = (value: string | string[]) => {
+  const handleSelect = (value: any) => {
+
     if (selectionMode === "country") {
       const selected = countries.find((country) => country.name === value);
+
       if (selected) {
-        setSelectedCountry(selected);
-        if (onChange) onChange(selected.name);
+        console.log("Selected country:", selected.name); // Log selected country
+        onChange?.(selected.name); // Call onChange with the country's name
+      } else {
+        console.error("Selected country not found");
+        console.log("Available countries for matching:", countries.map((c) => c.name));
       }
     } else if (selectionMode === "language") {
       const selectedLanguages = Array.isArray(value)
@@ -114,11 +119,36 @@ export default function UserSelection({
           className="max-w-full"
           label="Select Country"
           defaultSelectedKeys={typeof defaultValue === "string" ? [defaultValue] : undefined}
-          onChange={(value) => handleSelect(value.toString())}
+          onChange={(selectedKeys) => {
+            // `selectedKeys` is an array (due to the multiple selection handling in Select)
+            const selectedValue = Array.isArray(selectedKeys) ? selectedKeys[0] : selectedKeys;
+
+            console.log("Selected key (value):", selectedValue);
+
+            if (typeof selectedValue === "string") {
+              console.log("Selected value from <Select>:", selectedValue);
+        
+              // Match the selected value to the country name
+              const selectedCountry = countries.find(
+                (country) => country.name === selectedValue
+              );
+        
+              if (selectedCountry) {
+                console.log("Matched country:", selectedCountry.name);
+                onChange?.(selectedCountry.name); 
+              } else {
+                console.error("Country not found in the list.");
+                console.log("Available countries:", countries.map((country) => country.name));
+              }
+            } else {
+              console.error("Unexpected value type:", selectedValue);
+            }
+          }}
         >
           {countries.map((country) => (
             <SelectItem
               key={country.name}
+              value={country.name}
               startContent={
                 <Avatar alt={country.name} className="w-6 h-6" src={country.flag} />
               }

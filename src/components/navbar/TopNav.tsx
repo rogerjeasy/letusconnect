@@ -9,7 +9,7 @@ import {  Dropdown,
   DropdownItem,
   Input,
 } from "@nextui-org/react";
-import { useUserStore } from "../../store/userStore";
+import { useUserStore, generateRandomAvatar } from "../../store/userStore";
 import { ChevronDown } from "./Icons";
 import { SearchIcon } from "./SearchIcon";
 import MobileMenu from "./MobileNavBar";
@@ -23,6 +23,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const avatarPicture = user?.profilePicture || generateRandomAvatar();
 
   const icons = {
     chevron: <ChevronDown fill="currentColor" size={16} />,
@@ -161,7 +162,7 @@ const Navbar = () => {
                 userDetails={{
                   name: user?.username || "User",
                   email: user?.email || "user@example.com",
-                  avatarUrl: user?.profilePicture || "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+                  avatarUrl: avatarPicture,
                 }}
               />
             </div>

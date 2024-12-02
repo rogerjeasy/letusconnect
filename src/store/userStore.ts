@@ -20,7 +20,7 @@ export interface User {
   lookingForMentor: boolean;
   willingToMentor: boolean;
   connectionsMade: number;
-  accountCreatedAt: Date;
+  accountCreatedAt: string;
   isActive: boolean;
   isVerified: boolean;
   program: string;
@@ -160,3 +160,8 @@ export function useAuth() {
 
   return { user, isAuthenticated };
 }
+
+export const generateRandomAvatar = (): string => {
+  const uniqueId = Math.random().toString(36).substring(7);
+  return `https://picsum.photos/seed/${uniqueId}/150/150?nature`;
+};

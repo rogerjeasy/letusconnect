@@ -24,7 +24,7 @@ export const useFetchAddress = (token: string) => {
       });
 
       // Address found, populate the fields
-      setAddress(response.data[0]);
+      setAddress(response.data.addresses[0]);
       setAddressResponseStatus(200);
     } catch (error: any) {
       if (error.response?.status === 404) {

@@ -9,7 +9,7 @@ import {
   Button,
   Avatar,
 } from "@nextui-org/react";
-import { useUserStore } from "../../store/userStore";
+import { useUserStore, generateRandomAvatar } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -21,6 +21,7 @@ type ViewUserProfileProps = {
   export default function ViewUserProfile({ isOpen, onClose }: ViewUserProfileProps) {
   const { user, isAuthenticated } = useUserStore();
   const router = useRouter();
+  const avatarPicture = user?.profilePicture || generateRandomAvatar();
 
   // Protect the page
   useEffect(() => {
@@ -51,12 +52,12 @@ type ViewUserProfileProps = {
               {/* Modal Header */}
               <ModalHeader className="flex flex-col gap-1 text-center">
                 <Avatar
-                  src={user?.profilePicture || ""}
+                  src={avatarPicture}
                   alt={user?.username || "User Avatar"}
                   size="sm"
                   className="border-2 border-white"
                 >
-                  {!user?.profilePicture && user?.username?.charAt(0).toUpperCase()}
+                  {avatarPicture && user?.username?.charAt(0).toUpperCase()}
                 </Avatar>
                 <h1 className="text-xl font-bold mt-4">
                   {user?.firstName} {user?.lastName || ""}

@@ -2,37 +2,37 @@
 
 import { Input } from "@nextui-org/react";
 
-interface InputToUpdateProps {
+interface InputToUpdateProps<T = any> {
   type: string;
   label: string;
   placeholder: string;
-  defaultValue: string;
+  value: T; // Generic type for value
   labelColor?: string;
   variant?: "bordered" | "faded";
-  onChange: (value: string) => void;
+  onChange: (value: T) => void;
 }
 
-export default function InputToUpdate({
+export default function InputToUpdate<T = any>({
   type,
   label,
   placeholder,
-  defaultValue,
+  value,
   labelColor = "text-black",
   variant = "faded",
   onChange,
-}: InputToUpdateProps) {
+}: InputToUpdateProps<T>) {
   return (
     <Input
       type={type}
       label={label}
       placeholder={placeholder}
-      defaultValue={defaultValue}
+      value={value as string}
       className="max-w-xs"
       variant={variant}
       classNames={{
-        label: labelColor ? `${labelColor} font-bold` : undefined
+        label: labelColor ? `${labelColor} font-bold` : undefined,
       }}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e.target.value as T)}
     />
   );
 }
