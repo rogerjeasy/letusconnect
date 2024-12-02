@@ -159,7 +159,7 @@ export default function UserProfileCard() {
                 <InputForm type="text" label="Your UserID:" value={profile.uid || ""} />
             </div>
             <div className="flex-1 min-w-[200px]">
-                <InputForm type="text" label="Verified Profile" value={profile.isVerified || false} />
+                <InputForm type="text" label="Verified Profile" value={profile.isVerified ? "Verified" : "Not Verified"} />
             </div>
             <div className="flex-1 min-w-[200px]">
                 <InputForm type="text" label="Created" 
@@ -209,7 +209,7 @@ export default function UserProfileCard() {
 
             <div className="flex flex-wrap gap-4 mt-4">
             <div className="flex-1 min-w-[200px]">
-              <InputForm type="text" label="Role" value={profile.role.join(", ")} />
+              <InputForm type="text" label="Role" value={profile.role?.join(", ") || "No roles available"} />
             </div>
 
             <div className="flex-1 min-w-[200px]">
@@ -243,7 +243,7 @@ export default function UserProfileCard() {
                 <InputForm type="text" label="Phone Number" 
                   value={
                     profile.phoneCode && profile.phoneNumber
-                      ? `${profile.phoneCode} ${profile.phoneNumber}`
+                      ? `(${profile.phoneCode}) ${profile.phoneNumber}`
                       : "No phone number available"
                   } 
                 />

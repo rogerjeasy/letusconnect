@@ -97,16 +97,12 @@ export default function UserSelection({
   };
 
   const handleCountrySelect = (selectedKeys: Set<string>) => {
-    // Extract the selected value from the Set
     const selectedKey = Array.from(selectedKeys)[0];
-    console.log("Selected key for country select: ", selectedKey);
   
     const selectedCountry = countries.find((country) => country.name === selectedKey);
-    console.log("Selected country: ", selectedCountry);
   
     if (selectedCountry && onChange) {
-      console.log("Selected country name: ", selectedCountry.name);
-      onChange(selectedCountry.name); // Pass the country name
+      onChange(selectedCountry.name);
     }
   };
   
