@@ -22,6 +22,8 @@ import { formatFirestoreTimestamp } from "../utils/dateUtils";
 import { useUserLanguageStore } from "@/store/userLanguageStore";
 import { api } from "../../helpers/api";
 import Scroll from "./Scroll";
+// import InputDate from "../forms/InputDate";
+// import { parseDate } from "@internationalized/date";
 
 export default function UserProfileCard() {
   const { user, isAuthenticated, setUser } = useUserStore();
@@ -77,6 +79,8 @@ export default function UserProfileCard() {
   const handleSave = async () => {
     setIsUpdating(true);
 
+    console.log("Profile to update:", profile);
+
     try {
       
       const response = await api.put(`/api/users/${user?.uid}`, profile, {
@@ -110,18 +114,6 @@ export default function UserProfileCard() {
   const handleCancel = () => {
     setProfile({ ...originalProfile });
     setIsEditing(false);
-  };
-
-  const handleLanguageChange = (selected: string[]) => {
-    const selectedLanguages = languageOptions.filter((option) =>
-      selected.includes(option.value)
-    );
-    selectedLanguages.forEach((language) => {
-      setSelectedLanguage({
-        code: language.value,
-        name: language.label,
-      });
-    });
   };
 
   if (!isAuthenticated || !user) {
@@ -217,28 +209,24 @@ export default function UserProfileCard() {
 
             <div className="flex flex-wrap gap-4 mt-4">
             <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
-                <InputToUpdate
-                    type="text"
-                    label="Role"
-                    placeholder="Enter role"
-                    value={profile.role || ""}
-                    onChange={(value) => handleUpdateField("role", value)}
-                />
-                ) : (
-                <InputForm type="text" label="Role" value={profile.role || ""} />
-                )}
+              <InputForm type="text" label="Role" value={profile.role.join(", ")} />
             </div>
 
             <div className="flex-1 min-w-[200px]">
                 {isEditing ? (
                 <SelectCountry
                     selectionMode="phone"
-                    defaultValue={profile.phoneNumber || ""}
-                    onChange={(selected) => handleUpdateField("phoneNumber", selected)}
+                    defaultValue={profile.phoneCode || ""}
+                    onChange={(selected) => handleUpdateField("phoneCode", selected as string)}
                 />
                 ) : (
-                <InputForm type="text" label="Country" value={profile.phoneNumber || ""} />
+                <InputForm type="text" label="Phone Code" 
+                value={
+                    profile.phoneCode
+                      ? `${profile.phoneCode}`
+                      : "No phone code"
+                  }
+                />
                 )}
             </div>
 
@@ -252,7 +240,13 @@ export default function UserProfileCard() {
                     onChange={(value) => handleUpdateField("phoneNumber", value)}
                 />
                 ) : (
-                <InputForm type="text" label="Phone Number" value={profile.phoneNumber || ""} />
+                <InputForm type="text" label="Phone Number" 
+                  value={
+                    profile.phoneCode && profile.phoneNumber
+                      ? `${profile.phoneCode} ${profile.phoneNumber}`
+                      : "No phone number available"
+                  } 
+                />
                 )}
             </div>
             </div>
@@ -284,27 +278,55 @@ export default function UserProfileCard() {
             </div>
 
             <div className="flex flex-wrap gap-4 mt-4">
-            <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
-                <Scroll>
-                    <SelectCountry
-                    selectionMode="language"
-                    defaultValue={languageOptions.map((option) => option.value)}
-                    onChange={(selected) => handleLanguageChange(selected as string[])}
-                    />
-                </Scroll>
-                ) : (
-                <InputForm
-                    type="text"
-                    label="Languages"
-                    value={
-                    profile.languages && profile.languages.length > 0
-                        ? profile.languages.join(", ")
-                        : "No languages selected"
-                    }
-                />
-                )}
-            </div>
+                
+                <div className="flex-1 min-w-[200px]">
+                    {isEditing ? (
+                        <Scroll>
+                        <SelectCountry
+                            selectionMode="language"
+                            defaultValue={profile.languages || []} // Pass current languages as default
+                            onChange={(selectedLanguages) => {
+                            handleUpdateField("languages", selectedLanguages as string[]); // Update languages in the profile
+                            }}
+                        />
+                        </Scroll>
+                    ) : (
+                        <InputForm
+                        type="text"
+                        label="Languages"
+                        value={
+                            profile.languages && profile.languages.length > 0
+                            ? profile.languages.join(", ") // Display selected languages as a comma-separated string
+                            : "No languages selected"
+                        }
+                        />
+                    )}
+                </div>
+
+
+                {/* <div className="flex-1 min-w-[200px]">
+                    {isEditing ? (
+                        <InputDate
+                            label="Birth Date"
+                            defaultValue={profile.dateOfBirth ? parseDate(profile.dateOfBirth.toString()) : null}
+                            onChange={(date) => {
+                                if (date) {
+                                    handleUpdateField("dateOfBirth", date.toString()); // Update the date in the profile
+                                }
+                            }}
+                        />
+                    ) : (
+                        <InputForm
+                            type="text"
+                            label="Birth Date"
+                            value={
+                                profile.dateOfBirth
+                                  ? profile.dateOfBirth.toString() // Convert `DateValue` to string for display
+                                  : "Not specified"
+                              }
+                        />
+                    )}
+                </div> */}
             </div>
         </CardBody>
         <Divider />

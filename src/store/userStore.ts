@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useEffect } from "react";
+import { DateValue } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 
 // Define the User interface to match the server-side model
@@ -12,7 +13,7 @@ export interface User {
   phoneNumber: string;
   profilePicture: string;
   bio: string;
-  role: string;
+  role: string[];
   graduationYear: number;
   currentJobTitle: string;
   areasOfExpertise: string[];
@@ -24,6 +25,8 @@ export interface User {
   isActive: boolean;
   isVerified: boolean;
   program: string;
+  dateOfBirth: DateValue | null;
+  phoneCode: string;
   languages: string[];
   skills: string[];
   certifications: string[];

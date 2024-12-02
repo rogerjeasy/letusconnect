@@ -83,34 +83,45 @@ export default function UserSelection({
     }
   }, [countries, setCountries, languages, setLanguages, phoneCodes.length, setPhoneCodes]);
 
-  const handleSelect = (value: any) => {
+  const handleLanguageSelect = (selectedKeys: Set<string> | Iterable<string>) => {
+    const selectedLanguages = Array.from(selectedKeys)
+      .map((key) => {
+        const lang = languages.find((lang) => lang.code === key);
+        return lang?.name;
+      })
+      .filter((name): name is string => !!name);
 
-    if (selectionMode === "country") {
-      const selected = countries.find((country) => country.name === value);
-
-      if (selected) {
-        console.log("Selected country:", selected.name); // Log selected country
-        onChange?.(selected.name); // Call onChange with the country's name
-      } else {
-        console.error("Selected country not found");
-        console.log("Available countries for matching:", countries.map((c) => c.name));
-      }
-    } else if (selectionMode === "language") {
-      const selectedLanguages = Array.isArray(value)
-        ? languages.filter((lang) => lang && value.includes(lang.name))
-        : languages.filter((lang) => lang && lang.name === value);
-
-      if (selectedLanguages.length > 0 && onChange) {
-        onChange(selectedLanguages.map((lang) => lang.name));
-      }
-    } else if (selectionMode === "phone") {
-      const selected = phoneCodes.find((pc) => pc.code === value);
-      if (selected) {
-        setSelectedPhoneCode(selected);
-        if (onChange) onChange(selected.code);
-      }
+    if (onChange) {
+      onChange(selectedLanguages);
     }
   };
+
+  const handleCountrySelect = (selectedKeys: Set<string>) => {
+    // Extract the selected value from the Set
+    const selectedKey = Array.from(selectedKeys)[0];
+    console.log("Selected key for country select: ", selectedKey);
+  
+    const selectedCountry = countries.find((country) => country.name === selectedKey);
+    console.log("Selected country: ", selectedCountry);
+  
+    if (selectedCountry && onChange) {
+      console.log("Selected country name: ", selectedCountry.name);
+      onChange(selectedCountry.name); // Pass the country name
+    }
+  };
+  
+
+
+  const handlePhoneSelect = (selectedKey: Set<string>) => {
+    const selectedValue = Array.from(selectedKey)[0];
+  
+    const selectedPhone = phoneCodes.find((pc) => pc.code === selectedValue);
+  
+    if (selectedPhone && onChange) {
+      onChange(selectedPhone.code);
+    }
+  };  
+  
 
   const renderSelection = () => {
     if (selectionMode === "country") {
@@ -119,31 +130,7 @@ export default function UserSelection({
           className="max-w-full"
           label="Select Country"
           defaultSelectedKeys={typeof defaultValue === "string" ? [defaultValue] : undefined}
-          onChange={(selectedKeys) => {
-            // `selectedKeys` is an array (due to the multiple selection handling in Select)
-            const selectedValue = Array.isArray(selectedKeys) ? selectedKeys[0] : selectedKeys;
-
-            console.log("Selected key (value):", selectedValue);
-
-            if (typeof selectedValue === "string") {
-              console.log("Selected value from <Select>:", selectedValue);
-        
-              // Match the selected value to the country name
-              const selectedCountry = countries.find(
-                (country) => country.name === selectedValue
-              );
-        
-              if (selectedCountry) {
-                console.log("Matched country:", selectedCountry.name);
-                onChange?.(selectedCountry.name); 
-              } else {
-                console.error("Country not found in the list.");
-                console.log("Available countries:", countries.map((country) => country.name));
-              }
-            } else {
-              console.error("Unexpected value type:", selectedValue);
-            }
-          }}
+          onSelectionChange={(selectedKeys) => handleCountrySelect(selectedKeys as Set<string>)}
         >
           {countries.map((country) => (
             <SelectItem
@@ -166,17 +153,17 @@ export default function UserSelection({
             label="Select Languages"
             selectionMode="multiple"
             defaultSelectedKeys={
-              Array.isArray(defaultValue)
-                ? defaultValue.filter((key) => key !== undefined)
-                : [defaultValue].filter((key) => key !== undefined)
+              defaultValue instanceof Array
+                ? new Set(
+                    defaultValue
+                      .map((name) =>
+                        languages.find((lang) => lang.name === name)?.code
+                      )
+                      .filter((key): key is string => !!key)
+                  )
+                : undefined
             }
-            onChange={(selected) => {
-              if (Array.isArray(selected)) {
-                handleSelect(selected.map((item) => item.toString())); // Ensure selected is passed as string[]
-              } else {
-                handleSelect(selected.toString()); // Ensure single string is passed
-              }
-            }}
+            onSelectionChange={(selectedKeys) => handleLanguageSelect(selectedKeys as Set<string>)}
           >
             {languages.map((lang) => (
               <SelectItem key={lang.code} value={lang.code}>
@@ -185,7 +172,6 @@ export default function UserSelection({
             ))}
           </Select>
         </Scroll>
-
       );
     } else if (selectionMode === "phone") {
       return (
@@ -193,14 +179,15 @@ export default function UserSelection({
           className="max-w-full"
           label="Select Phone Code"
           defaultSelectedKeys={typeof defaultValue === "string" ? [defaultValue] : undefined}
-          onChange={(value) => handleSelect(value.toString())}
+          onSelectionChange={(selectedKey) => handlePhoneSelect(selectedKey as Set<string>)}
         >
           {phoneCodes.map((pc) => (
-            <SelectItem key={pc.code}>
+            <SelectItem key={pc.code} value={pc.code}>
               {`${pc.country} (${pc.code})`}
             </SelectItem>
           ))}
         </Select>
+
       );
     }
   };

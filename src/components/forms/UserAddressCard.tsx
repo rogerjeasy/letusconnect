@@ -51,8 +51,6 @@ export default function UserAddressCard() {
     }));
   };
 
-  console.log("Address:", address);
-
   const toggleEdit = () => {
     setIsEditing((prev) => !prev);
   };
