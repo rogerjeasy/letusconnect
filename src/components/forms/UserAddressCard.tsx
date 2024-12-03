@@ -11,6 +11,7 @@ import { api } from "../../helpers/api";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useFetchAddress } from "../../store/useFetchAddress";
+import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 
 export default function UserAddressCard() {
   const { user, isAuthenticated } = useUserStore();
@@ -123,13 +124,24 @@ export default function UserAddressCard() {
         <Card className="max-w-[800px] mx-auto">
       {/* Header */}
       <CardHeader className="flex justify-between items-center">
-        <div>
-          <p className="text-md font-bold">Current Address</p>
+        <div className="flex items-center gap-2">
+            <p className="text-md font-bold">Current Address</p>
         </div>
         <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
-          {isEditing ? "Editing..." : "Update Address"}
+            {isEditing ? (
+            <>
+                <EditDocumentIcon className="mr-2" />
+                Editing...
+            </>
+            ) : (
+            <>
+                <EditDocumentIcon className="mr-2" />
+                Update Address
+            </>
+            )}
         </Button>
       </CardHeader>
+
       <Divider />
       {/* Body */}
       <CardBody>
@@ -141,7 +153,6 @@ export default function UserAddressCard() {
                 selectionMode="country"
                 defaultValue={address.country}
                 onChange={(value) => {
-                    console.log("Selected Country (from SelectCountry):", value); // Direct log here
                     handleUpdateField("country", value as string);
                   }}
               />

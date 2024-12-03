@@ -22,6 +22,7 @@ import { formatFirestoreTimestamp } from "../utils/dateUtils";
 import { useUserLanguageStore } from "@/store/userLanguageStore";
 import { api } from "../../helpers/api";
 import Scroll from "./Scroll";
+import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 // import InputDate from "../forms/InputDate";
 // import { parseDate } from "@internationalized/date";
 
@@ -147,9 +148,23 @@ export default function UserProfileCard() {
                 <p className="text-sm text-default-500">{profile.email}</p>
             </div>
             </div>
-            <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
+            {/* <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
             {isEditing ? "Cancel" : "Edit Profile"}
-            </Button>
+            </Button> */}
+
+            <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
+            {isEditing ? (
+            <>
+                <EditDocumentIcon className="mr-2" />
+                Editing...
+            </>
+            ) : (
+            <>
+                <EditDocumentIcon className="mr-2" />
+                Update Profile
+            </>
+            )}
+        </Button>
         </CardHeader>
         <Divider />
         {/* Body */}
@@ -252,29 +267,29 @@ export default function UserProfileCard() {
             </div>
 
             <div className="flex flex-wrap gap-4 mt-4">
-            <div className="flex-1">
-                {isEditing ? (
-                <TextareaForm
-                value={profile.bio || ""}
-                    label="Bio"
-                    placeholder="Enter your bio"
-                    description=""
-                    onChange={(value) => handleUpdateField("bio", value)}
-                    labelColor="text-black"
-                />
-                ) : (
-                <TextareaForm
+                <div className="flex-1">
+                    {isEditing ? (
+                    <TextareaForm
                     value={profile.bio || ""}
-                    isReadOnly
-                    label="Bio"
-                    variant="faded"
-                    // defaultValue={profile.bio || ""}
-                    placeholder=""
-                    description=""
-                    labelColor="text-black"
-                />
-                )}
-            </div>
+                        label="Bio"
+                        placeholder="Enter your bio"
+                        description=""
+                        onChange={(value) => handleUpdateField("bio", value)}
+                        labelColor="text-black"
+                    />
+                    ) : (
+                    <TextareaForm
+                        value={profile.bio || ""}
+                        isReadOnly
+                        label="Bio"
+                        variant="faded"
+                        // defaultValue={profile.bio || ""}
+                        placeholder=""
+                        description=""
+                        labelColor="text-black"
+                    />
+                    )}
+                </div>
             </div>
 
             <div className="flex flex-wrap gap-4 mt-4">

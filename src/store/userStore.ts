@@ -52,11 +52,11 @@ interface UserSchoolExperience {
 }
 
 // Define the University interface
-interface University {
+export interface University {
   name: string;
   program: string;
   country: string;
-  city: string;
+  degree: string;
   startYear: number;
   endYear: number;
   level: string;
