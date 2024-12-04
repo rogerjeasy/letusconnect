@@ -14,6 +14,7 @@ import TextareaForm from "../forms/TextArea";
 import { University } from "../../store/userStore";
 import SingleDropdownSelection from "../forms/SingleSelection";
 import universityDegrees from "../../store/universityDegrees";
+import YearSelector from "../forms/YearSelector";
 
 export default function UserEducation() {
   const [educations, setEducations] = useState<University[]>([
@@ -230,7 +231,7 @@ export default function UserEducation() {
                         options={universityDegrees}
                         label="Degree"
                         placeholder="Select a degree"
-                        className="degree-dropdown"
+                        className="font-bold"
                         onChange={(selectedKey) =>
                             handleUpdateEducation(eduIndex, "degree", selectedKey)
                         }
@@ -241,15 +242,15 @@ export default function UserEducation() {
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     {isEditing ? (
-                      <InputToUpdate
-                        type="number"
+                      <YearSelector
+                        startYear={1950}
+                        endYear={new Date().getFullYear()}
                         label="Start Year"
-                        placeholder="Enter start year"
-                        value={education.startYear.toString()}
-                        onChange={(value) =>
-                          handleUpdateEducation(eduIndex, "startYear", Number(value))
+                        placeholder="Select a start year"
+                        onChange={(selectedYear) =>
+                            handleUpdateEducation(eduIndex, "startYear", Number(selectedYear))
                         }
-                      />
+                        />
                     ) : (
                       <InputForm
                         type="text"
@@ -260,15 +261,14 @@ export default function UserEducation() {
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     {isEditing ? (
-                      <InputToUpdate
-                        type="number"
-                        label="End Year"
-                        placeholder="Enter end year"
-                        value={education.endYear.toString()}
-                        onChange={(value) =>
-                          handleUpdateEducation(eduIndex, "endYear", Number(value))
-                        }
-                      />
+                      <YearSelector
+                      startYear={1950}
+                      label="End Year"
+                      placeholder="Select an end year"
+                      onChange={(selectedYear) =>
+                        handleUpdateEducation(eduIndex, "endYear", Number(selectedYear))
+                      }
+                    />
                     ) : (
                       <InputForm
                         type="text"

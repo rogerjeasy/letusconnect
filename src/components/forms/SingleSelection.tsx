@@ -18,7 +18,7 @@ const SingleDropdownSelection: React.FC<GeneralizedSelectProps> = ({
   options,
   label,
   placeholder,
-  className,
+  className="font-bold",
   onChange,
 }) => {
   const handleSelectionChange = (selectedKey: string) => {

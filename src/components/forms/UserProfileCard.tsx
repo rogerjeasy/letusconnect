@@ -44,17 +44,6 @@ export default function UserProfileCard() {
     onConfirm: () => {},
   });
 
-//   const userSpokenLanguages = profile.languages
-//     ? profile.languages.map((language: string) => {
-//         const matchingOption = languageOptions.find(
-//           (option) => option.label.toLowerCase() === language.toLowerCase()
-//         );
-//         return matchingOption
-//           ? { value: matchingOption.value, label: matchingOption.label }
-//           : null;
-//       }).filter((lang) => lang !== null)
-//     : [];
-
   useEffect(() => {
     if (!isAuthenticated || !user) {
       router.push("/login");
