@@ -29,6 +29,7 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 const RegistrationForm = () => {
   const setUser = useUserStore((state) => state.setUser);
   const setAddress = useUserStore((state) => state.setAddress);
+  const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -52,11 +53,26 @@ const RegistrationForm = () => {
         password: data.password,
         program: data.program,
       });
-
+  
       const { user, token } = response.data;
       user.profilePicture = user.profilePicture || avatarPicture;
       setUser(user, token);
-
+  
+      // Create school experience for the new user
+      const schoolExperienceResponse = await api.post(
+        "/api/school-experiences/",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      const schoolExperienceData = schoolExperienceResponse.data.data;
+      setSchoolExperience({
+        uid: schoolExperienceData.uid,
+        universities: schoolExperienceData.universities,
+      });
+  
       setSubmissionError(null);
       router.push("/dashboard");
     } catch (error: any) {
@@ -66,6 +82,7 @@ const RegistrationForm = () => {
       setLoading(false);
     }
   };
+   
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

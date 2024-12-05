@@ -47,12 +47,15 @@ export interface UserAddress {
 }
 
 // Define the UserSchoolExperience interface
-interface UserSchoolExperience {
+export interface UserSchoolExperience {
+  uid: string;
   universities: University[];
 }
 
+
 // Define the University interface
 export interface University {
+  id: string;
   name: string;
   program: string;
   country: string;
@@ -119,8 +122,10 @@ export const useUserStore = create<UserState>((set) => ({
   },
 
   setSchoolExperience: (schoolExperience: UserSchoolExperience) => {
+    localStorage.setItem("schoolExperience", JSON.stringify(schoolExperience));
     set({ schoolExperience });
   },
+  
 
   setWorkExperience: (workExperience: UserWorkExperience) => {
     set({ workExperience });
@@ -143,10 +148,14 @@ export const useUserStore = create<UserState>((set) => ({
     const user = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
+    const schoolExperience = localStorage.getItem("schoolExperience");
+    const parsedSchoolExperience = schoolExperience ? JSON.parse(schoolExperience) : null;
+
     if (user && token) {
       set({
         user: JSON.parse(user),
         isAuthenticated: true,
+        schoolExperience: parsedSchoolExperience,
       });
     }
   },

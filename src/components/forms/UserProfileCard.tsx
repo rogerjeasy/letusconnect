@@ -31,8 +31,6 @@ export default function UserProfileCard() {
   const router = useRouter();
   const token = localStorage.getItem("token");
 
-  const { languageOptions, setSelectedLanguage } = useUserLanguageStore();
-
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({ ...user });
   const [originalProfile, setOriginalProfile] = useState({ ...user });
@@ -68,8 +66,6 @@ export default function UserProfileCard() {
 
   const handleSave = async () => {
     setIsUpdating(true);
-
-    console.log("Profile to update:", profile);
 
     try {
       
@@ -167,7 +163,7 @@ export default function UserProfileCard() {
             </div>
             <div className="flex-1 min-w-[200px]">
                 <InputForm type="text" label="Created" 
-                value={formatFirestoreTimestamp(profile.accountCreatedAt)} 
+                value={profile.accountCreatedAt ? profile.accountCreatedAt : "Not specified"} 
                 />
             </div>
             <div className="flex-1 min-w-[200px]">

@@ -11,26 +11,18 @@ import SpinnerUI from "../forms/SpinnerUI";
 import Scroll from "../forms/Scroll";
 import SelectCountry from "../forms/SelectCountry";
 import TextareaForm from "../forms/TextArea";
-import { University } from "../../store/userStore";
+import { University, UserSchoolExperience } from "../../store/userStore";
 import SingleDropdownSelection from "../forms/SingleSelection";
 import universityDegrees from "../../store/universityDegrees";
 import YearSelector from "../forms/YearSelector";
+import { useUserStore } from "../../store/userStore";
+import { api } from "../../helpers/api";
 
 export default function UserEducation() {
-  const [educations, setEducations] = useState<University[]>([
-    {
-      name: "Example University",
-      program: "Computer Science",
-      country: "USA",
-      degree: "Bachelor of Science",
-      startYear: 2018,
-      endYear: 2022,
-      level: "Bachelor's",
-      experience: "Research Assistant",
-      awards: ["Best Student Award"],
-      extracurriculars: ["Debate Club", "Programming Team"],
-    },
-  ]);
+
+  const schoolExperience = useUserStore((state) => state.schoolExperience);
+  const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
+  const user = useUserStore((state) => state.user);
 
   const [isEditing, setIsEditing] = useState(false);
   const [universities, setUniversities] = useState<{ key: string; label: string }[]>([]);
@@ -66,8 +58,12 @@ export default function UserEducation() {
     fetchUniversities(selectedCountry);
   }, [selectedCountry]);
 
-  const handleAddEducation = () => {
-    const newEducation: University = {
+  console.log("schoolExperience", schoolExperience);
+  console.log("user", user);
+
+  const handleAddEducation = async () => {
+    const newEducation = {
+      id: "",
       name: "",
       program: "",
       country: "",
@@ -79,36 +75,135 @@ export default function UserEducation() {
       awards: [],
       extracurriculars: [],
     };
-    setEducations((prev) => [...prev, newEducation]);
+  
+    if (!schoolExperience?.uid) {
+      console.error("School experience UID is missing.");
+      return;
+    }
+  
+    try {
+      const response = await api.post(
+        `/api/school-experiences/${schoolExperience.uid}/universities`,
+        newEducation,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+  
+      const updatedExperience: UserSchoolExperience = {
+        uid: schoolExperience.uid,
+        universities: [...schoolExperience.universities, response.data],
+      };
+  
+      setSchoolExperience(updatedExperience);
+    } catch (error) {
+      console.error("Error adding education:", error);
+    }
+  };
+     
+
+  const handleUpdateEducation = async (
+    index: number,
+    field: keyof University,
+    value: any
+  ) => {
+    if (!schoolExperience || !schoolExperience.universities) {
+      console.error("School experience or universities are missing.");
+      return;
+    }
+  
+    const updatedUniversities = [...schoolExperience.universities];
+    const university = updatedUniversities[index];
+  
+    if (!university || !university.id) {
+      console.error("University or university ID is missing.");
+      return;
+    }
+  
+    updatedUniversities[index] = { ...university, [field]: value };
+    try {
+      await api.put(
+        `/api/school-experiences/${schoolExperience.uid}/universities/${university.id}`,
+        updatedUniversities[index],
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+  
+      setSchoolExperience({
+        ...schoolExperience,
+        universities: updatedUniversities,
+      });
+    } catch (error) {
+      console.error("Error updating education:", error);
+    }
   };
 
-  const handleUpdateEducation = (index: number, field: keyof University, value: any) => {
-    const updatedEducations = [...educations];
-    updatedEducations[index] = { ...updatedEducations[index], [field]: value };
-    setEducations(updatedEducations);
-  };
+  const handleDeleteEducation = async (index: number) => {
+    if (!schoolExperience || !schoolExperience.universities) {
+      console.error("School experience or universities are missing.");
+      return;
+    }
+  
+    const updatedUniversities = [...schoolExperience.universities];
+    const university = updatedUniversities[index];
+  
+    if (!university || !university.id) {
+      console.error("University or university ID is missing.");
+      return;
+    }
+  
+    try {
+      await api.delete(
+        `/api/school-experiences/${schoolExperience.uid}/universities/${university.id}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+  
+      updatedUniversities.splice(index, 1);
+      setSchoolExperience({
+        ...schoolExperience,
+        universities: updatedUniversities,
+      });
+    } catch (error) {
+      console.error("Error deleting education:", error);
+    }
+  };  
 
-  const handleDeleteEducation = (index: number) => {
-    setEducations((prev) => prev.filter((_, i) => i !== index));
+  const handleAddAward = (eduIndex: number) => {
+    if (!schoolExperience) {
+      console.error("School experience is missing.");
+      return;
+    }
+  
+    const updatedUniversities = [...schoolExperience.universities];
+    updatedUniversities[eduIndex].awards.push(""); // Add an empty award
+    setSchoolExperience({ ...schoolExperience, universities: updatedUniversities });
   };
-
-  const handleAddAward = (index: number) => {
-    const updatedEducations = [...educations];
-    updatedEducations[index].awards.push("");
-    setEducations(updatedEducations);
-  };
-
+  
   const handleUpdateAward = (eduIndex: number, awardIndex: number, value: string) => {
-    const updatedEducations = [...educations];
-    updatedEducations[eduIndex].awards[awardIndex] = value;
-    setEducations(updatedEducations);
+    if (!schoolExperience) {
+      console.error("School experience is missing.");
+      return;
+    }
+  
+    const updatedUniversities = [...schoolExperience.universities];
+    updatedUniversities[eduIndex].awards[awardIndex] = value; // Update the specific award
+    setSchoolExperience({ ...schoolExperience, universities: updatedUniversities });
   };
-
+  
   const handleDeleteAward = (eduIndex: number, awardIndex: number) => {
-    const updatedEducations = [...educations];
-    updatedEducations[eduIndex].awards.splice(awardIndex, 1);
-    setEducations(updatedEducations);
+    if (!schoolExperience) {
+      console.error("School experience is missing.");
+      return;
+    }
+  
+    const updatedUniversities = [...schoolExperience.universities];
+    updatedUniversities[eduIndex].awards.splice(awardIndex, 1); // Remove the specific award
+    setSchoolExperience({ ...schoolExperience, universities: updatedUniversities });
   };
+  
 
   const toggleEdit = () => {
     setIsEditing((prev) => {
@@ -133,7 +228,7 @@ export default function UserEducation() {
 
         {/* Education Sub-Cards */}
         <CardBody>
-          {educations.map((education, eduIndex) => (
+          {schoolExperience?.universities?.map((education, eduIndex) => (
             <Card key={eduIndex} className="mb-4">
               <CardHeader className="flex justify-between items-center">
                 <p className="text-md font-bold">{education.name || `Education ${eduIndex + 1}`}</p>
@@ -255,7 +350,7 @@ export default function UserEducation() {
                       <InputForm
                         type="text"
                         label="Start Year"
-                        value={education.startYear.toString()}
+                        value={education.startYear?.toString()}
                       />
                     )}
                   </div>
@@ -273,7 +368,7 @@ export default function UserEducation() {
                       <InputForm
                         type="text"
                         label="End Year"
-                        value={education.endYear.toString()}
+                        value={education.endYear?.toString()}
                       />
                     )}
                   </div>
@@ -282,34 +377,35 @@ export default function UserEducation() {
                 {/* Awards Section */}
                 <div className="mt-4">
                   <p className="text-md font-bold">Awards</p>
-                  {education.awards.map((award, awardIndex) => (
+                  {(education.awards || []).map((award, awardIndex) => (
                     <div key={awardIndex} className="flex items-center gap-2">
-                      {isEditing ? (
+                        {isEditing ? (
                         <InputToUpdate
-                          type="text"
-                          label={`Award ${awardIndex + 1}`}
-                          placeholder="Enter award"
-                          value={award}
-                          onChange={(value) =>
+                            type="text"
+                            label={`Award ${awardIndex + 1}`}
+                            placeholder="Enter award"
+                            value={award}
+                            onChange={(value) =>
                             handleUpdateAward(eduIndex, awardIndex, value)
-                          }
+                            }
                         />
-                      ) : (
+                        ) : (
                         <InputForm type="text" label={`Award ${awardIndex + 1}`} value={award} />
-                      )}
-                      {isEditing && (
+                        )}
+                        {isEditing && (
                         <Button
-                          size="sm"
-                          variant="flat"
-                          color="danger"
-                          onPress={() => handleDeleteAward(eduIndex, awardIndex)}
-                          startContent={<DeleteDocumentIcon />}
+                            size="sm"
+                            variant="flat"
+                            color="danger"
+                            onPress={() => handleDeleteAward(eduIndex, awardIndex)}
+                            startContent={<DeleteDocumentIcon />}
                         >
-                          Remove
+                            Remove
                         </Button>
-                      )}
+                        )}
                     </div>
-                  ))}
+                    ))}
+
                   {isEditing && (
                     <Button
                       size="sm"
