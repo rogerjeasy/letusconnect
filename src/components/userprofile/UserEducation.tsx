@@ -299,7 +299,7 @@ export default function UserEducation() {
         {/* Header */}
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <p className="text-md font-bold">Education</p>
+            <p className="text-md font-bold">Education Section</p>
           </div>
         </CardHeader>
         <Divider />

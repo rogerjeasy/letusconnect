@@ -4,6 +4,7 @@ import { Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
 import UserAddressCard from "../forms/UserAddressCard";
 import UserProfileCard from "../forms/UserProfileCard";
 import UserEducation from "./UserEducation";
+import UserWorkExperienceComponent from "./UserWorkExperienceComponent";
 import { useUserStore } from "../../store/userStore";
 
 export default function ManageUser() {
@@ -29,6 +30,10 @@ export default function ManageUser() {
           {/* User Education Card */}
           <div className="w-full max-w-[800px] mx-auto">
             <UserEducation />
+          </div>
+          {/* User Work Experience Card */}
+          <div className="w-full max-w-[800px] mx-auto">
+            <UserWorkExperienceComponent />
           </div>
           {/* User Address Card */}
           <div className="w-full max-w-[800px] mx-auto">

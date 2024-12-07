@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import { useEffect } from "react";
 import { DateValue } from "@nextui-org/react";
@@ -52,7 +54,6 @@ export interface UserSchoolExperience {
   universities: University[];
 }
 
-
 // Define the University interface
 export interface University {
   id: string;
@@ -68,18 +69,20 @@ export interface University {
 }
 
 // Define the UserWorkExperience interface
-interface UserWorkExperience {
+export interface UserWorkExperience {
+  uid: string;
   workExperiences: WorkExperience[];
 }
 
 // Define the WorkExperience interface
-interface WorkExperience {
+export interface WorkExperience {
+  id: string;
   company: string;
   position: string;
-  city: string;
+  city?: string;
   country: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
   responsibilities: string[];
   achievements: string[];
 }
@@ -117,6 +120,7 @@ export const useUserStore = create<UserState>((set) => ({
   },
 
   setAddress: (address: UserAddress) => {
+    localStorage.setItem("address", JSON.stringify(address));
     set({ address });
   },
 
@@ -124,15 +128,18 @@ export const useUserStore = create<UserState>((set) => ({
     localStorage.setItem("schoolExperience", JSON.stringify(schoolExperience));
     set({ schoolExperience });
   },
-  
 
   setWorkExperience: (workExperience: UserWorkExperience) => {
+    localStorage.setItem("workExperience", JSON.stringify(workExperience));
     set({ workExperience });
   },
 
   logout: () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("address");
+    localStorage.removeItem("schoolExperience");
+    localStorage.removeItem("workExperience");
 
     set({
       user: null,
@@ -146,17 +153,17 @@ export const useUserStore = create<UserState>((set) => ({
   restoreUser: () => {
     const user = localStorage.getItem("user");
     const token = localStorage.getItem("token");
-
+    const address = localStorage.getItem("address");
     const schoolExperience = localStorage.getItem("schoolExperience");
-    const parsedSchoolExperience = schoolExperience ? JSON.parse(schoolExperience) : null;
+    const workExperience = localStorage.getItem("workExperience");
 
-    if (user && token) {
-      set({
-        user: JSON.parse(user),
-        isAuthenticated: true,
-        schoolExperience: parsedSchoolExperience,
-      });
-    }
+    set({
+      user: user ? JSON.parse(user) : null,
+      address: address ? JSON.parse(address) : null,
+      schoolExperience: schoolExperience ? JSON.parse(schoolExperience) : null,
+      workExperience: workExperience ? JSON.parse(workExperience) : null,
+      isAuthenticated: !!(user && token),
+    });
   },
 }));
 
@@ -172,6 +179,7 @@ export function useAuth() {
   return { user, isAuthenticated };
 }
 
+// Function to generate a random avatar URL
 export const generateRandomAvatar = (): string => {
   const uniqueId = Math.random().toString(36).substring(7);
   return `https://picsum.photos/seed/${uniqueId}/150/150?nature`;
