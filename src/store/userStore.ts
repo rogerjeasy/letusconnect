@@ -62,7 +62,6 @@ export interface University {
   degree: string;
   startYear: number;
   endYear: number;
-  level: string;
   experience: string;
   awards: string[];
   extracurriculars: string[];

@@ -255,12 +255,12 @@ export default function UserProfileCard() {
                 <div className="flex-1">
                     {isEditing ? (
                     <TextareaForm
-                    value={profile.bio || ""}
-                        label="Bio"
-                        placeholder="Enter your bio"
-                        description=""
-                        onChange={(value) => handleUpdateField("bio", value)}
-                        labelColor="text-black"
+                      value={profile.bio || ""}
+                      label="Bio"
+                      placeholder="Enter your bio"
+                      description=""
+                      onChange={(value) => handleUpdateField("bio", value)}
+                      labelColor="text-black"
                     />
                     ) : (
                     <TextareaForm

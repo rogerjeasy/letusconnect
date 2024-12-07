@@ -9,6 +9,7 @@ interface YearSelectorProps {
   label: string;
   placeholder?: string;
   className?: string;
+  value?: string; // Controlled input
   onChange?: (selectedYear: string) => void;
 }
 
@@ -17,15 +18,10 @@ const YearSelector: React.FC<YearSelectorProps> = ({
   endYear = new Date().getFullYear() + 8,
   label,
   placeholder = "Select a year",
-  className="font-bold",
+  className = "font-bold",
+  value,
   onChange,
 }) => {
-  const handleSelectionChange = (selectedYear: string) => {
-    if (onChange) {
-      onChange(selectedYear);
-    }
-  };
-
   const years = Array.from({ length: endYear - startYear + 1 }, (_, index) =>
     (endYear - index).toString()
   );
@@ -36,7 +32,13 @@ const YearSelector: React.FC<YearSelectorProps> = ({
       label={label}
       placeholder={placeholder}
       className={className}
-      onSelectionChange={(key) => handleSelectionChange(key as string)}
+      selectedKeys={value && years.includes(value) ? new Set([value]) : new Set()}
+      onSelectionChange={(selectedKeys) => {
+        const selectedYear = Array.from(selectedKeys)[0] as string;
+        if (onChange) {
+          onChange(selectedYear);
+        }
+      }}
     >
       {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
     </Select>
