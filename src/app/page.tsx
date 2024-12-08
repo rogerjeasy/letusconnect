@@ -1,15 +1,11 @@
 "use client";
 
-import HeroSection from "../components/herosection/HeroSection";
+import HomePageComponent from "@/components/homepage/HomePage";
 
 const HomePage = () => {
   return (
     <div>
-      {/* Hero Section */}
-      <HeroSection />
-
-      {/* Additional Sections (optional) */}
-      {/* You can add more sections here for other parts of the homepage */}
+      <HomePageComponent />
     </div>
   );
 };

@@ -1,17 +1,28 @@
+// HomePage.tsx
 "use client";
 
-import HeroSection from "../herosection/HeroSection";
+import BlogResourcesSection from "./BlogResourcesSection";
+import CommunityStats from "./CommunityStats";
+import HeroSection from "./HeroSection";
+import InteractiveDemo from "./InteractiveDemo";
+import FeatureOverview from "./KeyFeatures";
+import SegmentedCTAs from "./SegmentedCTAs";
+import TestimonialsCarousel from "./TestimonialsCarousel";
+import UpcomingEvents from "./UpcomingEvents";
 
-const HomePage = () => {
+const HomePageComponent = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      {/* Hero Section */}
       <HeroSection />
-
-      {/* Additional Sections */}
-      {/* Add more sections here for other parts of the homepage */}
+      <FeatureOverview />
+      <TestimonialsCarousel />
+      <CommunityStats />
+      <InteractiveDemo />
+      <SegmentedCTAs />
+      <UpcomingEvents />
+      <BlogResourcesSection />
     </div>
   );
 };
 
-export default HomePage;
+export default HomePageComponent;
