@@ -1,4 +1,3 @@
-// HomePage.tsx
 "use client";
 
 import BlogResourcesSection from "./BlogResourcesSection";
