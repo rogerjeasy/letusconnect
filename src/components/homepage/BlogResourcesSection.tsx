@@ -34,8 +34,19 @@ const blogPosts: BlogPost[] = [
 
 export default function BlogResourcesSection() {
   return (
-    <section className="py-12 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section
+      className="py-12 relative text-white"
+      style={{
+        backgroundImage: `url('https://images.unsplash.com/photo-1593642634443-44adaa06623a?auto=format&fit=crop&w=1920&q=80')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Overlay for Readability */}
+      <div className="absolute top-0 left-0 w-full h-full bg-black/50"></div>
+
+      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 leading-tight">
           Blog and Career Resources
         </h2>
@@ -44,7 +55,7 @@ export default function BlogResourcesSection() {
           {blogPosts.map((post, index) => (
             <Card
               key={index}
-              className="p-6 rounded-lg shadow-lg bg-gray-50 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
+              className="p-6 rounded-lg shadow-lg bg-white text-gray-800 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
             >
               <CardHeader className="flex items-center gap-4 mb-4">
                 {post.icon}
