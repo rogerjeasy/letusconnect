@@ -1,6 +1,8 @@
 "use client";
 
 import { FaUserPlus, FaSearch, FaCalendarCheck, FaTrophy } from "react-icons/fa";
+import Link from "next/link";
+import { Button } from "@nextui-org/react";
 import SectionTitle from "../shared/SectionTitle";
 
 const steps = [
@@ -13,10 +15,10 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 text-center">
         <SectionTitle title="How It Works" />
         
-        <div className="flex justify-center items-center gap-8 flex-wrap relative">
+        <div className="flex justify-center items-center gap-8 flex-wrap relative mb-12">
           {steps.map((step, index) => (
             <div key={index} className="relative flex flex-col items-center w-56">
               <div className="bg-white p-6 rounded-full shadow-lg mb-4 transform transition-transform duration-300 hover:scale-110">
@@ -33,6 +35,18 @@ export default function HowItWorks() {
             </div>
           ))}
         </div>
+
+        {/* CTA Button */}
+        <Link href="/mentorship/how-it-works">
+          <Button
+            color="primary"
+            size="lg"
+            radius="lg"
+            className="font-bold transition-transform duration-300 hover:scale-105"
+          >
+            Learn More
+          </Button>
+        </Link>
       </div>
     </section>
   );

@@ -20,7 +20,7 @@ export default function TextareaForm({
   variant = "faded",
   placeholder,
   description,
-  labelColor,
+  labelColor = "font-bold",
   onChange,
 }: TextAreaProps) {
   return (

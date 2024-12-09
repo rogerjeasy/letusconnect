@@ -16,6 +16,9 @@ import MobileMenu from "./MobileNavBar";
 import ProfileDropDown from "./ProfileDropDown";
 import DropdownMenuComponent from "./DropdownMenuComponent";
 import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
+import DropDownWithIcon from "../forms/DropDownWithIcon";
+import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
+import { aboutOptions } from "../dropdownoptions/AboutOptions";
 
 
 const Navbar = () => {
@@ -74,9 +77,10 @@ const Navbar = () => {
             </Button>
 
             {/* Mentorship Dropdown */}
-            <DropdownMenuComponent 
-              title="Mentorship"
-              menuItems={menuOptions.Mentorship}
+            <DropDownWithIcon
+              buttonLabel="Mentorship"
+              options={mentorshipOptionsForDropDown.mentorshipAuthUsers}
+              buttonColor="default"
             />
 
           {/* Projects Dropdown */}
@@ -106,14 +110,22 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <DropdownMenuComponent
-                title="About"
-                menuItems={menuOptions.About}
+              {/* About Dropdown */}
+              <DropDownWithIcon
+                buttonLabel="About"
+                options={aboutOptions.aboutUs}
+                buttonColor="default"
               />
 
-              <DropdownMenuComponent
+              {/* <DropdownMenuComponent
                 title="Mentorship"
                 menuItems={menuOptions.MentorshipNonAuth}
+              /> */}
+
+              <DropDownWithIcon
+                buttonLabel="Mentorship"
+                options={mentorshipOptionsForDropDown.mentorshipNonAuthUsers}
+                buttonColor="default"
               />
 
               <DropdownMenuComponent
