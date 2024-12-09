@@ -12,7 +12,7 @@ export type DropdownContentItem = {
       { key: "mentor", label: "Become a Mentor", href: "/mentorship/mentor" },
     ],
     MentorshipNonAuth: [
-        { key: "explore", label: "Explore Mentors", href: "mentorship/explore-mentors" },
+        { key: "explore", label: "Explore Mentors", href: "mentorship" },
         { key: "why-mentorship", label: "Why Mentorship Matters", href: "/mentorship/why-mentorship" },
         { key: "how-it-works", label: "How Mentorship Works", href: "/mentorship/how-it-works" },
         { key: "benefits", label: "Benefits of Mentorship", href: "/mentorship/benefits" },

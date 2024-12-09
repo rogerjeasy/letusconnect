@@ -1,4 +1,3 @@
-// components/ImageZoom.tsx
 "use client";
 
 import { Image } from "@nextui-org/react";
