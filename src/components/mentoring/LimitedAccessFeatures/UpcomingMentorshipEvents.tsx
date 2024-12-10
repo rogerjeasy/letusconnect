@@ -144,13 +144,12 @@ export default function UpcomingMentorshipEvents() {
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 mt-6">
                     <SeeEventButton
-                      color="primary"
+                      color="secondary"
                       size="md"
                       radius="lg"
                       className="w-full"
                       onClick={() => openDrawer(event)}
                     />
-
 
                   <Link href={`/events/${event.id}/join`}>
                     <Button

@@ -23,7 +23,7 @@ export default function SeeEventButton({
       size={size}
       radius={radius}
       variant="flat"
-      className={`w-full font-bold transition-transform duration-300 hover:scale-105 ${className}`}
+    //   className={`w-full font-bold transition-transform duration-300 hover:scale-105 ${className}`}
       endContent={
         <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
           <path

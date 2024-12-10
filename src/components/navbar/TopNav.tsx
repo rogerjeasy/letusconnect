@@ -57,24 +57,24 @@ const Navbar = () => {
 
         {/* Middle Section */}
         <div className="hidden md:flex space-x-6 items-center">
-          <Button 
-            variant="bordered"
-            size="sm" 
-          >
-            <Link href="/" className="hover:text-gray-200">
+          <Link href="/" className="hover:text-gray-200">
+            <Button 
+              variant="bordered"
+              size="sm" 
+            >
               Home
-            </Link>
-          </Button>
+            </Button>
+          </Link>
           {isAuthenticated ? (
             <>
-              <Button 
-                variant="bordered"
-                size="sm" 
-              >
-                <Link href="/dashboard" className="hover:text-gray-200">
+              <Link href="/dashboard" className="hover:text-gray-200">
+                <Button 
+                  variant="bordered"
+                  size="sm" 
+                >
                   Dashboard
-                </Link>
-            </Button>
+                </Button>
+              </Link> 
 
             {/* Mentorship Dropdown */}
             <DropDownWithIcon
