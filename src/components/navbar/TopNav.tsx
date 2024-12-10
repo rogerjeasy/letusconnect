@@ -20,6 +20,7 @@ import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
 import { aboutOptions } from "../dropdownoptions/AboutOptions";
 import { adminOptions } from "../dropdownoptions/adminOptions";
+import { connectStudentOptions } from "../dropdownoptions/connectStudentOptions";
 
 
 const Navbar = () => {
@@ -51,21 +52,15 @@ const Navbar = () => {
       <div className="container mx-auto px-4 flex justify-between items-center h-16">
         {/* Left Section: Logo */}
         <div className="text-2xl font-bold">
-          <Link href="/" className="hover:text-gray-200">
-            LetUsConnect
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/dashboard">Let's Connect</Link>
+          ) : (
+            <Link href="/">Let's Connect</Link>
+          )}
         </div>
 
         {/* Middle Section */}
         <div className="hidden md:flex space-x-6 items-center">
-          <Link href="/" className="hover:text-gray-200">
-            <Button 
-              variant="bordered"
-              size="sm" 
-            >
-              Home
-            </Button>
-          </Link>
           {isAuthenticated ? (
             <>
               <Link href="/dashboard" className="hover:text-gray-200">
@@ -93,6 +88,13 @@ const Navbar = () => {
             <DropDownWithIcon
               buttonLabel="Mentorship"
               options={mentorshipOptionsForDropDown.mentorshipAuthUsers}
+              buttonColor="default"
+            />
+
+            {/* Connect with Fellow Students */}
+            <DropDownWithIcon
+              buttonLabel="Students & Alumni"
+              options={connectStudentOptions.connectAuthUsers}
               buttonColor="default"
             />
 
@@ -138,6 +140,13 @@ const Navbar = () => {
               <DropDownWithIcon
                 buttonLabel="Mentorship"
                 options={mentorshipOptionsForDropDown.mentorshipNonAuthUsers}
+                buttonColor="default"
+              />
+
+              {/* Connect with Fellow Students */}
+              <DropDownWithIcon
+                buttonLabel="Students & Alumni"
+                options={connectStudentOptions.connectNonAuthUsers}
                 buttonColor="default"
               />
 

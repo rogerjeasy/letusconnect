@@ -20,7 +20,10 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button color={buttonColor} variant="bordered" className="font-bold"
+        <Button 
+            color={buttonColor} 
+            variant="bordered" 
+            className="font-bold"
             endContent={<ChevronDown fill="currentColor" size={16} />}>
           {buttonLabel}
         </Button>
