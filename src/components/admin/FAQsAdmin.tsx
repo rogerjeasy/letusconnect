@@ -175,11 +175,13 @@ export default function FAQsAdmin() {
     );
   }
 
-  return (
-    <>
-      <AccessDenied condition={!isAuthenticated || !user?.role?.includes("admin")} message="Access Denied: Admin privileges required." />
+  if (!isAuthenticated || !user?.role?.includes("admin")) {
+    return <AccessDenied condition={true} message="Access Denied: Admin privileges required." />;
+  }
 
-      <div className="p-8">
+  return (
+
+    <div className="p-8">
         {/* Centered Title */}
         <h2 className="text-3xl font-bold mb-4 text-center">FAQs Management</h2>
 
@@ -389,7 +391,6 @@ export default function FAQsAdmin() {
             </div>
           </>
         )}
-      </div>
-    </>
+    </div>
   );
 }

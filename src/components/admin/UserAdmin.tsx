@@ -14,11 +14,13 @@ import {
   Tooltip,
   Pagination,
   Chip,
+  user,
 } from "@nextui-org/react";
 import { FaEdit, FaTrash, FaSearch, FaBan, FaCheckCircle } from "react-icons/fa";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { api } from "@/helpers/api";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
+import { useUserStore } from "@/store/userStore";
 
 interface User {
   id: string;
@@ -39,6 +41,7 @@ export default function UserAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const { user, isAuthenticated, restoreUser, loading: userLoading } = useUserStore();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -47,6 +50,10 @@ export default function UserAdmin() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -95,9 +102,12 @@ export default function UserAdmin() {
     currentPage * itemsPerPage
   );
 
+  if (!isAuthenticated || !user?.role?.includes("admin")) {
+    return <AccessDenied condition={true} message="Access Denied: Admin privileges required." />;
+  }
+
   return (
     <div className="p-8">
-      <AccessDenied condition={false} message="Access Denied: Admin privileges required." />
 
       <h2 className="text-3xl font-bold mb-6 text-center">User Management</h2>
 
