@@ -94,6 +94,7 @@ interface UserState {
   schoolExperience: UserSchoolExperience | null;
   workExperience: UserWorkExperience | null;
   isAuthenticated: boolean;
+  loading: boolean;
   setUser: (user: User, token: string) => void;
   setAddress: (address: UserAddress) => void;
   setSchoolExperience: (schoolExperience: UserSchoolExperience) => void;
@@ -108,6 +109,7 @@ export const useUserStore = create<UserState>((set) => ({
   schoolExperience: null,
   workExperience: null,
   isAuthenticated: false,
+  loading: true,
 
   setUser: (user: User, token: string) => {
     localStorage.setItem("user", JSON.stringify(user));
@@ -116,6 +118,7 @@ export const useUserStore = create<UserState>((set) => ({
     set({
       user,
       isAuthenticated: true,
+      loading: false,
     });
   },
 
@@ -135,18 +138,14 @@ export const useUserStore = create<UserState>((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("address");
-    localStorage.removeItem("schoolExperience");
-    localStorage.removeItem("workExperience");
-
+    localStorage.clear();
     set({
       user: null,
       address: null,
       schoolExperience: null,
       workExperience: null,
       isAuthenticated: false,
+      loading: false,
     });
   },
 
@@ -162,7 +161,8 @@ export const useUserStore = create<UserState>((set) => ({
       address: address ? JSON.parse(address) : null,
       schoolExperience: schoolExperience ? JSON.parse(schoolExperience) : null,
       workExperience: workExperience ? JSON.parse(workExperience) : null,
-      isAuthenticated: !!(user && token),
+      isAuthenticated: !!user && !!token,
+      loading: false,
     });
   },
 }));
@@ -175,6 +175,12 @@ export function useAuth() {
   useEffect(() => {
     restoreUser();
   }, [restoreUser]);
+
+  useEffect(() => {
+    if (!user || !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [user, isAuthenticated, router]);
 
   return { user, isAuthenticated };
 }

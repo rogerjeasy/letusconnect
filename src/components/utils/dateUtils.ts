@@ -1,3 +1,9 @@
+/**
+ * Extracts the date and time from a Firestore timestamp string.
+ * @param timestamp - The ISO timestamp string (e.g., "2024-12-10T01:45:42.602659Z").
+ * @returns An object with `date` and `time` properties.
+ */
+
 export const formatFirestoreTimestamp = (
     timestamp: string | null | undefined
 ): string => {
@@ -22,3 +28,20 @@ export function extractMonthAndDay(dateStr: string): { month: string; day: strin
     return { month, day };
   }
   
+  export function extractDateAndTime(timestamp: string): { date: string; time: string } {
+    if (!timestamp) {
+      throw new Error("Invalid timestamp");
+    }
+  
+    // Split the timestamp into date and time parts
+    const [datePart, timePart] = timestamp.split("T");
+  
+    if (!datePart || !timePart) {
+      throw new Error("Invalid timestamp format");
+    }
+  
+    // Extract the time without the milliseconds and 'Z'
+    const time = timePart.split(".")[0];
+  
+    return { date: datePart, time };
+  }

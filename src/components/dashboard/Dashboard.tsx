@@ -1,64 +1,70 @@
+// app/dashboard/page.tsx or wherever your Dashboard component is located
+
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardBody, Avatar } from "@nextui-org/react";
+import { Card, CardBody, Avatar, Spinner } from "@nextui-org/react";
 import { useUserStore } from "../../store/userStore";
+import AccessDenied from "@/components/accessdenied/AccessDenied";
 
 export default function Dashboard() {
-  const { user, isAuthenticated } = useUserStore();
-  const router = useRouter();
+  const { user, isAuthenticated, loading, restoreUser } = useUserStore();
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, user, router]);
+    restoreUser();
+  }, [restoreUser]);
 
-  if (!isAuthenticated || !user) {
-    return null;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   return (
-    <Card
-      className="max-w-4xl mx-auto mt-8 p-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg rounded-lg"
-      isHoverable
-      isPressable
-    >
-      <CardBody className="flex flex-col md:flex-row items-center md:items-start gap-4">
-        {/* Avatar */}
-        <Avatar
-          src={user.profilePicture || ""}
-          alt={user.username || "User Avatar"}
-          size="lg"
-          className="border-2 border-white"
+    <>
+      <AccessDenied
+        condition={!isAuthenticated || !user}
+        message="Access Denied: You need to be logged in to view this page."
+      />
+
+      {isAuthenticated && user && (
+        <Card
+          className="max-w-4xl mx-auto mt-8 p-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg rounded-lg"
+          isHoverable
+          isPressable
         >
-          {!user.profilePicture && user.username?.charAt(0).toUpperCase()}
-        </Avatar>
+          <CardBody className="flex flex-col md:flex-row items-center md:items-start gap-4">
+            {/* Avatar */}
+            <Avatar
+              src={user.profilePicture || ""}
+              alt={user.username || "User Avatar"}
+              size="lg"
+              className="border-2 border-white"
+            >
+              {!user.profilePicture && user.username?.charAt(0).toUpperCase()}
+            </Avatar>
 
-        {/* User Info */}
-        <div className="flex flex-col gap-2 text-center md:text-left">
-          <h1 className="text-xl font-bold">
-            Welcome, {user.firstName || user.username || "Guest"}!
-          </h1>
-          <p className="text-sm text-white/80">
-            {user.bio || "Let’s connect, mentor, and grow together!"}
-          </p>
+            {/* User Info */}
+            <div className="flex flex-col gap-2 text-center md:text-left">
+              <h1 className="text-xl font-bold">
+                Welcome, {user.firstName || user.username || "Guest"}!
+              </h1>
+              <p className="text-sm text-white/80">
+                {user.bio || "Let’s connect, mentor, and grow together!"}
+              </p>
 
-          {/* Additional Information */}
-          {user.role && (
-            <p className="text-sm font-medium mt-2">
-              Role: <span className="text-white/90">{user.role}</span>
-            </p>
-          )}
-          {/* {user.universityName && (
-            <p className="text-sm font-medium">
-              University:{" "}
-              <span className="text-white/90">{user.universityName}</span>
-            </p>
-          )} */}
-        </div>
-      </CardBody>
-    </Card>
+              {/* Additional Information */}
+              {user.role && (
+                <p className="text-sm font-medium mt-2">
+                  Role(s): <span className="text-white/90">{user.role?.join(", ")}</span>
+                </p>
+              )}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+    </>
   );
 }

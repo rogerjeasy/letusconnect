@@ -19,6 +19,7 @@ import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
 import { aboutOptions } from "../dropdownoptions/AboutOptions";
+import { adminOptions } from "../dropdownoptions/adminOptions";
 
 
 const Navbar = () => {
@@ -75,6 +76,18 @@ const Navbar = () => {
                   Dashboard
                 </Button>
               </Link> 
+
+            {/* Check if the user has the 'admin' role */}
+              {user && user.role?.includes("admin") ? (
+              <>
+                <DropDownWithIcon
+                  buttonLabel="Admin Dashboard"
+                  options={adminOptions.adminDashboard}
+                  buttonColor="default"
+                />
+              </>
+              ) : null}
+            
 
             {/* Mentorship Dropdown */}
             <DropDownWithIcon
