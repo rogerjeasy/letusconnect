@@ -62,9 +62,9 @@ export default function FAQs() {
           <p className="text-gray-500">No FAQs available at the moment.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center gap-6">
           {paginatedFaqs.map((faq) => (
-            <Card key={faq.id} className="w-full shadow-md">
+            <Card key={faq.id} className="w-full max-w-3xl shadow-md">
               <CardHeader className="bg-gray-100">
                 <h2 className="text-xl font-semibold">{faq.question}</h2>
               </CardHeader>

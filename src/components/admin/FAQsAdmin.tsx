@@ -19,6 +19,9 @@ import {
   Spinner,
   Tooltip,
   Textarea,
+  Card,
+  Pagination,
+  CardBody,
 } from "@nextui-org/react";
 import {
   FaPlus,
@@ -27,6 +30,8 @@ import {
   FaTrash,
   FaExclamationCircle,
   FaBoxOpen,
+  FaTags,
+  FaListAlt,
 } from "react-icons/fa";
 import { api } from "../../helpers/api";
 import { useUserStore } from "../../store/userStore";
@@ -59,6 +64,10 @@ export default function FAQsAdmin() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<string | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Restore user data on page load
   useEffect(() => {
     restoreUser();
@@ -89,6 +98,7 @@ export default function FAQsAdmin() {
       faq.question.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredFaqs(filtered);
+    setCurrentPage(1);
   };
 
   const handleCreateFAQ = async () => {
@@ -138,6 +148,24 @@ export default function FAQsAdmin() {
     setIsDeleteModalOpen(false);
     setFaqToDelete(null);
   };
+
+  const getCategoryStats = () => {
+    const categoryCounts: { [key: string]: number } = {};
+    faqs.forEach((faq) => {
+      categoryCounts[faq.category] = (categoryCounts[faq.category] || 0) + 1;
+    });
+    return categoryCounts;
+  };
+
+  const categoryStats = getCategoryStats();
+  const totalCategories = faqs.length;
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredFaqs.length / itemsPerPage);
+  const paginatedFaqs = filteredFaqs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (userLoading) {
     return (
@@ -249,6 +277,7 @@ export default function FAQsAdmin() {
             <Spinner size="lg" />
           </div>
         ) : (
+          <>
           <Table aria-label="FAQs Table" className="border-separate border-spacing-y-2">
             <TableHeader>
               <TableColumn>ID</TableColumn>
@@ -260,7 +289,7 @@ export default function FAQsAdmin() {
               <TableColumn>Action</TableColumn>
             </TableHeader>
             <TableBody>
-              {filteredFaqs.length === 0 ? (
+              {paginatedFaqs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-10">
                     <FaBoxOpen className="text-6xl text-gray-400 mb-4" />
@@ -268,13 +297,13 @@ export default function FAQsAdmin() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredFaqs.map((faq) => (
+                paginatedFaqs.map((faq) => (
                   <TableRow key={faq.id}>
                   <TableCell>{faq.id}</TableCell>
                   <TableCell>{faq.question}</TableCell>
                   <TableCell>{faq.response}</TableCell>
                   <TableCell>{faq.username}</TableCell>
-                  <TableCell>
+                  <TableCell className="w-40">
                     {faq.createdAt
                       ? (() => {
                           const { date, time } = extractDateAndTime(faq.createdAt);
@@ -287,7 +316,7 @@ export default function FAQsAdmin() {
                         })()
                       : "Unknown"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="w-40">
                     {faq.updatedAt
                       ? (() => {
                           const { date, time } = extractDateAndTime(faq.updatedAt);
@@ -323,6 +352,42 @@ export default function FAQsAdmin() {
               )}
             </TableBody>
           </Table>
+          {/* Pagination */}
+          <div className="flex justify-center mt-6">
+              <Pagination
+                total={totalPages}
+                initialPage={1}
+                page={currentPage}
+                onChange={setCurrentPage}
+                color="primary"
+              />
+            </div>
+          {/* Statistics Summary */}
+          <div className="mt-10">
+          <h3 className="text-2xl font-bold mb-4 text-center">FAQs Statistics</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {Object.entries(categoryStats).map(([category, count]) => (
+              <Card key={category} className="w-full max-w-md mx-auto shadow-lg">
+                <CardBody className="flex items-center gap-4">
+                  <FaTags className="text-4xl text-blue-500" />
+                  <div>
+                    <h4 className="text-lg font-semibold">{category}</h4>
+                    <p className="text-gray-500">FAQs: {count}</p>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+                <Card className="w-full max-w-md mx-auto shadow-lg">
+                  <CardBody className="flex items-center justify-center gap-4">
+                    <FaListAlt className="text-4xl text-green-500" />
+                    <h4 className="text-lg font-semibold">Total Categories: {totalCategories}</h4>
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>

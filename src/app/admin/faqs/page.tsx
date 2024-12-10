@@ -1,6 +1,6 @@
 "use client"
 
-import FAQsAdmin from "@/components/faqs/FAQsAdmin"
+import FAQsAdmin from "@/components/admin/FAQsAdmin"
 
 export default function FAQsPage() {
   return (
