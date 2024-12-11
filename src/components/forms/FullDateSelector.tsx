@@ -24,7 +24,7 @@ export default function FullDateSelector({
     : null;
 
   // Handle the onChange event
-  const handleDateChange = (newDate: DateValue) => {
+  const handleDateChange = (newDate: DateValue | null) => {
     onChange(newDate ? new Date(newDate.year, newDate.month - 1, newDate.day) : null);
   };
 
