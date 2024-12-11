@@ -81,29 +81,31 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
             <p className="font-semibold">Signed in as</p>
             <p className="font-semibold">{userDetails.email}</p>
           </DropdownItem>
-          {profileItems.map((item) => (
-            <DropdownItem
-              key={item.key}
-              color={item.color}
-              onPress={
-                item.key === "profile"
-                  ? handleViewProfile
-                  : item.key === "logout"
-                  ? handleLogout
-                  : item.key === "settings"
-                  ? handleSettingsRedirect
-                  : undefined
-              }
-              as={item.href ? Link : "button"}
-              href={item.href ? item.href : undefined}
-            >
-              {item.key === "profile" || item.key === "logout" || item.key === "settings" ? (
-                item.label
-              ) : (
-                <Link href={item.href}>{item.label}</Link>
-              )}
-            </DropdownItem>
-          ))}
+          <>
+            {profileItems.map((item) => (
+              <DropdownItem
+                key={item.key}
+                color={item.color}
+                onPress={
+                  item.key === "profile"
+                    ? handleViewProfile
+                    : item.key === "logout"
+                    ? handleLogout
+                    : item.key === "settings"
+                    ? handleSettingsRedirect
+                    : undefined
+                }
+                as={item.href ? Link : "button"}
+                href={item.href ? item.href : undefined}
+              >
+                {item.key === "profile" || item.key === "logout" || item.key === "settings" ? (
+                  item.label
+                ) : (
+                  <Link href={item.href}>{item.label}</Link>
+                )}
+              </DropdownItem>
+            ))}
+          </>
         </DropdownMenu>
       </Dropdown>
 

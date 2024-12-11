@@ -2,7 +2,7 @@ export type DropdownContentItem = {
     key: string;
     label: string;
     href: string;
-    color?: string;
+    color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
   };
   
   export const menuOptions: Record<string, DropdownContentItem[]> = {
