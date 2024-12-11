@@ -16,6 +16,23 @@ interface PhoneCode {
   code: string;
 }
 
+
+interface CountryAPIResponse {
+  name: {
+    common: string;
+  };
+  flags: {
+    svg: string;
+  };
+  languages?: {
+    [key: string]: string;
+  };
+  idd?: {
+    root?: string;
+    suffixes?: string[];
+  };
+}
+
 export default function UserSelection({
   selectionMode = "country",
   defaultValue,
@@ -31,24 +48,22 @@ export default function UserSelection({
     phoneCodes,
     setLanguages,
     setPhoneCodes,
-    setSelectedLanguage,
-    setSelectedPhoneCode,
   } = useUserLanguageStore();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("https://restcountries.com/v3.1/all");
-        const data: any[] = await response.json();
+        const data: CountryAPIResponse[] = await response.json();
 
-        const formattedCountries = data.map((country: any) => ({
+        const formattedCountries = data.map((country) => ({
           name: country.name.common,
           flag: country.flags.svg,
         }));
 
         const uniqueLanguages: Language[] = Array.from(
           new Set(
-            data.flatMap((country: any) =>
+            data.flatMap((country) =>
               Object.values(country.languages || {}) as string[]
             )
           )
@@ -58,7 +73,7 @@ export default function UserSelection({
         }));
 
         const uniquePhoneCodes: PhoneCode[] = Array.from(
-          data.reduce((acc: Map<string, PhoneCode>, country: any) => {
+          data.reduce((acc: Map<string, PhoneCode>, country) => {
             const code = `${country.idd?.root || ""}${country.idd?.suffixes?.[0] || ""}`;
             if (code && !acc.has(code)) {
               acc.set(code, {

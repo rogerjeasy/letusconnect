@@ -77,10 +77,8 @@ export default function WorkExperienceCard({
   cancelChanges,
 }: WorkExperienceCardProps) {
   const {
-    register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<WorkExperienceFormValues>({
     resolver: zodResolver(workExperienceSchema),

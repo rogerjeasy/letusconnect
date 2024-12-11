@@ -7,7 +7,7 @@ import InputForm from "../forms/InputForm";
 import InputToUpdate from "../forms/InputToUpdate";
 import SelectCountry from "../forms/SelectCountry";
 import { useUserStore } from "../../store/userStore";
-import { api } from "../../helpers/api";
+import { api, handleError } from "../../helpers/api";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useFetchAddress } from "../../store/useFetchAddress";
@@ -42,7 +42,7 @@ export default function UserAddressCard() {
     } else {
       fetchAddress();
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, fetchAddress]);
   
   const handleUpdateField = (field: keyof typeof address, value: string) => {
     
@@ -85,14 +85,15 @@ export default function UserAddressCard() {
           });
         setIsUpdating(false);
         setIsEditing(false);
-    } catch (error: any) {
-            console.error("Failed to save address:", error.response?.data?.error || error);
-            setModalProps({
-                isOpen: true,
-                title: "Oops!",
-                content: `Failed to save address. Please try again. ${error.response?.data?.error || error?.message}`,
-                onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
-            });
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Failed to save address:",  errorMessage);
+      setModalProps({
+        isOpen: true,
+        title: "Oops!",
+        content: `Failed to save address. Please try again. ${errorMessage}`,
+        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+      });
     } finally {
         setIsUpdating(false);
       }
@@ -110,7 +111,7 @@ export default function UserAddressCard() {
     <div className="relative">
         {isUpdating && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                <SpinnerUI label="Updating address..." color="primary" labelColor="primary" />
+              <SpinnerUI label="Updating address..." color="primary" labelColor="primary" />
             </div>
         )}
         <ModalPopup

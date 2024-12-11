@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SpinnerUI from "../forms/SpinnerUI";
+import { handleError } from "../../helpers/api";
 
 interface University {
   country: string;
@@ -30,8 +31,9 @@ const UniversityList: React.FC<{ country: string }> = ({ country }) => {
         const data: University[] = await response.json();
         const universityNames = data.map((university) => university.name);
         setUniversities(universityNames);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong.");
+      } catch (err) {
+        const errorMessage = handleError(err);
+        setError(errorMessage || "Something went wrong.");
       } finally {
         setLoading(false);
       }

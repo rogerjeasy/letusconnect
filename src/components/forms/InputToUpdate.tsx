@@ -2,7 +2,7 @@
 
 import { Input } from "@nextui-org/react";
 
-interface InputToUpdateProps<T = any> {
+interface InputToUpdateProps<T = string> {
   type: string;
   label: string;
   placeholder: string;
@@ -12,7 +12,7 @@ interface InputToUpdateProps<T = any> {
   onChange: (value: T) => void;
 }
 
-export default function InputToUpdate<T = any>({
+export default function InputToUpdate<T>({
   type,
   label,
   placeholder,

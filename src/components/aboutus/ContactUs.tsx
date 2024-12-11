@@ -10,7 +10,7 @@ import SpinnerUI from "../forms/SpinnerUI";
 import Link from "next/link";
 import { DeleteDocumentIcon } from "../icons/DeleteDocumentIcon";
 import SimpleInputText from "../forms/SimpleInputText";
-import { api } from "../../helpers/api";
+import { api, handleError } from "../../helpers/api";
 import { handleValueField } from "../../helpers/handleValueField";
 import ModalPopup from "../forms/ModalPopup";
 
@@ -72,10 +72,11 @@ export default function ContactUsForm() {
       setModalContent(response.data.message);
       setModalConfirmLabel("OK");
       setIsModalOpen(true);
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Error submitting form:", errorMessage);
       setModalTitle("Submission Failed");
-      setModalContent(error.response?.data?.error || "An error occurred. Please try again.");
+      setModalContent(errorMessage || "An error occurred. Please try again.");
       setModalConfirmLabel("Try Again");
       setIsModalOpen(true);
     } finally {

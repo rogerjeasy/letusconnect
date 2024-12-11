@@ -2,6 +2,8 @@
 
 import { Card, CardBody, Button } from "@nextui-org/react";
 import Link from "next/link";
+import Image from "next/image";
+
 
 export default function AboutHeroSection() {
   return (
@@ -13,17 +15,17 @@ export default function AboutHeroSection() {
       {/* Background Image Slider */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <div className="flex w-[300%] h-full animate-slide">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1531545514256-b1400bc00f31?auto=format&fit=crop&w=1600&q=80"
             alt="Students Collaborating"
             className="w-1/3 h-full object-cover"
           />
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1600&q=80"
             alt="Team Meeting"
             className="w-1/3 h-full object-cover"
           />
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1600&q=80"
             alt="Mentorship Session"
             className="w-1/3 h-full object-cover"

@@ -35,6 +35,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/44.jpg",
         linkedin: "https://www.linkedin.com/in/emilyjohnson",
         email: "emily.johnson@example.com",
+        twitter: "https://twitter.com/emilyjohnson",
       },
     ],
   },
@@ -48,6 +49,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/34.jpg",
         linkedin: "https://www.linkedin.com/in/michaelsmith",
         email: "michael.smith@example.com",
+        twitter: "https://twitter.com/michaelsmith",
       },
       {
         name: "Sophia Martinez",
@@ -56,6 +58,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/68.jpg",
         linkedin: "https://www.linkedin.com/in/sophiamartinez",
         email: "sophia.martinez@example.com",
+        twitter: "https://twitter.com/sophiamartinez",
       },
       {
         name: "James Brown",
@@ -64,6 +67,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/53.jpg",
         linkedin: "https://www.linkedin.com/in/jamesbrown",
         email: "james.brown@example.com",
+        twitter: "https://twitter.com/jamesbrown",
       },
       {
         name: "Olivia Davis",
@@ -72,6 +76,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/56.jpg",
         linkedin: "https://www.linkedin.com/in/oliviadavis",
         email: "olivia.davis@example.com",
+        twitter: "https://twitter.com/oliviadavis",
       },
     ],
   },
@@ -85,6 +90,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/28.jpg",
         linkedin: "https://www.linkedin.com/in/davidlee",
         email: "david.lee@example.com",
+        twitter: "https://twitter.com/davidlee",
       },
       {
         name: "Emily Carter",
@@ -93,6 +99,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/45.jpg",
         linkedin: "https://www.linkedin.com/in/emilycarter",
         email: "emily.carter@example.com",
+        twitter: "https://twitter.com/emilycarter",
       },
       {
         name: "Liam Wilson",
@@ -101,6 +108,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/41.jpg",
         linkedin: "https://www.linkedin.com/in/liamwilson",
         email: "liam.wilson@example.com",
+        twitter: "https://twitter.com/liamwilson",
       },
       {
         name: "Grace Moore",
@@ -109,6 +117,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/37.jpg",
         linkedin: "https://www.linkedin.com/in/gracemoore",
         email: "grace.moore@example.com",
+        twitter: "https://twitter.com/gracemoore",
       },
     ],
   },
@@ -122,6 +131,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/12.jpg",
         linkedin: "https://www.linkedin.com/in/danielthompson",
         email: "daniel.thompson@example.com",
+        twitter: "https://twitter.com/danielthompson",
       },
       {
         name: "Hannah White",
@@ -130,6 +140,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/15.jpg",
         linkedin: "https://www.linkedin.com/in/hannahwhite",
         email: "hannah.white@example.com",
+        twitter: "https://twitter.com/hannahwhite",
       },
       {
         name: "Ethan Scott",
@@ -138,6 +149,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/men/25.jpg",
         linkedin: "https://www.linkedin.com/in/ethanscott",
         email: "ethan.scott@example.com",
+        twitter: "https://twitter.com/ethanscott",
       },
       {
         name: "Natalie Brown",
@@ -146,6 +158,7 @@ const departments: Department[] = [
         image: "https://randomuser.me/api/portraits/women/22.jpg",
         linkedin: "https://www.linkedin.com/in/nataliebrown",
         email: "natalie.brown@example.com",
+        twitter: "https://twitter.com/nataliebrown",
       },
     ],
   },
@@ -178,6 +191,24 @@ export default function MeetTheTeam() {
                       <h4 className="text-xl font-bold mb-2">{member.name}</h4>
                       <h5 className="text-lg text-gray-500 mb-4">{member.role}</h5>
                       <p className="text-gray-700 mb-6">{member.bio}</p>
+                      {/* Social Icons */}
+                      <div className="flex justify-center gap-4">
+                        {member.linkedin && (
+                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+                            <FaLinkedin size={24} className="text-blue-600 hover:text-blue-800" />
+                          </a>
+                        )}
+                        {member.twitter && (
+                          <a href={member.twitter} target="_blank" rel="noopener noreferrer">
+                            <FaTwitter size={24} className="text-blue-400 hover:text-blue-600" />
+                          </a>
+                        )}
+                        {member.email && (
+                          <a href={`mailto:${member.email}`}>
+                            <FaEnvelope size={24} className="text-gray-600 hover:text-gray-800" />
+                          </a>
+                        )}
+                      </div>
                     </CardBody>
                   </Card>
                 ))}
@@ -196,6 +227,25 @@ export default function MeetTheTeam() {
                         <h4 className="text-xl font-bold mb-2">{member.name}</h4>
                         <h5 className="text-lg text-gray-500 mb-4">{member.role}</h5>
                         <p className="text-gray-700 mb-6">{member.bio}</p>
+
+                        {/* Social Icons */}
+                        <div className="flex justify-center gap-4">
+                          {member.linkedin && (
+                            <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+                              <FaLinkedin size={24} className="text-blue-600 hover:text-blue-800" />
+                            </a>
+                          )}
+                          {member.twitter && (
+                            <a href={member.twitter} target="_blank" rel="noopener noreferrer">
+                              <FaTwitter size={24} className="text-blue-400 hover:text-blue-600" />
+                            </a>
+                          )}
+                          {member.email && (
+                            <a href={`mailto:${member.email}`}>
+                              <FaEnvelope size={24} className="text-gray-600 hover:text-gray-800" />
+                            </a>
+                          )}
+                        </div>
                       </CardBody>
                     </Card>
                   </SwiperSlide>

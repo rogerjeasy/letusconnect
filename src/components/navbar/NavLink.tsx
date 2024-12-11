@@ -1,4 +1,5 @@
-import { div } from "framer-motion/client";
+"use client";
+
 import React from "react";
 
 

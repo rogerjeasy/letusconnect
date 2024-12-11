@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardBody, Divider, Button } from "@nextui-org/react";
 import { University, UserSchoolExperience } from "../../store/userStore";
 import { useUserStore } from "../../store/userStore";
-import { api } from "../../helpers/api";
+import { api, handleError } from "../../helpers/api";
 import EducationCard from "../cards/EducationCard";
 import { z } from "zod";
 import PlusCircleIcon from "../icons/PlusCircleIcon";
@@ -33,16 +33,16 @@ export default function UserEducation() {
 
   const schoolExperience = useUserStore((state) => state.schoolExperience);
   const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
-  const user = useUserStore((state) => state.user);
+  // const user = useUserStore((state) => state.user);
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [, setIsEditing] = useState(false);
   const [universities, setUniversities] = useState<{ key: string; label: string }[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [manualUniversity, setManualUniversity] = useState<string>("");
   const [isEditingIndex, setIsEditingIndex] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [fieldValues, setFieldValues] = useState<Record<number, Partial<University>>>({});
+  const [, setFieldValues] = useState<Record<number, Partial<University>>>({});
 
   const fetchUniversities = async (country: string) => {
     const endpoint = country
@@ -55,13 +55,14 @@ export default function UserEducation() {
       if (!response.ok) throw new Error("Failed to fetch universities");
 
       const data: University[] = await response.json();
-      const universityNames = data.map((university, index) => ({
+      const universityNames = data.map((university, ) => ({
         key: `${university.name}`,
         label: university.name,
       }));
       setUniversities(universityNames);
     } catch (error) {
       console.error("Error fetching universities:", error);
+      alert("Failed to fetch universities. Please try again.");
       setUniversities([]);
     } finally {
       setIsLoading(false);
@@ -99,7 +100,7 @@ export default function UserEducation() {
     return true;
   };
 
-  const handleFieldValue = (index: number, field: keyof University, value: any) => {
+  const handleFieldValue = (index: number, field: keyof University, value: string | number | string[]) => {
     setFieldValues((prev) => ({
       ...prev,
       [index]: {
@@ -157,7 +158,9 @@ export default function UserEducation() {
   
       setIsEditingIndex(updatedUniversities.length - 1);
     } catch (error) {
-      console.error("Error adding new education:", error);
+      const errorMessage = handleError(error);
+      console.error("Error adding new education:", errorMessage);
+      alert(errorMessage);
     }
   };  
 
@@ -257,7 +260,9 @@ export default function UserEducation() {
         console.warn("University ID is missing. Cannot update the record.");
       }
     } catch (error) {
-      console.error("Error saving education:", error);
+      const errorMessage = handleError(error);
+      console.error("Error saving education:", errorMessage);
+      alert(errorMessage);
     }
   };  
 
@@ -289,7 +294,9 @@ export default function UserEducation() {
         universities: updatedUniversities,
       });
     } catch (error) {
-      console.error("Error deleting education:", error);
+      const errorMessage = handleError(error);
+      console.error("Error deleting education:", errorMessage);
+      alert(errorMessage);
     }
   };  
 

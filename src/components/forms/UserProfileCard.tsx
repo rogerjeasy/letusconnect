@@ -18,9 +18,7 @@ import SelectCountry from "../forms/SelectCountry";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useUserStore } from "../../store/userStore";
-import { formatFirestoreTimestamp } from "../utils/dateUtils";
-import { useUserLanguageStore } from "@/store/userLanguageStore";
-import { api } from "../../helpers/api";
+import { api, handleError } from "../../helpers/api";
 import Scroll from "./Scroll";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 // import InputDate from "../forms/InputDate";
@@ -84,12 +82,13 @@ export default function UserProfileCard() {
         setIsEditing(false);
       }
       setIsEditing(false);
-    } catch (error: any) {
-      console.error("Failed to update profile:", error);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Failed to update profile:", errorMessage);
       setModalProps({
         isOpen: true,
         title: "Oops!",
-        content: `Failed to save profile. Please try again. ${error.response?.data?.error || error?.message}`,
+        content: `Failed to save profile. Please try again. ${errorMessage}`,
         onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
       });
     } finally {

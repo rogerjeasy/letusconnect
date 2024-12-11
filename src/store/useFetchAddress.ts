@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { api } from "../helpers/api";
+import { api, handleError } from "../helpers/api";
 
 export const useFetchAddress = (token: string) => {
   const [address, setAddress] = useState({
@@ -26,12 +26,13 @@ export const useFetchAddress = (token: string) => {
       // Address found, populate the fields
       setAddress(response.data.addresses[0]);
       setAddressResponseStatus(200);
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error) {
+      const errorMessage = handleError(error);
+      if (errorMessage.status === 404) {
         setAddressResponseStatus(404);
         console.log("Address not yet created");
       } else {
-        console.error("Failed to fetch address:", error);
+        console.error("Failed to fetch address:", errorMessage);
       }
     }
   };

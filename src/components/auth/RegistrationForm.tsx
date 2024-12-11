@@ -6,7 +6,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Button, Spinner } from "@nextui-org/react";
-import { api } from "../../helpers/api"; 
+import { api, handleError } from "../../helpers/api"; 
 import { useUserStore, generateRandomAvatar } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +28,7 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 const RegistrationForm = () => {
   const setUser = useUserStore((state) => state.setUser);
-  const setAddress = useUserStore((state) => state.setAddress);
+  // const setAddress = useUserStore((state) => state.setAddress);
   const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -75,9 +75,9 @@ const RegistrationForm = () => {
   
       setSubmissionError(null);
       router.push("/dashboard");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || "Failed to register. Please try again.";
-      setSubmissionError(errorMessage);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

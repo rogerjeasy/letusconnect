@@ -36,8 +36,6 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
 
   // Address state management
   const {
-    address,
-    setAddress,
     fetchAddress,
   } = useFetchAddress(token!);
 
@@ -96,6 +94,8 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
                   ? handleSettingsRedirect
                   : undefined
               }
+              as={item.href ? Link : "button"}
+              href={item.href ? item.href : undefined}
             >
               {item.key === "profile" || item.key === "logout" || item.key === "settings" ? (
                 item.label

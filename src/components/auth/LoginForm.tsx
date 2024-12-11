@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Spinner, Button } from "@nextui-org/react";
 import { useUserStore, generateRandomAvatar } from "../../store/userStore";
-import { api } from "../../helpers/api";
+import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
 
 // Zod Schema for Form Validation
@@ -46,12 +46,9 @@ const LoginForm = () => {
         setSubmissionError(null);
         router.push("/dashboard");
       }
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        setSubmissionError(error.response.data.error);
-      } else {
-        setSubmissionError("An unexpected error occurred. Please try again.");
-      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

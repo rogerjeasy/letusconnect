@@ -22,6 +22,7 @@ import {
   FaUsers,
   FaBan,
   FaCalendarAlt,
+  FaUndo,
 } from "react-icons/fa";
 import { api } from "@/helpers/api";
 
@@ -85,6 +86,16 @@ export default function StudentAlumniDirectory() {
     setFilteredUsers(filtered);
     setCurrentPage(1);
   };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setProgramFilter("");
+    setYearFilter("");
+    setInterestFilter("");
+    setFilteredUsers(users);
+    setCurrentPage(1);
+  };
+
 
   // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -156,10 +167,15 @@ export default function StudentAlumniDirectory() {
           />
         </div>
 
-        {/* Apply Filters Button */}
-        <Button color="primary" startContent={<FaFilter />} onClick={handleSearch} className="mx-auto">
-          Apply Filters
-        </Button>
+        {/* Buttons */}
+        <div className="flex justify-center gap-4">
+          <Button color="primary" startContent={<FaFilter />} onClick={handleSearch}>
+            Apply Filters
+          </Button>
+          <Button color="secondary" startContent={<FaUndo />} onClick={handleResetFilters}>
+            Reset Filters
+          </Button>
+        </div>
       </div>
 
       {/* User Cards */}
@@ -169,9 +185,10 @@ export default function StudentAlumniDirectory() {
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="text-center">
-          <FaBan className="text-6xl text-gray-400 mb-4" />
-          <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
+          <FaBan className="text-6xl text-gray-400 mb-4 mx-auto block" />
+            <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
         </div>
+
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
           {paginatedUsers.map((user, index) => (

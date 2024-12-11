@@ -118,7 +118,7 @@ export default function TestimonialsCarousel() {
 
                 {/* Responsive Quote */}
                 <p className="text-base sm:text-lg md:text-xl lg:text-2xl italic mb-4 leading-snug sm:leading-relaxed md:leading-loose max-w-prose mx-auto">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
 
                 {/* Responsive Name */}

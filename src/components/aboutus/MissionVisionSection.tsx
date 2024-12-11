@@ -2,6 +2,7 @@
 
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { FaLightbulb, FaChartLine } from "react-icons/fa";
+import Image from "next/image";
 
 export default function MissionVisionSection() {
   return (
@@ -22,7 +23,7 @@ export default function MissionVisionSection() {
               <p className="text-gray-700 mb-4">
                 Our mission is to create a dynamic platform where students, alumni, and industry experts can connect, collaborate, and grow. We aim to foster an ecosystem of lifelong learning, mentorship, and innovation.
               </p>
-              <img
+              <Image
                 src="https://images.pexels.com/photos/3184325/pexels-photo-3184325.jpeg"
                 alt="Mission Image"
                 className="rounded-lg object-cover w-full h-64"
@@ -40,7 +41,7 @@ export default function MissionVisionSection() {
               <p className="text-gray-700 mb-4">
                 Our vision is to become the leading networking and collaboration platform that empowers individuals to achieve personal and professional growth through meaningful connections and shared knowledge.
               </p>
-              <img
+              <Image
                 src="https://images.pexels.com/photos/3184395/pexels-photo-3184395.jpeg"
                 alt="Vision Image"
                 className="rounded-lg object-cover w-full h-64"

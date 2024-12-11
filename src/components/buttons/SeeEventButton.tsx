@@ -14,7 +14,7 @@ export default function SeeEventButton({
   color = "primary",
   size = "md",
   radius = "lg",
-  className = "",
+  // className = "",
   onClick,
 }: SeeEventButtonProps) {
   return (

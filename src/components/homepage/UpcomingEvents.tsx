@@ -1,11 +1,5 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Button } from "@nextui-org/react";
-import Link from "next/link";
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
-import { EventDetails } from "../../store/eventDetails";
-import { useState } from "react";
-import SeeEvent from "../forms/SeeEvents";
 import UpcomingMentorshipEvents from "../mentoring/LimitedAccessFeatures/UpcomingMentorshipEvents";
 
 export default function UpcomingEvents() {

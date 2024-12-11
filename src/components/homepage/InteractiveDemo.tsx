@@ -13,7 +13,7 @@ export default function InteractiveDemo() {
         </h2>
 
         <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Get a quick tour of the platform's key features and see how you can benefit from mentorship, collaboration, and networking.
+          Get a quick tour of the platform&rsquo;s key features and see how you can benefit from mentorship, collaboration, and networking.
         </p>
 
         {/* Embedded Video or Thumbnail with CTA */}

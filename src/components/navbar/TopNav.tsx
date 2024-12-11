@@ -3,19 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
-import {  Dropdown,  
-  DropdownTrigger,  
-  DropdownMenu,  
-  DropdownItem,
+import { 
   Input,
 } from "@nextui-org/react";
 import { useUserStore, generateRandomAvatar } from "../../store/userStore";
-import { ChevronDown } from "./Icons";
+// import { ChevronDown } from "./Icons";
 import { SearchIcon } from "./SearchIcon";
 import MobileMenu from "./MobileNavBar";
 import ProfileDropDown from "./ProfileDropDown";
 import DropdownMenuComponent from "./DropdownMenuComponent";
-import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
+import { menuOptions } from "../../store/menuOptions";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
 import { aboutOptions } from "../dropdownoptions/AboutOptions";
@@ -26,13 +23,13 @@ import { connectStudentOptions } from "../dropdownoptions/connectStudentOptions"
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useUserStore();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
+  const [, setDropdownOpen] = useState(false);
+  // const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const avatarPicture = user?.profilePicture || generateRandomAvatar();
 
-  const icons = {
-    chevron: <ChevronDown fill="currentColor" size={16} />,
-  };
+  // const icons = {
+  //   chevron: <ChevronDown fill="currentColor" size={16} />,
+  // };
 
   const handleLogout = () => {
     logout();
@@ -43,9 +40,9 @@ const Navbar = () => {
     setMobileMenuOpen((prev) => !prev);
   };
 
-  const closeDropdown = () => {
-    setDropdownOpen(false);
-  };
+  // const closeDropdown = () => {
+  //   setDropdownOpen(false);
+  // };
 
   return (
     <nav className="bg-blue-600 text-white fixed w-full z-50 shadow">
@@ -53,9 +50,9 @@ const Navbar = () => {
         {/* Left Section: Logo */}
         <div className="text-2xl font-bold">
           {isAuthenticated ? (
-            <Link href="/dashboard">Let's Connect</Link>
+            <Link href="/dashboard">Let&apos;s Connect</Link>
           ) : (
-            <Link href="/">Let's Connect</Link>
+            <Link href="/">Let&apos;s Connect</Link>
           )}
         </div>
 

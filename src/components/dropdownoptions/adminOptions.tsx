@@ -3,7 +3,7 @@ import {
     FaUsers,
     FaQuestionCircle,
     FaTasks,
-    FaClipboardList,
+    // FaClipboardList,
     FaCogs,
     FaChartLine,
     FaEnvelopeOpenText,

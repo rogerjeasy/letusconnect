@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardBody, Divider, Button } from "@nextui-org/react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { set, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputForm from "../forms/InputForm";
 import InputToUpdate from "../forms/InputToUpdate";
@@ -30,11 +30,11 @@ interface EducationCardProps {
   handleUpdateAward: (eduIndex: number, awardIndex: number, value: string) => void;
   handleDeleteAward: (eduIndex: number, awardIndex: number) => void;
   toggleEdit: (index: number) => void;
-  saveChanges: (index: number, data: any) => void;
+  saveChanges: (index: number, data: EducationFormValues) => void;
   cancelChanges: (index: number) => void;
   setSelectedCountry: (country: string) => void;
   setManualUniversity: (university: string) => void;
-  handleFieldValue: (index: number, field: keyof University, value: any) => void;
+  handleFieldValue: (index: number, field: keyof University, value: string | number) => void;
 }
 
 // Zod Schema for Validation

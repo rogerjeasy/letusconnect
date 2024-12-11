@@ -3,6 +3,7 @@
 import { Card } from "@nextui-org/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -87,7 +88,7 @@ export default function PartnersAffiliations() {
                 className="block w-40 h-40 md:w-48 md:h-48 p-4 bg-gray-100 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105"
               >
                 <Card className="flex items-center justify-center h-full p-4">
-                  <img
+                  <Image
                     src={partner.logo}
                     alt={partner.name}
                     className="max-h-20 max-w-full object-contain"

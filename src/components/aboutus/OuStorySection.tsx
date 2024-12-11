@@ -44,8 +44,9 @@ export default function OurStorySection() {
           Our Story
         </h2>
         <p className="text-lg md:text-xl text-gray-700 text-center max-w-4xl mx-auto mb-12 leading-relaxed">
-          Our platform was born from a vision to bridge the gap between students, alumni, and industry experts. As we prepare for launch, we're excited to share the milestones that have shaped our journey so far.
+          Our platform was born from a vision to bridge the gap between students, alumni, and industry experts. As we prepare for launch, we&rsquo;re excited to share the milestones that have shaped our journey so far.
         </p>
+
 
         {/* First Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

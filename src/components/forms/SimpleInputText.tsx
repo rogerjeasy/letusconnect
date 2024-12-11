@@ -2,6 +2,7 @@
 
 import { Input } from "@nextui-org/react";
 import { ReactNode } from "react";
+import { UseFormRegisterReturn } from "react-hook-form";
 
 interface SimpleInputTextProps {
   placeholder: string;
@@ -9,7 +10,7 @@ interface SimpleInputTextProps {
   isInvalid?: boolean;
   errorMessage?: string;
   type?: string;
-  register: any; // The register function from react-hook-form
+  register: UseFormRegisterReturn;
 }
 
 export default function SimpleInputText({

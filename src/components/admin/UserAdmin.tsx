@@ -14,11 +14,10 @@ import {
   Tooltip,
   Pagination,
   Chip,
-  user,
 } from "@nextui-org/react";
-import { FaEdit, FaTrash, FaSearch, FaBan, FaCheckCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaSearch, FaBan } from "react-icons/fa";
 import ModalPopup from "@/components/forms/ModalPopup";
-import { api } from "@/helpers/api";
+import { api, handleError } from "@/helpers/api";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import { useUserStore } from "@/store/userStore";
 
@@ -41,7 +40,7 @@ export default function UserAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const { user, isAuthenticated, restoreUser, loading: userLoading } = useUserStore();
+  const { user, isAuthenticated, restoreUser } = useUserStore();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -61,8 +60,9 @@ export default function UserAdmin() {
       const response = await api.get("/api/users");
       setUsers(response.data.users);
       setFilteredUsers(response.data.users);
-    } catch (error: any) {
-      console.error("Error fetching users:", error?.response?.data?.message);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Error fetching users:", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,8 @@ export default function UserAdmin() {
       setUserToDelete(null);
       fetchUsers();
     } catch (error) {
-      console.error("Error deleting user:", error);
+      const errorMessage = handleError(error);
+      console.error("Error deleting user:", errorMessage);
     }
   };
 

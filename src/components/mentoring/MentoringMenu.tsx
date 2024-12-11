@@ -5,7 +5,7 @@ import NonLoggedInMentoringMenu from "./NonLoggedInMentoringMenu";
 import { useUserStore } from "@/store/userStore";
 
 export default function MentoringMenu() {
-    const { user, isAuthenticated } = useUserStore();
+    const { isAuthenticated } = useUserStore();
   return (
     <div>
       {isAuthenticated ? <LoggedInMentoringMenu /> : <NonLoggedInMentoringMenu />}

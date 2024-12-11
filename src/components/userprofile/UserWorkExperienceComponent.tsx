@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardHeader, CardBody, Divider, Button } from "@nextui-org/react";
 import { WorkExperience } from "../../store/userStore";
 import { useUserStore } from "../../store/userStore";
 import { api } from "../../helpers/api";
 import PlusCircleIcon from "../icons/PlusCircleIcon";
 import WorkExperienceCard from "../cards/WorkExperienceCard";
-import { set } from "zod";
 
 // Default new work experience template
 const newWorkExperienceTemplate: WorkExperience = {
@@ -27,7 +26,7 @@ export default function UserWorkExperienceComponent() {
   const setWorkExperience = useUserStore((state) => state.setWorkExperience);
 
   const [isEditingIndex, setIsEditingIndex] = useState<number | null>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationError, ] = useState<string | null>(null);
 
   // const handleAddWorkExperience = async () => {
   //   try {

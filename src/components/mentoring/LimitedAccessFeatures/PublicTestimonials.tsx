@@ -2,7 +2,6 @@
 
 import { Card, CardBody } from "@nextui-org/react";
 import { FaQuoteLeft } from "react-icons/fa";
-import SectionTitle from "../../shared/SectionTitle";
 
 export default function PublicTestimonials() {
   return (
@@ -14,7 +13,8 @@ export default function PublicTestimonials() {
         <Card className="w-80 p-4 rounded-lg shadow-md">
           <CardBody>
             <p className="text-gray-700 italic mb-4">
-              "This platform connected me with a mentor who transformed my career path!"
+            &ldquo;I found invaluable advice and resources to prepare for my dream job.
+            This platform connected me with a mentor who transformed my career path!&rdquo;
             </p>
             <h4 className="font-bold text-gray-800">- Jane Doe, Data Scientist</h4>
           </CardBody>
@@ -22,7 +22,7 @@ export default function PublicTestimonials() {
         <Card className="w-80 p-4 rounded-lg shadow-md">
           <CardBody>
             <p className="text-gray-700 italic mb-4">
-              "I found invaluable advice and resources to prepare for my dream job."
+            &ldquo;I found invaluable advice and resources to prepare for my dream job.&rdquo;
             </p>
             <h4 className="font-bold text-gray-800">- John Smith, Software Engineer</h4>
           </CardBody>

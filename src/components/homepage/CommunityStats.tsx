@@ -30,8 +30,8 @@ const stats: Stat[] = [
   { title: "Active Projects", count: 400, suffix: "+", icon: <FaProjectDiagram size={32} className="text-green-500" /> },
   { title: "Networking Connections", count: 800, suffix: "+", icon: <FaLaptop size={32} className="text-indigo-500" /> },
   { title: "Start-up Ideas Shared", count: 100, suffix: "+", icon: <FaRocket size={32} className="text-red-500" /> },
-//   { title: "Mentorship Satisfaction Rate", count: 90, suffix: "%", icon: <FaStar size={32} className="text-orange-500" /> },
-//   { title: "Expert Webinars Conducted", count: 50, suffix: "+", icon: <FaChartLine size={32} className="text-pink-500" /> },
+  { title: "Mentorship Satisfaction Rate", count: 90, suffix: "%", icon: <FaStar size={32} className="text-orange-500" /> },
+  { title: "Expert Webinars Conducted", count: 50, suffix: "+", icon: <FaChartLine size={32} className="text-pink-500" /> },
 ];
 
 export default function CommunityStats() {

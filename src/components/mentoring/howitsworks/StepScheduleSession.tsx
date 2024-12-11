@@ -2,7 +2,6 @@
 
 import { FaCalendarCheck } from "react-icons/fa";
 import { Button } from "@nextui-org/react";
-import Image from "next/image";
 
 export default function StepScheduleSession() {
   return (
