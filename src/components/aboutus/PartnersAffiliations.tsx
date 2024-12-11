@@ -92,6 +92,7 @@ export default function PartnersAffiliations() {
                     src={partner.logo}
                     alt={partner.name}
                     className="max-h-20 max-w-full object-contain"
+                    fill
                   />
                 </Card>
               </a>
