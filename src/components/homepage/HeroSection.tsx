@@ -1,16 +1,9 @@
 "use client";
 
-import { Card, CardBody, Button } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
+import { Card, CardBody } from "@nextui-org/react";
+import Link from "next/link";
 
 export default function HeroSection() {
-  const router = useRouter();
-
-  // Handle redirection
-  const handleRedirect = (href: string) => {
-    router.push(href);
-  };
-
   return (
     <Card
       isFooterBlurred
@@ -57,32 +50,28 @@ export default function HeroSection() {
 
         {/* Buttons */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-          {/* Get Started Button with Animated Arrow */}
-          <Button
-            radius="lg"
-            size="lg"
-            color="primary"
-            className="bg-white text-teal-600 font-bold hover:bg-teal-100 w-full md:w-auto group transition-transform duration-300 hover:scale-105"
-            onClick={() => handleRedirect("/register")}
-          >
-            <span className="flex items-center gap-2">
-              Get Started
-              <span className="transition-transform duration-300 transform group-hover:translate-x-2">
-                ➔
+          {/* Sign Up Button with Animated Arrow */}
+          <Link href="/register">
+            <button
+              className="rounded-lg px-6 py-3 text-lg font-bold bg-white text-teal-600 hover:bg-teal-100 w-full md:w-auto group transition-transform duration-300 hover:scale-105"
+            >
+              <span className="flex items-center gap-2">
+                Get Started
+                <span className="transition-transform duration-300 transform group-hover:translate-x-2">
+                  ➔
+                </span>
               </span>
-            </span>
-          </Button>
+            </button>
+          </Link>
 
           {/* Explore Community Button */}
-          <Button
-            radius="lg"
-            size="lg"
-            variant="bordered"
-            className="text-white border-white font-bold hover:bg-white/10 w-full md:w-auto transition-transform duration-300 hover:scale-105"
-            onClick={() => handleRedirect("/community")}
-          >
-            Explore the Community
-          </Button>
+          <Link href="/community">
+            <button
+              className="rounded-lg px-6 py-3 text-lg font-bold text-white border border-white hover:bg-white/10 w-full md:w-auto transition-transform duration-300 hover:scale-105"
+            >
+              Explore the Community
+            </button>
+          </Link>
         </div>
       </CardBody>
 
