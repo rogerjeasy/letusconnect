@@ -45,7 +45,6 @@ export default function UserAdmin() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
-  // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -71,9 +70,10 @@ export default function UserAdmin() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    const filtered = users.filter((user) =>
-      user.username.toLowerCase().includes(value.toLowerCase()) ||
-      user.email.toLowerCase().includes(value.toLowerCase())
+    const filtered = users.filter(
+      (user) =>
+        user.username.toLowerCase().includes(value.toLowerCase()) ||
+        user.email.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredUsers(filtered);
   };
@@ -108,8 +108,7 @@ export default function UserAdmin() {
   }
 
   return (
-    <div className="p-8">
-
+    <div className="pt-24 md:pt-28 px-4 md:px-8"> {/* Added top padding and horizontal padding */}
       <h2 className="text-3xl font-bold mb-6 text-center">User Management</h2>
 
       <div className="flex justify-center mb-6">
@@ -138,56 +137,59 @@ export default function UserAdmin() {
           </TableHeader>
           <TableBody>
             {paginatedUsers.length === 0 ? (
-                <TableRow>
+              <TableRow>
                 <TableCell colSpan={6} className="text-center py-10">
-                    <FaBan className="text-6xl text-gray-400 mb-4" />
-                    <p className="text-gray-500">No users found</p>
+                  <FaBan className="text-6xl text-gray-400 mb-4" />
+                  <p className="text-gray-500">No users found</p>
                 </TableCell>
-                </TableRow>
+              </TableRow>
             ) : (
-                paginatedUsers.map((user) => (
+              paginatedUsers.map((user) => (
                 <TableRow key={user.id || user.email || `${user.username}-${user.email}`}>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
                     {user.role.map((r) => (
-                        <Chip key={`${user.id}-${r}`} color={r === "admin" ? "danger" : "default"} className="mr-1">
+                      <Chip
+                        key={`${user.id}-${r}`}
+                        color={r === "admin" ? "danger" : "default"}
+                        className="mr-1"
+                      >
                         {r}
-                        </Chip>
+                      </Chip>
                     ))}
-                    </TableCell>
-                    <TableCell>
+                  </TableCell>
+                  <TableCell>
                     <Tooltip content={user.status === "active" ? "Active User" : "Inactive User"}>
-                        <Chip color={user.status === "active" ? "success" : "danger"}>
+                      <Chip color={user.status === "active" ? "success" : "danger"}>
                         {user.status}
-                        </Chip>
+                      </Chip>
                     </Tooltip>
-                    </TableCell>
-                    <TableCell>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
-                        <Tooltip content="Edit User">
+                      <Tooltip content="Edit User">
                         <Button isIconOnly color="warning" variant="light">
-                            <FaEdit />
+                          <FaEdit />
                         </Button>
-                        </Tooltip>
-                        <Tooltip content="Delete User">
+                      </Tooltip>
+                      <Tooltip content="Delete User">
                         <Button
-                            isIconOnly
-                            color="danger"
-                            variant="light"
-                            onClick={() => openDeleteModal(user.id)}
+                          isIconOnly
+                          color="danger"
+                          variant="light"
+                          onClick={() => openDeleteModal(user.id)}
                         >
-                            <FaTrash />
+                          <FaTrash />
                         </Button>
-                        </Tooltip>
+                      </Tooltip>
                     </div>
-                    </TableCell>
+                  </TableCell>
                 </TableRow>
-                ))
+              ))
             )}
-            </TableBody>
-
+          </TableBody>
         </Table>
       )}
 

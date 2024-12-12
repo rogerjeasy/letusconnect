@@ -1,5 +1,3 @@
-// app/dashboard/page.tsx or wherever your Dashboard component is located
-
 "use client";
 
 import { useEffect } from "react";
@@ -23,7 +21,7 @@ export default function Dashboard() {
   }
 
   return (
-    <>
+    <div className="pt-24 md:pt-28 px-4 md:px-8"> {/* Added top and horizontal padding */}
       <AccessDenied
         condition={!isAuthenticated || !user}
         message="Access Denied: You need to be logged in to view this page."
@@ -31,7 +29,7 @@ export default function Dashboard() {
 
       {isAuthenticated && user && (
         <Card
-          className="max-w-4xl mx-auto mt-8 p-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg rounded-lg"
+          className="max-w-4xl mx-auto p-6 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg rounded-lg"
           isHoverable
           isPressable
         >
@@ -65,6 +63,6 @@ export default function Dashboard() {
           </CardBody>
         </Card>
       )}
-    </>
+    </div>
   );
 }

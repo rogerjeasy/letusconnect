@@ -181,7 +181,7 @@ export default function FAQsAdmin() {
 
   return (
 
-    <div className="p-8">
+    <div className="p-4 md:p-8 pt-24 md:pt-28">
         {/* Centered Title */}
         <h2 className="text-3xl font-bold mb-4 text-center">FAQs Management</h2>
 

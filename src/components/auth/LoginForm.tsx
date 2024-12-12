@@ -57,7 +57,7 @@ const LoginForm = () => {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full h-screen flex justify-center items-center bg-cover bg-center overflow-hidden"
+      className="min-h-screen w-full flex flex-col justify-center items-center bg-cover bg-center overflow-y-auto"
       style={{ backgroundImage: "url('https://images.pexels.com/photos/6146970/pexels-photo-6146970.jpeg')" }}
     >
       <Card className="flex flex-row w-full max-w-4xl shadow-lg overflow-hidden">

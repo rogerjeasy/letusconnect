@@ -96,7 +96,6 @@ export default function StudentAlumniDirectory() {
     setCurrentPage(1);
   };
 
-
   // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = filteredUsers.slice(
@@ -105,7 +104,7 @@ export default function StudentAlumniDirectory() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8 pt-24 md:pt-28">
       {/* Feature Explanation */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold mb-4">🎓 Student & Alumni Directory</h1>
@@ -186,9 +185,8 @@ export default function StudentAlumniDirectory() {
       ) : filteredUsers.length === 0 ? (
         <div className="text-center">
           <FaBan className="text-6xl text-gray-400 mb-4 mx-auto block" />
-            <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
+          <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
         </div>
-
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
           {paginatedUsers.map((user, index) => (
