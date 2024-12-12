@@ -13,6 +13,7 @@ import { eventsOptions } from "../dropdownoptions/eventOptions";
 import { testimonialsOptions } from "../dropdownoptions/testimonialOptions";
 import { groupsOptions } from "../dropdownoptions/forumOptions";
 import { SearchIcon } from "./SearchIcon";
+import { useRouter } from "next/navigation";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -20,6 +21,7 @@ interface NavigationMenuProps {
 }
 
 const NavigationMenu = ({ isAuthenticated, user }: NavigationMenuProps) => {
+  const router = useRouter();
   return (
     <div className="flex flex-wrap items-center gap-1 md:gap-2 justify-between w-full">
       <div className="flex flex-wrap items-center gap-1 md:gap-2">
@@ -155,16 +157,22 @@ const NavigationMenu = ({ isAuthenticated, user }: NavigationMenuProps) => {
 
         {!isAuthenticated && (
           <div className="flex gap-1">
-            <Link href="/register">
-              <Button color="primary" size="sm" className="bg-green-500 hover:bg-green-600 text-white">
-                Register
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button color="secondary" size="sm" className="bg-yellow-500 hover:bg-yellow-600 text-white">
-                Login
-              </Button>
-            </Link>
+            <Button
+              color="primary"
+              size="sm"
+              className="bg-green-500 hover:bg-green-600 text-white"
+              onPress={() => router.push("/register")}
+            >
+              Register
+            </Button>
+            <Button
+              color="secondary"
+              size="sm"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white"
+              onPress={() => router.push("/login")}
+            >
+              Login
+            </Button>
           </div>
         )}
       </div>
