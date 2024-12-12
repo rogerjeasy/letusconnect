@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown } from "../navbar/Icons";
 
 interface DropdownOption {
@@ -15,15 +15,21 @@ interface DropDownWithIconProps {
   buttonLabel: string;
   options: DropdownOption[];
   buttonColor?: "primary" | "default" | "secondary" | "success" | "warning";
-  onCloseMenu?: () => void;
+  closeMenu?: () => void;
 }
 
-export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "primary" }: DropDownWithIconProps) {
+export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "primary", closeMenu }: DropDownWithIconProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const handleMouseEnter = () => setIsOpen(true);
   const handleMouseLeave = () => setIsOpen(false);
-  const handleOptionClick = () => setIsOpen(false);
+
+  const handleOptionClick = (link: string) => {
+    setIsOpen(false);
+    if (closeMenu) closeMenu();
+    router.push(link);
+  };
 
   return (
     <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -38,12 +44,20 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
             {buttonLabel}
           </Button>
         </DropdownTrigger>
-        <DropdownMenu aria-label={buttonLabel} variant="faded" onAction={handleOptionClick}>
+        <DropdownMenu aria-label={buttonLabel} variant="faded">
           {options.map((option, index) => (
-            <DropdownItem key={index} startContent={option.icon} onClick={handleOptionClick}>
-              <Link href={option.link} className="w-full block">
+            <DropdownItem
+              key={index}
+              startContent={option.icon}
+              onPress={() => handleOptionClick(option.link)}
+            >
+              <Button
+                variant="light"
+                className="w-full justify-start text-left"
+                onPress={() => handleOptionClick(option.link)}
+              >
                 {option.label}
-              </Link>
+              </Button>
             </DropdownItem>
           ))}
         </DropdownMenu>

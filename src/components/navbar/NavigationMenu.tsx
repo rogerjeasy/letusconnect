@@ -22,11 +22,13 @@ interface NavigationMenuProps {
 
 const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProps) => {
   const router = useRouter();
+
   return (
     <div className="flex flex-wrap items-center gap-1 md:gap-2 justify-between w-full">
       <div className="flex flex-wrap items-center gap-1 md:gap-2">
         {isAuthenticated ? (
           <>
+            {/* Dashboard Button */}
             <Button
               variant="bordered"
               size="sm"
@@ -44,6 +46,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
                 buttonLabel="Admin Dashboard"
                 options={adminOptions.adminDashboard}
                 buttonColor="default"
+                closeMenu={closeMenu}
               />
             )}
 
@@ -52,6 +55,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Mentorship"
               options={mentorshipOptionsForDropDown.mentorshipAuthUsers}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Connect with Fellow Students */}
@@ -59,6 +63,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Students & Alumni"
               options={connectStudentOptions.connectAuthUsers}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Projects Dropdown */}
@@ -66,6 +71,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Projects"
               options={projectsOptions.projectsAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Jobs & Careers Dropdown */}
@@ -73,6 +79,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Jobs & Careers"
               options={jobsOptions.jobs}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Events Dropdown */}
@@ -80,6 +87,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Events"
               options={eventsOptions.events}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Testimonials Dropdown */}
@@ -87,6 +95,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Testimonials"
               options={testimonialsOptions.testimonials}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             {/* Groups/Forums Dropdown */}
@@ -94,52 +103,60 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               buttonLabel="Groups/Forums"
               options={groupsOptions.groups}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
           </>
         ) : (
           <>
-            <DropDownWithIcon buttonLabel="About" options={aboutOptions.aboutUs} buttonColor="default" />
+            <DropDownWithIcon buttonLabel="About" options={aboutOptions.aboutUs} buttonColor="default" closeMenu={closeMenu} />
 
             <DropDownWithIcon
               buttonLabel="Mentorship"
               options={mentorshipOptionsForDropDown.mentorshipNonAuthUsers}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Students & Alumni"
               options={connectStudentOptions.connectNonAuthUsers}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Projects"
               options={projectsOptions.projectsNonAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Jobs & Careers"
               options={jobsOptions.jobsNonAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Events"
               options={eventsOptions.eventsNonAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Groups/Forums"
               options={groupsOptions.groupsNonAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
 
             <DropDownWithIcon
               buttonLabel="Testimonials"
               options={testimonialsOptions.testimonialsNonAuth}
               buttonColor="default"
+              closeMenu={closeMenu}
             />
           </>
         )}
