@@ -82,14 +82,9 @@ export default function FeatureOverview() {
         {/* Learn More Button */}
         <div className="mt-12 text-center">
           <Link href="/testimonies">
-            <Button
-              color="success"
-              radius="lg"
-              size="lg"
-              className="font-bold w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
-            >
+            <button className="bg-teal-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-teal-600 transition">
               Learn More
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
