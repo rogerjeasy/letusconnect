@@ -5,7 +5,7 @@ import TopNav from "@/components/navbar/TopNav";
 import AuthWrapper from "@/components/AuthWrapper";
 
 export const metadata: Metadata = {
-  title: "LetUsConnect",
+  title: "Let Us Connect",
   description: "Networking and Collaboration Platform",
 };
 
