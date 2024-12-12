@@ -25,6 +25,8 @@ import {
   FaUndo,
 } from "react-icons/fa";
 import { api } from "@/helpers/api";
+import { generateRandomAvatar } from "../../store/userStore";
+
 
 interface User {
   id: string;
@@ -191,9 +193,11 @@ export default function StudentAlumniDirectory() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
           {paginatedUsers.map((user, index) => (
             <Card key={user.id || user.email || `user-${index}`} className="shadow-md">
+              
               <CardHeader className="flex gap-3">
                 <Avatar
-                  src={user.profilePicture || "/default-avatar.png"}
+                  
+                  src={user.profilePicture || generateRandomAvatar()}
                   alt={user.username}
                   size="lg"
                 />
