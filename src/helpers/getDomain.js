@@ -7,7 +7,7 @@ import { isProduction } from "./isProduction"
  * @returns {string}
  */
 export const getDomain = () => {
-  const prodUrl = "https://go-letusconnect.onrender.com" // App Engine URL to be replaced
+  const prodUrl = "https://go-letusconnect.onrender.com"
   const devUrl = "http://localhost:8080"
 
   return isProduction() ? prodUrl : devUrl
