@@ -15,6 +15,7 @@ import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
 import ViewUserProfile from "../userprofile/ViewProfile";
 import Logout from "../userprofile/Logout";
 import { useFetchAddress } from "../../store/useFetchAddress";
+import { useUserStore } from "@/store/userStore";
 
 type ProfileDropDownProps = {
   type: "avatar" | "user";
@@ -33,6 +34,7 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
   const token = localStorage.getItem("token");
+  const { logout } = useUserStore();
 
   // Address state management
   const {
@@ -44,8 +46,11 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
   };
 
   const handleLogout = () => {
-    setLogoutModalOpen(true);
+    setLogoutModalOpen(false);
+    logout();
+    router.push("/");
   };
+  
 
   const handleSettingsRedirect = async () => {
     await fetchAddress();
@@ -84,26 +89,27 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
           <>
             {profileItems.map((item) => (
               <DropdownItem
-                key={item.key}
-                color={item.color}
-                onPress={
-                  item.key === "profile"
-                    ? handleViewProfile
-                    : item.key === "logout"
-                    ? handleLogout
-                    : item.key === "settings"
-                    ? handleSettingsRedirect
-                    : undefined
-                }
-                as={item.href ? Link : "button"}
-                href={item.href ? item.href : undefined}
-              >
-                {item.key === "profile" || item.key === "logout" || item.key === "settings" ? (
-                  item.label
-                ) : (
-                  <Link href={item.href}>{item.label}</Link>
-                )}
-              </DropdownItem>
+              key={item.key}
+              color={item.color}
+              onPress={
+                item.key === "profile"
+                  ? handleViewProfile
+                  : item.key === "logout"
+                  ? handleLogout
+                  : item.key === "settings"
+                  ? handleSettingsRedirect
+                  : undefined
+              }
+            >
+              {item.href ? (
+                <Link href={item.href} className="w-full block">
+                  {item.label}
+                </Link>
+              ) : (
+                item.label
+              )}
+            </DropdownItem>
+            
             ))}
           </>
         </DropdownMenu>

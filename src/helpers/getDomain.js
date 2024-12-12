@@ -8,7 +8,7 @@ import { isProduction } from "./isProduction"
  */
 export const getDomain = () => {
   const prodUrl = "https://go-letusconnect.onrender.com"
-  const devUrl = "http://localhost:8080"
+  const devUrl = "https://go-letusconnect.onrender.com"
 
   return isProduction() ? prodUrl : devUrl
 }
