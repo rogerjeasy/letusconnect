@@ -18,9 +18,10 @@ import { useRouter } from "next/navigation";
 interface NavigationMenuProps {
   isAuthenticated: boolean;
   user?: { role?: string[] } | null;
+  closeMenu: () => void;
 }
 
-const NavigationMenu = ({ isAuthenticated, user }: NavigationMenuProps) => {
+const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProps) => {
   const router = useRouter();
   return (
     <div className="flex flex-wrap items-center gap-1 md:gap-2 justify-between w-full">
@@ -161,7 +162,10 @@ const NavigationMenu = ({ isAuthenticated, user }: NavigationMenuProps) => {
               color="primary"
               size="sm"
               className="bg-green-500 hover:bg-green-600 text-white"
-              onPress={() => router.push("/register")}
+              onPress={() => {
+                closeMenu();
+                router.push("/register");
+              }}
             >
               Register
             </Button>
@@ -169,7 +173,10 @@ const NavigationMenu = ({ isAuthenticated, user }: NavigationMenuProps) => {
               color="secondary"
               size="sm"
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onPress={() => router.push("/login")}
+              onPress={() => {
+                closeMenu();
+                router.push("/login");
+              }}
             >
               Login
             </Button>
