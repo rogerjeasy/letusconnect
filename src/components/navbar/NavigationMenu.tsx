@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button, Input } from "@nextui-org/react";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { adminOptions } from "../dropdownoptions/adminOptions";
@@ -28,11 +27,16 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
       <div className="flex flex-wrap items-center gap-1 md:gap-2">
         {isAuthenticated ? (
           <>
-            <Link href="/dashboard">
-              <Button variant="bordered" size="sm">
-                Dashboard
-              </Button>
-            </Link>
+            <Button
+              variant="bordered"
+              size="sm"
+              onPress={() => {
+                closeMenu();
+                router.push("/dashboard");
+              }}
+            >
+              Dashboard
+            </Button>
 
             {/* Admin Dashboard */}
             {user?.role?.includes("admin") && (
