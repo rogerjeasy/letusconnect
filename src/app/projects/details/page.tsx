@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Spinner } from "@nextui-org/react";
 import ViewProjectDetails from "@/components/projects/ViewProjectDetails";
 import { Project } from "@/store/project";
 import { api, handleError } from "@/helpers/api";
 
-const ViewDetailsPage = () => {
+const ViewDetailsContent = () => {
   const searchParams = useSearchParams();
   const projectId = searchParams.get("id");
 
@@ -53,5 +53,11 @@ const ViewDetailsPage = () => {
     </div>
   );
 };
+
+const ViewDetailsPage = () => (
+  <Suspense fallback={<div className="flex justify-center p-6"><Spinner size="lg" /></div>}>
+    <ViewDetailsContent />
+  </Suspense>
+);
 
 export default ViewDetailsPage;
