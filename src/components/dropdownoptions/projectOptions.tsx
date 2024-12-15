@@ -10,15 +10,19 @@ import {
   FaInfoCircle,
   FaQuestionCircle,
   FaStar,
+  FaBell,
 } from "react-icons/fa";
 
 export const projectsOptions = {
   // Authenticated Users: Projects
   projectsAuth: [
-    { label: "View Projects", icon: <FaEye className="text-blue-500" />, link: "/projects/view" },
-    { label: "Create a Project", icon: <FaPlusCircle className="text-green-500" />, link: "/projects/create" },
+    { label: "View My Projects", icon: <FaEye className="text-blue-500" />, link: "/projects/view" },
+    { label: "Create a New Project", icon: <FaPlusCircle className="text-green-500" />, link: "/projects/create" },
     { label: "Join a Project", icon: <FaUsers className="text-teal-500" />, link: "/projects/join" },
-    { label: "Manage Projects", icon: <FaTasks className="text-purple-500" />, link: "/projects/manage" },
+    { label: "Manage My Projects", icon: <FaTasks className="text-purple-500" />, link: "/projects/manage" },
+    { label: "Notifications", icon: <FaBell className="text-red-500" />, link: "/projects/notifications" },
+    { label: "Help & Documentation", icon: <FaQuestionCircle className="text-yellow-500" />, link: "/projects/help" },
+    { label: "Project Insights", icon: <FaStar className="text-orange-500" />, link: "/projects/insights" },
   ],
 
   // Non-Authenticated Users: Projects

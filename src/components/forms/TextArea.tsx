@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Textarea } from "@nextui-org/react";
 
 interface TextAreaProps {
@@ -10,6 +11,8 @@ interface TextAreaProps {
   placeholder: string;
   description: string;
   labelColor?: string;
+  isInvalid?: boolean;       // New prop for validation state
+  errorMessage?: string;     // New prop for error message
   onChange?: (value: string) => void;
 }
 
@@ -21,6 +24,8 @@ export default function TextareaForm({
   placeholder,
   description,
   labelColor = "font-bold",
+  isInvalid = false,
+  errorMessage = "",
   onChange,
 }: TextAreaProps) {
   return (
@@ -31,6 +36,8 @@ export default function TextareaForm({
       label={label}
       placeholder={placeholder}
       description={description}
+      isInvalid={isInvalid}
+      errorMessage={errorMessage}
       onChange={(e) => onChange?.(e.target.value)} // Ensure proper onChange handling
       className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4"
       classNames={{

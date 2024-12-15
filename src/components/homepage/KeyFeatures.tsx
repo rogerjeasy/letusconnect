@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Button } from "@nextui-org/react";
+import { Card, CardBody, CardHeader } from "@nextui-org/react";
 import { FaUserFriends, FaComments, FaBriefcase, FaCalendarAlt, FaStar } from "react-icons/fa";
 import { Users } from "lucide-react";
 import Link from "next/link";

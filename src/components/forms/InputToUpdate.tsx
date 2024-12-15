@@ -1,5 +1,7 @@
+// InputToUpdate.tsx
 "use client";
 
+import React from "react";
 import { Input } from "@nextui-org/react";
 
 interface InputToUpdateProps<T = string> {
@@ -9,7 +11,10 @@ interface InputToUpdateProps<T = string> {
   value: T; // Generic type for value
   labelColor?: string;
   variant?: "bordered" | "faded";
+  width?: string;
   onChange: (value: T) => void;
+  isInvalid?: boolean;       // New prop for validation state
+  errorMessage?: string;     // New prop for error message
 }
 
 export default function InputToUpdate<T>({
@@ -19,7 +24,10 @@ export default function InputToUpdate<T>({
   value,
   labelColor = "text-black",
   variant = "faded",
+  width = "max-w-xs",
   onChange,
+  isInvalid = false,
+  errorMessage = "",
 }: InputToUpdateProps<T>) {
   return (
     <Input
@@ -27,8 +35,10 @@ export default function InputToUpdate<T>({
       label={label}
       placeholder={placeholder}
       value={value as string}
-      className="max-w-xs"
+      className={width}
       variant={variant}
+      isInvalid={isInvalid}
+      errorMessage={errorMessage}
       classNames={{
         label: labelColor ? `${labelColor} font-bold` : undefined,
       }}
