@@ -30,7 +30,6 @@ const JoinedProjectsPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data.data);
         setProjects(response.data.data);
       } catch (err) {
         const errorMessage = handleError(err);

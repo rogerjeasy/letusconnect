@@ -8,6 +8,10 @@ import { useUserStore, generateRandomAvatar } from "@/store/userStore";
 
 interface ProjectCardProps {
   project: Project;
+  onViewDetails?: (project: Project) => void;
+  onUpdateProject?: (project: Project) => void;
+  onDeleteProject?: (projectId: string) => void;
+  onJoinProject?: (projectId: string) => void;
 }
 
 // Function to get status color
@@ -26,7 +30,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
+const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject, onJoinProject }: ProjectCardProps) => {
   const user = useUserStore((state) => state.user);
   const truncateDescription = (description: string) => {
     const words = description.split(" ");
@@ -63,20 +67,20 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         </p>
       </CardBody>
       <CardFooter className="flex gap-2">
-        <Button color="primary" size="sm" className="w-1/2">
+        <Button color="primary" size="sm" className="w-1/2" onClick={() => onViewDetails && onViewDetails(project)}>
           <FaEye className="mr-2" /> View Details
         </Button>
         {isOwner ? (
           <>
-            <Button color="warning" size="sm" className="w-1/3">
+            <Button color="warning" size="sm" className="w-1/3" onClick={() => onUpdateProject && onUpdateProject(project)}>
               <FaEdit className="mr-2" /> Update
             </Button>
-            <Button color="danger" size="sm" className="w-1/3">
+            <Button color="danger" size="sm" className="w-1/3" onClick={() => onDeleteProject && onDeleteProject(project.id)}>
               <FaTrash className="mr-2" /> Delete
             </Button>
           </>
         ) : (
-          <Button color="success" size="sm" className="w-1/2">
+          <Button color="success" size="sm" className="w-1/2" onClick={() => onJoinProject && onJoinProject(project.id)}>
             <FaUserPlus className="mr-2" /> Join Now
           </Button>
         )}

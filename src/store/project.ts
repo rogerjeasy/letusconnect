@@ -4,6 +4,8 @@ import exp from "constants";
 
 export interface InvitedUser {
     userId: string;
+    username: string;
+    email: string;
     role: string; // e.g., "owner", "collaborator"
     // joinedAt: Date;
   }
