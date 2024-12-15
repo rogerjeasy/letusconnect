@@ -69,7 +69,7 @@ export interface Participants {
     industry: string;
     academicFields: string[];
     status: string; // "open", "in_progress", "completed", "archived"
-    participants: InvitedUser[];
+    participants: Participants[];
     invitedUsers: InvitedUser[];
     joinRequests: JoinRequest[];
     tasks: Task[];

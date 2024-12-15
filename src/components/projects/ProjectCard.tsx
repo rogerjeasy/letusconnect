@@ -2,21 +2,9 @@
 
 import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Avatar, Button } from "@nextui-org/react";
-import { FaEye, FaUserPlus } from "react-icons/fa";
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  owner: {
-    name: string;
-    avatarUrl: string;
-  };
-  skillsNeeded: string[];
-  collaborationType: string;
-  industry: string;
-  status: string;
-}
+import { FaEdit, FaEye, FaTrash, FaUserPlus } from "react-icons/fa";
+import { Project } from "@/store/project";
+import { useUserStore, generateRandomAvatar } from "@/store/userStore";
 
 interface ProjectCardProps {
   project: Project;
@@ -39,18 +27,24 @@ const getStatusColor = (status: string) => {
 };
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
+  const user = useUserStore((state) => state.user);
   const truncateDescription = (description: string) => {
     const words = description.split(" ");
     return words.length > 20 ? words.slice(0, 20).join(" ") + "..." : description;
   };
 
+  // Check if the user is the owner or a participant with the role "owner"
+  const isOwner =
+    user?.uid === project.ownerId ||
+    project.participants.some((participant) => participant.userId === user?.uid && participant.role === "owner");
+
   return (
     <Card className="w-85 h-85 flex flex-col justify-between shadow-lg">
       <CardHeader className="flex items-center gap-4">
-        <Avatar src={project.owner.avatarUrl} alt={project.owner.name} />
+        <Avatar src={project.participants[0].profilePicture} alt={generateRandomAvatar()} />
         <div>
           <h3 className="font-bold">{project.title}</h3>
-          <p className="text-sm text-gray-500">Owner: {project.owner.name}</p>
+          <p className="text-sm text-gray-500">Owner: {project.ownerUsername}</p>
         </div>
       </CardHeader>
       <CardBody className="flex-grow">
@@ -72,9 +66,20 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         <Button color="primary" size="sm" className="w-1/2">
           <FaEye className="mr-2" /> View Details
         </Button>
-        <Button color="success" size="sm" className="w-1/2">
-          <FaUserPlus className="mr-2" /> Join Now
-        </Button>
+        {isOwner ? (
+          <>
+            <Button color="warning" size="sm" className="w-1/3">
+              <FaEdit className="mr-2" /> Update
+            </Button>
+            <Button color="danger" size="sm" className="w-1/3">
+              <FaTrash className="mr-2" /> Delete
+            </Button>
+          </>
+        ) : (
+          <Button color="success" size="sm" className="w-1/2">
+            <FaUserPlus className="mr-2" /> Join Now
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

@@ -2,16 +2,16 @@
 
 
 import ProjectHeaderSection from "./ProjectHeaderSection"
-import ProjectListingsSection from "./ProjectListingsSection";
 import ProjectSearchFilterSection from "./ProjectSearchFilterSection";
 import WhyExploreProjects from "./WhyExploreProjects";
+import PublicProjectsPage from "./PubicProjects";
 
 const ExploreProjects = () => {
   return (
     <div>
       <ProjectHeaderSection />
       <ProjectSearchFilterSection />
-      <ProjectListingsSection />
+      <PublicProjectsPage />
       <WhyExploreProjects />
     </div>
   );
