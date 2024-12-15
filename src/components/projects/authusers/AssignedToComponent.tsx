@@ -6,11 +6,33 @@ import { Participants } from "@/store/project";
 
 interface AssignedToComponentProps {
   users: Participants[];
-  onSelectionChange: (selectedUsers: Participants[]) => void;
+  onSelectionChange?: (selectedUsers: Participants[]) => void;
+  onlyView?: boolean;
 }
 
-const AssignedToComponent = ({ users, onSelectionChange }: AssignedToComponentProps) => {
-  return (
+const AssignedToComponent = ({ users, onSelectionChange, onlyView = false }: AssignedToComponentProps) => {
+  return onlyView ? (
+    <div className="flex flex-col gap-2 max-w-xs">
+      {users.length > 0 ? (
+        users.map((user) => (
+          <div key={user.userId} className="flex items-center gap-2 border-b py-2">
+            <Avatar
+              alt={user.username}
+              className="flex-shrink-0"
+              size="sm"
+              src={user.profilePicture}
+            />
+            <div className="flex flex-col">
+              <span className="text-small font-semibold">{user.username} ({user.role})</span>
+              <span className="text-tiny text-default-400">{user.email}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="text-default-500">No participants available.</div>
+      )}
+    </div>
+  ) : (
     <Select
       classNames={{
         base: "max-w-xs",
@@ -24,7 +46,9 @@ const AssignedToComponent = ({ users, onSelectionChange }: AssignedToComponentPr
         // Ensure keys is treated as a Set<string>
         const selectedKeys = new Set<string>(keys as Set<string>);
         const selectedUsers = users.filter((user) => selectedKeys.has(user.userId));
-        onSelectionChange(selectedUsers);
+        if (onSelectionChange) {
+          onSelectionChange(selectedUsers);
+        }
       }}
       renderValue={(items: SelectedItems<Participants>) => {
         return items.map((item) => (

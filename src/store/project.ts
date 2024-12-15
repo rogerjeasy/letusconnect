@@ -1,6 +1,7 @@
 // types/project.ts
 
-import exp from "constants";
+export const projectRoles = ["Member", "Contributor", "Moderator", "Owner"];
+
 
 export interface InvitedUser {
     userId: string;
@@ -22,8 +23,10 @@ export interface Participants {
   
   export interface JoinRequest {
     userId: string;
-    userName: string;
+    username: string;
     message: string;
+    profilePicture: string;
+    email: string;
     // requestedAt: Date;
     status: string; // "pending", "accepted", "rejected"
   }

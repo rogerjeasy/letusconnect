@@ -6,29 +6,27 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" }
 });
 
-export const handleError = error => {
+export const handleError = (error) => {
   const response = error.response;
 
   if (response) {
     // Handle 4xx and 5xx status codes
     if (`${response.status}`.match(/^[4|5]\d{2}$/)) {
-      let info = `\nRequest to: ${response.request.responseURL}`;
+      let errorMessage = "An error occurred.";
 
-      if (response.data.status) {
-        info += `\nStatus code: ${response.data.status}`;
-        info += `\nError: ${response.data.error}`;
-        info += `\nError message: ${response.data.message}`;
+      if (response.data && typeof response.data === "object") {
+        // Check if there is a specific error message in the response data
+        errorMessage = response.data.error || response.data.message || JSON.stringify(response.data, null, 2);
       } else {
-        info += `\nStatus code: ${response.status}`;
-        info += `\nError message:\n${response.data}`;
+        errorMessage = response.statusText || `Status code: ${response.status}`;
       }
 
       console.log("The request was made and answered but was unsuccessful.", response);
-      
-      return info;
+
+      return errorMessage;
     }
   } else if (error.message) {
-    // Handle CORS errors
+    // Handle network errors and other client-side issues
     if (error.message.match(/Network Error/)) {
       alert("The server cannot be reached.\nDid you start it?");
     } else if (error.message.includes("CORS header")) {
@@ -39,9 +37,9 @@ export const handleError = error => {
 
     return error.message;
   } else {
-    // General error handling
+    // General error handling for unexpected issues
     console.log("An unknown error occurred.", error);
 
     return "An unknown error occurred.";
   }
-}
+};

@@ -16,6 +16,7 @@ import {
 export const projectsOptions = {
   // Authenticated Users: Projects
   projectsAuth: [
+    { label: "Explore Projects", icon: <FaSearch className="text-blue-500" />, link: "/projects/explore" },
     { label: "View My Projects", icon: <FaEye className="text-blue-500" />, link: "/projects/view" },
     { label: "Create a New Project", icon: <FaPlusCircle className="text-green-500" />, link: "/projects/create" },
     { label: "Join a Project", icon: <FaUsers className="text-teal-500" />, link: "/projects/join" },
