@@ -14,11 +14,7 @@ import {
 } from "@nextui-org/react";
 import { FaTimesCircle } from "react-icons/fa";
 import { ChevronDown } from "../navbar/Icons";
-
-const categories = ["Data Science", "AI", "Machine Learning", "Web Development", "IoT"];
-const industries = ["Finance", "Healthcare", "Education", "Technology"];
-const skillsNeeded = ["Python", "TensorFlow", "React", "GoLang"];
-const statuses = ["Open", "In Progress", "Completed", "Archived"];
+import { projectRoles, industries, skills, statuses } from "@/store/project";
 
 const ProjectSearchFilterSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,8 +53,8 @@ const ProjectSearchFilterSection = () => {
                 Categories
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Categories">
-              {categories.map((category) => (
+            <DropdownMenu aria-label="Project Role">
+              {projectRoles.map((category) => (
                 <DropdownItem key={category}>{category}</DropdownItem>
               ))}
             </DropdownMenu>
@@ -94,7 +90,7 @@ const ProjectSearchFilterSection = () => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Skills Needed">
-              {skillsNeeded.map((skill) => (
+              {skills.map((skill) => (
                 <DropdownItem key={skill}>{skill}</DropdownItem>
               ))}
             </DropdownMenu>

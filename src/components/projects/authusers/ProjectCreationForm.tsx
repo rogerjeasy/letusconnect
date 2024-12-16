@@ -22,12 +22,7 @@ import { api, handleError } from "../../../helpers/api";
 import { Task, Participants } from "@/store/project";
 import TaskCard from "./TaskCard";
 import ModalPopup from "../../forms/ModalPopup";
-
-
-const collaborationTypes = ["Public", "Private"];
-const industries = ["Education", "Finance", "Healthcare", "Technology", "Other"];
-const statuses = ["Open", "In Progress", "Completed"];
-const skills = ["Python", "JavaScript", "GoLang", "TensorFlow", "React"];
+import { collaborationTypes, industries, skills, statuses } from "../../../store/project";
 
 const ProjectCreationForm = () => {
   const user = useUserStore((state) => state.user);
@@ -204,7 +199,7 @@ const ProjectCreationForm = () => {
                     selectedKeys={formData.collaborationType ? new Set([formData.collaborationType]) : new Set()}
                     onSelectionChange={(keys) => {
                         const selectedKey = Array.from(keys)[0] as string;
-                        setFormData({ ...formData, collaborationType: selectedKey.toLowerCase() });
+                        setFormData({ ...formData, collaborationType: selectedKey });
                     }}
                     isInvalid={!!errors.collaborationType}
                     errorMessage={errors.collaborationType}
@@ -224,6 +219,7 @@ const ProjectCreationForm = () => {
                     placeholder="Select industry"
                     className="font-bold"
                     selectedKeys={formData.industry ? [formData.industry] : []}
+                    showScrollIndicators
                     onSelectionChange={(keys) =>
                         setFormData({ ...formData, industry: Array.from(keys)[0] as string })
                     }
@@ -264,6 +260,7 @@ const ProjectCreationForm = () => {
                 placeholder="Select required skills"
                 selectionMode="multiple"
                 className="font-bold"
+                showScrollIndicators
                 selectedKeys={formData.skillsNeeded}
                 onSelectionChange={(keys) =>
                     setFormData({ ...formData, skillsNeeded: Array.from(keys) as string[] })

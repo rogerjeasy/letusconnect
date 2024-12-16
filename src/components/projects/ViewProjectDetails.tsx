@@ -108,8 +108,6 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
   };
 
-  console.log(formData.joinRequests)
-
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
       <Card className="p-6 shadow-lg">

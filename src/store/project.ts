@@ -1,6 +1,17 @@
 // types/project.ts
 
 export const projectRoles = ["Member", "Contributor", "Moderator", "Owner"];
+export const collaborationTypes = ["Public", "Private"];
+export const industries = ["Education", "Finance", "Healthcare", "Technology", "Artificial Intelligence", 
+                            "EdTech", "Other", "Sustainability", "Retail", "Entertainment", 
+                            "Nonprofit", "Environmental Tech", "Virtual Reality", "MusicTech"];
+export const statuses = ["Open", "In Progress", "Completed", "Archived"];
+export const skills = ["Python", "JavaScript", "GoLang", "TensorFlow", "React", "NLP", 
+                        "Data Analysis", "UX Research & Design", "Full-Stack Web Development",
+                        "Mobile Development", "Machine Learning", "Artificial Intelligence",
+                        "Cloud Services", "Database Management", "Cybersecurity", "DevOps",
+                        "Authentication & Security (OAuth, JWT)", "Project Management Tools Integration",
+                    "API Development", "API Integration", "UI/UX Design"];
 
 
 export interface InvitedUser {
