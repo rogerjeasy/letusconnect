@@ -1,119 +1,127 @@
 "use client";
-
-import React, { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import { api, handleError } from "@/helpers/api";
 import ModalPopup from "@/components/forms/ModalPopup";
-import { Button, Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
+import { useSpring, animated } from "@react-spring/web";
+import { Card, CardHeader, CardBody, CardFooter, Input, Button } from "@nextui-org/react";
 
-const UnsubscribePageContent: React.FC = () => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
+
+const NewsLetter: React.FC = () => {
+  const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [totalSubscribers, setTotalSubscribers] = useState(0);
 
   useEffect(() => {
-    const emailParam = searchParams.get("email");
-    setEmail(emailParam);
-  }, [searchParams]);
+    fetchTotalSubscribers();
+  }, []);
 
-  const handleUnsubscribe = async () => {
-    if (!email) return;
+  const fetchTotalSubscribers = async () => {
+    try {
+      const response = await api.get("/api/newsletters/subscribers/count");
+      setTotalSubscribers(response.data.totalSubscribers);
+    } catch (error) {
+      console.error("Failed to fetch total subscribers:", error);
+    }
+  };
 
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
     setStatus("loading");
     setMessage("");
-    setIsModalOpen(false);
 
     try {
-      await api.post("/api/newsletters/unsubscribe", { email });
+      await api.post("/api/newsletters/subscribe", {
+        email,
+      });
+
       setStatus("success");
-      setMessage("✅ You have successfully unsubscribed from the newsletter.");
+      setMessage("🎉 Thank you for subscribing to our newsletter!");
       setIsModalOpen(true);
+      setEmail("");
+      fetchTotalSubscribers();
     } catch (error) {
       const errorMessage = handleError(error);
       setStatus("error");
-      setMessage(errorMessage || "❌ Failed to unsubscribe. Please try again.");
+      setMessage(errorMessage || "❌ Something went wrong. Please try again.");
       setIsModalOpen(true);
+    } finally {
+      setTimeout(() => setStatus("idle"), 5000);
     }
   };
 
-  const handleCloseSuccess = () => {
-    router.push("/"); // Redirect to the homepage
-  };
-
-  const handleRetryOrContact = () => {
-    if (status === "error") {
-      handleUnsubscribe();
-    }
-  };
-
-  const handleGoToContactUs = () => {
-    router.push("/contact-us"); // Redirect to the contact-us page
-  };
+  const animatedSubscribers = useSpring({
+    from: { number: 0 },
+    to: { number: totalSubscribers },
+    config: { duration: 1000 },
+  });
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md shadow-2xl rounded-lg">
-        <CardHeader className="flex justify-center bg-red-500 text-white py-6 rounded-t-lg">
-          <h2 className="text-2xl font-bold">Unsubscribe</h2>
+    <section className="py-12 relative text-white">
+    <div className="container mx-auto px-1 flex justify-center items-center">
+        <Card className="w-full max-w-screen-xl mx-auto shadow-2xl rounded-xl">
+        {/* Card Header */}
+        <CardHeader className="flex justify-center bg-white text-black rounded-t-xl py-4">
+            <h2 className="text-3xl font-bold flex items-center gap-2">
+            📬 Join Our Newsletter
+            </h2>
         </CardHeader>
-        <CardBody className="p-6 text-center">
-          <p className="text-gray-700 mb-6">
-            {email
-              ? `Are you sure you want to unsubscribe from our newsletter?`
-              : "Invalid request. Email not provided."}
-          </p>
-          <p className="font-semibold">{email}</p>
-          {email && (
-            <div className="mt-6 space-x-4">
-              <Button
-                color="danger"
-                onPress={handleUnsubscribe}
+
+        {/* Card Body */}
+        <CardBody className="py-6 text-center space-y-4">
+            <p className="text-gray-700 text-lg">
+            Stay updated with the latest news, articles, and updates from our team.
+            </p>
+            <form
+            onSubmit={handleSubscribe}
+            className="flex flex-wrap gap-4 items-center justify-center px-4"
+            >
+            <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 min-w-[300px] rounded-lg caret-black"
+            />
+            <Button
+                onClick={handleSubscribe}
+                color="primary"
                 isDisabled={status === "loading"}
-              >
-                {status === "loading" ? "Unsubscribing..." : "Yes, Unsubscribe"}
-              </Button>
-              <Button color="default" variant="light" onPress={() => router.push("/")}>
-                Cancel
-              </Button>
-            </div>
-          )}
+                className="py-3 px-6 font-semibold"
+            >
+                {status === "loading" ? "Subscribing..." : "Subscribe"}
+            </Button>
+            </form>
         </CardBody>
-        <CardFooter className="text-center py-4">
-          {status === "loading" && <p className="text-gray-600 text-sm">Processing...</p>}
+
+        {/* Card Footer */}
+        <CardFooter className="flex justify-center bg-gray-100 py-4 rounded-b-xl">
+            <p className="text-gray-700 text-xl font-semibold">
+            🌟 Total Subscribers:{" "}
+            <animated.span className="text-blue-600 text-2xl font-bold">
+                {animatedSubscribers.number.to((n) => Math.floor(n))}
+            </animated.span>
+            </p>
         </CardFooter>
-      </Card>
-
-      {/* Modal Popup */}
-      <ModalPopup
-        isOpen={isModalOpen}
-        title={status === "success" ? "✅ Unsubscribed Successfully" : "❌ Unsubscription Failed"}
-        content={
-          status === "success"
-            ? "You have successfully unsubscribed from our newsletter."
-            : "We couldn't process your request at the moment. Would you like to retry or visit our contact-us page?"
-        }
-        confirmLabel={status === "success" ? "OK" : "Retry"}
-        onConfirm={status === "success" ? handleCloseSuccess : handleRetryOrContact}
-        confirmColor={status === "success" ? "success" : "danger"}
-        showCancelButton={status === "error"}
-        cancelLabel="Contact Us"
-        onCancel={status === "error" ? handleGoToContactUs : undefined}
-        cancelColor="default"
-      />
+        </Card>
     </div>
+
+    {/* Modal Popup */}
+    <ModalPopup
+        isOpen={isModalOpen}
+        title={status === "success" ? "🎉 Subscription Successful!" : "❌ Subscription Failed"}
+        content={message}
+        confirmLabel="Close"
+        onConfirm={() => setIsModalOpen(false)}
+        confirmColor={status === "success" ? "success" : "danger"}
+    />
+    </section>
+
+
+
   );
 };
 
-// Wrap the main component in a Suspense boundary
-const UnsubscribePage: React.FC = () => {
-  return (
-    <Suspense fallback={<div className="text-center py-12">Loading...</div>}>
-      <UnsubscribePageContent />
-    </Suspense>
-  );
-};
-
-export default UnsubscribePage;
+export default NewsLetter;

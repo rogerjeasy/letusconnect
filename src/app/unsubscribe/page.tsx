@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { Button, Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
 
-const UnsubscribePage: React.FC = () => {
+const UnsubscribePageContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
@@ -14,7 +15,6 @@ const UnsubscribePage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Retrieve the email query parameter
     const emailParam = searchParams.get("email");
     setEmail(emailParam);
   }, [searchParams]);
@@ -45,7 +45,7 @@ const UnsubscribePage: React.FC = () => {
 
   const handleRetryOrContact = () => {
     if (status === "error") {
-      handleUnsubscribe(); // Retry the unsubscribe action
+      handleUnsubscribe();
     }
   };
 
@@ -75,7 +75,7 @@ const UnsubscribePage: React.FC = () => {
               >
                 {status === "loading" ? "Unsubscribing..." : "Yes, Unsubscribe"}
               </Button>
-              <Button color="success" onPress={() => router.push("/")}>
+              <Button color="default" variant="light" onPress={() => router.push("/")}>
                 Cancel
               </Button>
             </div>
@@ -104,6 +104,15 @@ const UnsubscribePage: React.FC = () => {
         cancelColor="secondary"
       />
     </div>
+  );
+};
+
+// Wrap the main component in a Suspense boundary
+const UnsubscribePage: React.FC = () => {
+  return (
+    <Suspense fallback={<div className="text-center py-12">Loading...</div>}>
+      <UnsubscribePageContent />
+    </Suspense>
   );
 };
 
