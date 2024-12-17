@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Card, CardHeader, CardBody, CardFooter, Avatar, Button } from "@nextui-org/react";
-import { FaEdit, FaEye, FaTrash, FaUserPlus, FaClock } from "react-icons/fa";
+import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
+import { FaEdit, FaEye, FaTrash, FaUserPlus, FaClock, FaUserCheck, FaBell } from "react-icons/fa";
 import { Project } from "@/store/project";
 import { useUserStore, generateRandomAvatar } from "@/store/userStore";
 
@@ -47,8 +47,37 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
   // Check if the user is in the join requests list
   const isPendingApproval = project.joinRequests.some((request) => request.userId === user?.uid);
 
+  // Check if the user is a participant (but not the owner)
+  const isParticipant = project.participants.some(
+    (participant) => participant.userId === user?.uid && participant.role !== "owner"
+  );
+
   return (
-    <Card className="w-85 h-85 flex flex-col justify-between shadow-lg">
+    <Card className="w-85 h-85 flex flex-col justify-between shadow-lg relative overflow-visible">
+      {/* Notification Icon for Pending Join Requests */}
+      {isOwner && project.joinRequests.length > 0 && (
+        <div className="absolute top-4 right-4 z-10">
+          <Tooltip
+            content={
+              <div className="text-center">
+                <p className="font-bold">New Join Requests</p>
+                <p className="text-xs text-gray-500">Click to view and manage</p>
+              </div>
+            }
+            color="secondary"
+            placement="left"
+            offset={15}
+          >
+            <div className="relative cursor-pointer">
+              <FaBell className="text-yellow-500 text-2xl" />
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {project.joinRequests.length}
+              </span>
+            </div>
+          </Tooltip>
+        </div>
+      )}
+
       <CardHeader className="flex items-center gap-4">
         <Avatar src={project.participants[0]?.profilePicture || generateRandomAvatar()} alt="Avatar" />
         <div>
@@ -67,6 +96,9 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
         </p>
         <p className="text-sm text-gray-600">
           <strong>Industry:</strong> {project.industry}
+        </p>
+        <p className="text-sm text-gray-600">
+          <strong>Number of Participant{project.participants.length > 1 ? "s" : ""}:</strong> {project.participants.length}
         </p>
         <p className={`text-sm font-semibold ${getStatusColor(project.status)}`}>
           <strong>Status:</strong> {project.status}
@@ -90,6 +122,10 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
         ) : isPendingApproval ? (
           <Button color="secondary" size="sm" className="w-1/2" disabled>
             <FaClock className="mr-2" /> Waiting for Approval
+          </Button>
+        ) : isParticipant ? (
+          <Button color="success" size="sm" className="w-1/2" disabled>
+            <FaUserCheck className="mr-2" /> Joined
           </Button>
         ) : (
           <Button color="success" size="sm" className="w-1/2" onClick={() => onJoinProject && onJoinProject(project.id)}>

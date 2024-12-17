@@ -23,6 +23,7 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [updatedProjects, setUpdatedProjects] = useState(projects);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
 
@@ -62,6 +63,7 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
     setLoading(true);
     try {
       await api.delete(`/api/projects/${selectedProjectId}`);
+      setUpdatedProjects((prevProjects) => prevProjects.filter((p) => p.id !== selectedProjectId));
       setIsDeleteModalOpen(false);
       setSelectedProjectId(null);
     } catch (err) {
@@ -82,6 +84,28 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
       await api.post(`/api/projects/${projectId}/join`, null, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
+      setUpdatedProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === projectId
+            ? {
+                ...project,
+                joinRequests: [
+                  ...project.joinRequests,
+                  {
+                    userId: user.uid,
+                    username: user.username || "Unknown User",
+                    message: "Request to join the project",
+                    profilePicture: user.profilePicture || "",
+                    email: user.email || "",
+                    status: "pending",
+                  },
+                ],
+              }
+            : project
+        )
+      ); 
+
       setJoinModalProps({
         title: "Success",
         content: "Join request sent successfully!",
@@ -92,7 +116,7 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
       const errorMessage = handleError(err);
       setJoinModalProps({
         title: "Error",
-        content: `Failed to send join request. ${errorMessage}`,
+        content: errorMessage,
         confirmLabel: "Close",
         confirmColor: "danger",
       });
@@ -104,37 +128,31 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
 
   return (
     <section className="p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center">{title}</h2>
-
+      <h2 className="text-2xl font-bold mb-6 text-center">{title}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
-        {projects.length > 0 ? (
-            projects.slice(0, displayCount).map((project) => (
-                <div
-                key={project.id}
-                className="flex justify-center transition-transform transform hover:scale-105 hover:shadow-2xl"
-                >
-                <ProjectCard
-                    project={project}
-                    onViewDetails={handleViewDetails}
-                    onUpdateProject={handleUpdateProject}
-                    onDeleteProject={handleDeleteProject}
-                    onJoinProject={handleJoinProject}
-                />
-                </div>
-            ))
-            ) : (
-            <div className="text-center col-span-full text-gray-500 flex flex-col items-center gap-2">
-                <FaFolderOpen size={50} />
-                <p>No projects available.</p>
+        {updatedProjects.length > 0 ? (
+          updatedProjects.slice(0, displayCount).map((project) => (
+            <div key={project.id} className="flex justify-center transition-transform transform hover:scale-105 hover:shadow-2xl">
+              <ProjectCard
+                project={project}
+                onViewDetails={handleViewDetails}
+                onUpdateProject={handleUpdateProject}
+                onDeleteProject={handleDeleteProject}
+                onJoinProject={handleJoinProject}
+              />
             </div>
-            )}
-
-
+          ))
+        ) : (
+          <div className="text-center col-span-full text-gray-500 flex flex-col items-center gap-2">
+            <FaFolderOpen size={50} />
+            <p>No projects available.</p>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-center gap-4 mt-8">
-        {displayCount < projects.length && (
+        {displayCount < updatedProjects.length && (
           <Button
             color="primary"
             className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition-transform hover:scale-105"
@@ -154,7 +172,6 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
       <ModalPopup
         isOpen={isDeleteModalOpen}
         title="Confirm Delete"
@@ -168,7 +185,6 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
         showCancelButton={true}
       />
 
-      {/* Join Request Result Modal */}
       <ModalPopup
         isOpen={isJoinModalOpen}
         title={joinModalProps.title}
@@ -178,7 +194,6 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
         onConfirm={() => setIsJoinModalOpen(false)}
       />
 
-      {/* Login Prompt Modal */}
       <ModalPopup
         isOpen={isLoginPromptOpen}
         title={loginPromptProps.title}

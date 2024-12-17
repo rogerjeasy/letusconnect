@@ -18,19 +18,19 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
-import { FaCheck, FaTimes, FaUser, FaUserShield } from "react-icons/fa";
+import { FaCheck, FaTimes, FaUserShield } from "react-icons/fa";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { api, handleError } from "@/helpers/api";
 import { JoinRequest, projectRoles } from "@/store/project";
 
 interface JoinedRequestManagementProps {
-  joinRequests: JoinRequest[];
+  joinRequests?: JoinRequest[];
   projectId: string;
   onUpdate: () => void;
+  onClose: () => void;
 }
 
-
-const JoinedRequestManagement = ({ joinRequests, projectId, onUpdate }: JoinedRequestManagementProps) => {
+const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClose }: JoinedRequestManagementProps) => {
   const [selectedRequest, setSelectedRequest] = useState<JoinRequest | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>(projectRoles[0]);
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -45,18 +45,19 @@ const JoinedRequestManagement = ({ joinRequests, projectId, onUpdate }: JoinedRe
     try {
       await api.put(
         `/api/projects/${projectId}/join-requests/${selectedRequest.userId}`,
-        { 
+        {
           action: "accept",
-          userId: selectedRequest.userId, 
-          role: selectedRole, 
+          userId: selectedRequest.userId,
+          role: selectedRole,
           username: selectedRequest.username,
           email: selectedRequest.email,
-          profilePicture: selectedRequest.profilePicture,
+          profilePicture: selectedRequest.profilePicture || "",
         },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       onUpdate();
       setShowRoleModal(false);
+      onClose();
     } catch (err) {
       handleError(err);
     } finally {
@@ -72,14 +73,20 @@ const JoinedRequestManagement = ({ joinRequests, projectId, onUpdate }: JoinedRe
     try {
       await api.put(
         `/api/projects/${projectId}/join-requests/${selectedRequest.userId}`,
-        { action: "reject" },
+        { action: "reject",
+          userId: selectedRequest.userId,
+          username: selectedRequest.username,
+          email: selectedRequest.email
+
+         },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       onUpdate();
       setShowRejectModal(false);
+      onClose();
     } catch (err) {
       const errorMessage = handleError(err);
-      alert("Failed to reject join request. "+errorMessage);
+      alert(`Failed to reject join request. ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -94,46 +101,47 @@ const JoinedRequestManagement = ({ joinRequests, projectId, onUpdate }: JoinedRe
           <TableColumn>Actions</TableColumn>
         </TableHeader>
         <TableBody emptyContent="No join requests available.">
-          {joinRequests.map((request) => (
-            <TableRow key={request.userId}>
-              <TableCell>
-                <div className="flex items-center gap-4">
-                  <Avatar src={request.profilePicture} alt={request.username} />
-                  <div>
-                    <p className="font-semibold">{request.username}</p>
-                    <p className="text-sm text-gray-500">{request.email}</p>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button
-                    color="success"
-                    size="sm"
-                    startContent={<FaCheck />}
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setShowRoleModal(true);
-                    }}
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    color="danger"
-                    size="sm"
-                    startContent={<FaTimes />}
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setShowRejectModal(true);
-                    }}
-                  >
-                    Reject
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+            {joinRequests.map((request) => (
+                <TableRow key={request.userId}>
+                <TableCell>
+                    <div className="flex items-center gap-4">
+                    <Avatar src={request.profilePicture || ""} alt={request.username} />
+                    <div>
+                        <p className="font-semibold">{request.username}</p>
+                        <p className="text-sm text-gray-500">{request.email}</p>
+                    </div>
+                    </div>
+                </TableCell>
+                <TableCell>
+                    <div className="flex gap-2">
+                    <Button
+                        color="success"
+                        size="sm"
+                        startContent={<FaCheck />}
+                        onClick={() => {
+                        setSelectedRequest(request);
+                        setShowRoleModal(true);
+                        }}
+                    >
+                        Accept
+                    </Button>
+                    <Button
+                        color="danger"
+                        size="sm"
+                        startContent={<FaTimes />}
+                        onClick={() => {
+                        setSelectedRequest(request);
+                        setShowRejectModal(true);
+                        }}
+                    >
+                        Reject
+                    </Button>
+                    </div>
+                </TableCell>
+                </TableRow>
+            ))}
+            </TableBody>
+
       </Table>
 
       {/* Modal for Accepting Request and Selecting Role */}
@@ -180,7 +188,6 @@ const JoinedRequestManagement = ({ joinRequests, projectId, onUpdate }: JoinedRe
         cancelLabel="Cancel"
         onConfirm={handleReject}
         onCancel={() => setShowRejectModal(false)}
-        // isLoading={loading}
         showCancelButton
       />
     </div>

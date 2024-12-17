@@ -21,6 +21,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
 
+
   const [formData, setFormData] = useState({
     id: project.id,
     title: project.title,
@@ -47,13 +48,22 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   });
 
   // Check if the current user is an owner
-  const isOwner = user && formData.participants.some((participant) => participant.userId === user.uid && participant.role === "owner");
+    const isOwner =
+    user && Array.isArray(formData.participants) && formData.participants.some(
+    (participant) => participant.userId === user.uid && participant.role === "owner"
+    );
 
-  // Check if the user is a participant
-  const isParticipant = user && formData.participants.some((participant) => participant.userId === user.uid);
+    // Check if the user is a participant
+    const isParticipant =
+    user && Array.isArray(formData.participants) && formData.participants.some(
+    (participant) => participant.userId === user.uid
+    );
 
-  // Check if the user is in the join requests list
-  const isInJoinRequests = user && formData.joinRequests.some((request) => request.userId === user.uid);
+    // Check if the user is in the join requests list
+    const isInJoinRequests =
+    user && Array.isArray(formData.joinRequests) && formData.joinRequests.some(
+    (request) => request.userId === user.uid
+    );
 
   // Handle joining a project
   const handleJoinProject = async () => {
@@ -108,6 +118,19 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
   };
 
+  // Function to refresh project data
+    const refreshProjectData = async () => {
+        try {
+        const response = await api.get(`/api/projects/${formData.id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setFormData(response.data);
+        console.log("project: ", response.data);
+        } catch (err) {
+        handleError(err);
+        }
+    };
+  
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
       <Card className="p-6 shadow-lg">
@@ -148,7 +171,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
 
           <div className="flex items-center gap-2">
             <Button color="primary" variant="ghost" startContent={<FaUsers />} onClick={() => setShowParticipants(true)}>
-              Participants: {formData.participants.length}
+                Participants: {Array.isArray(formData.participants) ? formData.participants.length : 0}
             </Button>
             <Divider orientation="vertical" className="hidden md:block h-6" />
           </div>
@@ -161,9 +184,10 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold">
-              Num of Tasks: <span className="text-blue-500">{formData.tasks.length}</span>
-            </div>
+          <div className="text-sm font-semibold">
+            Num of Tasks: <span className="text-blue-500">{Array.isArray(formData.tasks) ? formData.tasks.length : 0}</span>
+          </div>
+
             <Divider orientation="vertical" className="hidden md:block h-6" />
           </div>
 
@@ -257,11 +281,17 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
           <ModalContent>
             <ModalHeader>Join Requests</ModalHeader>
             <ModalBody>
-              <JoinedRequestManagement
+            <JoinedRequestManagement
                 joinRequests={formData.joinRequests}
                 projectId={formData.id}
-                onUpdate={() => setShowJoinRequests(false)}
-              />
+                onUpdate={refreshProjectData}
+                onClose={() => {
+                    setShowJoinRequests(false);
+                    refreshProjectData(); // Refresh project details after handling join requests
+                }}
+            />
+
+
             </ModalBody>
           </ModalContent>
         </Modal>

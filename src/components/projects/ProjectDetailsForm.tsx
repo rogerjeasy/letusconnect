@@ -186,10 +186,11 @@ const ProjectDetailsForm = ({
         {!isEditing ? (
           <Input
             label="Skills Needed"
-            value={formData.skillsNeeded.join(", ")}
+            value={Array.isArray(formData.skillsNeeded) ? formData.skillsNeeded.join(", ") : ""}
             readOnly
             className="font-bold"
-          />
+        />
+        
         ) : (
           <Select
             label="Skills Needed"
