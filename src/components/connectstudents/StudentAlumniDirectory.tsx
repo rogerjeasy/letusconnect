@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 import { api } from "@/helpers/api";
 import UserCard from "./UserCard";
-import { User } from "@/store/userStore";
+import { User, useUserStore } from "@/store/userStore";
 import UserCardWhileLoading from "./UserCardWhileLoading";
 
 export default function StudentAlumniDirectory() {
@@ -31,6 +31,7 @@ export default function StudentAlumniDirectory() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const currentUser = useUserStore((state) => state.user);
 
   useEffect(() => {
     fetchUsers();
@@ -40,8 +41,15 @@ export default function StudentAlumniDirectory() {
     setLoading(true);
     try {
       const response = await api.get("/api/users");
-      setUsers(response.data.users);
-      setFilteredUsers(response.data.users);
+      let fetchedUsers = response.data.users;
+
+      // Exclude the currentUser if not null
+      if (currentUser) {
+        fetchedUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
+      }
+
+      setUsers(fetchedUsers);
+      setFilteredUsers(fetchedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
