@@ -5,6 +5,7 @@ import CommunityStats from "./CommunityStats";
 import HeroSection from "./HeroSection";
 import InteractiveDemo from "./InteractiveDemo";
 import FeatureOverview from "./KeyFeatures";
+import NewsLetter from "./NewsLetter";
 import SegmentedCTAs from "./SegmentedCTAs";
 import TestimonialsCarousel from "./TestimonialsCarousel";
 import UpcomingEvents from "./UpcomingEvents";
@@ -19,6 +20,7 @@ const HomePageComponent = () => {
       <InteractiveDemo />
       <SegmentedCTAs />
       <UpcomingEvents />
+      <NewsLetter />
       <BlogResourcesSection />
     </div>
   );

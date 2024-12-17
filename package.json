@@ -16,6 +16,7 @@
     "@nextui-org/dropdown": "^2.1.31",
     "@nextui-org/react": "^2.6.5",
     "@nextui-org/system": "^2.4.4",
+    "@react-spring/web": "^9.7.5",
     "axios": "^1.7.8",
     "framer-motion": "^11.11.17",
     "letusconnect": "file:",
