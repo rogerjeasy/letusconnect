@@ -23,9 +23,11 @@ import { Task, Participants } from "@/store/project";
 import TaskCard from "./TaskCard";
 import ModalPopup from "../../forms/ModalPopup";
 import { collaborationTypes, industries, skills, statuses } from "../../../store/project";
+import AccessDenied from "@/components/accessdenied/AccessDenied";
 
 const ProjectCreationForm = () => {
   const user = useUserStore((state) => state.user);
+  const { isAuthenticated, restoreUser } = useUserStore();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -49,6 +51,10 @@ const ProjectCreationForm = () => {
   const [participants, setParticipants] = useState<Participants[]>([]);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
 
   useEffect(() => {
     if (user) {
@@ -146,6 +152,10 @@ const ProjectCreationForm = () => {
     const lastTask = formData.tasks[formData.tasks.length - 1];
     return lastTask.title.trim() !== "" && lastTask.description.trim() !== "";
   };
+
+  if (!isAuthenticated || !user) {
+    return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
+  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">

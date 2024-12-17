@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, 
     // CardFooter, Button, Spinner 
 } from "@nextui-org/react";
@@ -10,6 +10,8 @@ import { api, handleError } from "@/helpers/api";
 import ProjectDetailsForm from "../../projects/ProjectDetailsForm";
 import ModalPopup from "../../forms/ModalPopup";
 import ProjectTaskFormDetails from "../ProjectTaskFormDetails";
+import AccessDenied from "@/components/accessdenied/AccessDenied";
+import { useUserStore } from "@/store/userStore";
 
 interface UpdateProjectProps {
   project: Project;
@@ -28,6 +30,8 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
     participants: project.participants || [],
   });
 
+  const user = useUserStore((state) => state.user);
+  const { isAuthenticated, restoreUser } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [modalProps, setModalProps] = useState({
     isOpen: false,
@@ -35,6 +39,10 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
     content: "",
     onConfirm: () => {},
   });
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -78,6 +86,10 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
       participants: project.participants || [],
     });
   };
+
+  if (!isAuthenticated || !user) {
+    return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
+  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
