@@ -2,45 +2,24 @@
 
 import { useState, useEffect } from "react";
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  Avatar,
   Input,
   Button,
   Pagination,
   Select,
   SelectItem,
-  Chip,
-  Spinner,
 } from "@nextui-org/react";
 import {
   FaSearch,
   FaFilter,
   FaBook,
-  FaMapMarkerAlt,
   FaUsers,
   FaBan,
-  FaCalendarAlt,
   FaUndo,
 } from "react-icons/fa";
 import { api } from "@/helpers/api";
-import { generateRandomAvatar } from "../../store/userStore";
-
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  bio: string;
-  profilePicture: string;
-  areaOfInterest: string;
-  program: string;
-  graduationYear: number;
-  accountCreatedAt: string;
-  city?: string;
-  country?: string;
-}
+import UserCard from "./UserCard";
+import { User } from "@/store/userStore";
+import UserCardWhileLoading from "./UserCardWhileLoading";
 
 export default function StudentAlumniDirectory() {
   const [users, setUsers] = useState<User[]>([]);
@@ -82,9 +61,11 @@ export default function StudentAlumniDirectory() {
     }
     if (interestFilter) {
       filtered = filtered.filter((user) =>
-        user.areaOfInterest.toLowerCase().includes(interestFilter.toLowerCase())
+        user.interests.some((interest) =>
+          interest.toLowerCase().includes(interestFilter.toLowerCase())
+        )
       );
-    }
+    }    
     setFilteredUsers(filtered);
     setCurrentPage(1);
   };
@@ -181,8 +162,11 @@ export default function StudentAlumniDirectory() {
 
       {/* User Cards */}
       {loading ? (
-        <div className="flex justify-center">
-          <Spinner size="lg" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
+          {/* Display placeholder cards while loading */}
+          {Array.from({ length: 6 }).map((_, index) => (
+            <UserCardWhileLoading key={index} />
+          ))}
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="text-center">
@@ -190,39 +174,13 @@ export default function StudentAlumniDirectory() {
           <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
-          {paginatedUsers.map((user, index) => (
-            <Card key={user.id || user.email || `user-${index}`} className="shadow-md">
-              
-              <CardHeader className="flex gap-3">
-                <Avatar
-                  
-                  src={user.profilePicture || generateRandomAvatar()}
-                  alt={user.username}
-                  size="lg"
-                />
-                <div>
-                  <h3 className="font-bold text-lg">{user.username}</h3>
-                  <p className="text-sm text-gray-500">
-                    {user.program} | Class of {user.graduationYear}
-                  </p>
-                </div>
-              </CardHeader>
-              <CardBody>
-                <p className="text-gray-600 mb-2">{user.bio || "No bio available."}</p>
-                <Chip color="secondary" startContent={<FaMapMarkerAlt />}>
-                  {user.city && user.country
-                    ? `${user.city}, ${user.country}`
-                    : "No location available"}
-                </Chip>
-                <p className="text-sm text-gray-500 mt-2 flex items-center">
-                  <FaCalendarAlt className="mr-2" /> Joined: {user?.accountCreatedAt}
-                </p>
-              </CardBody>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
+          {paginatedUsers.map((user) => (
+            <UserCard key={user.uid} user={user} />
           ))}
         </div>
       )}
+
 
       {/* Pagination */}
       <div className="flex justify-center mt-8">

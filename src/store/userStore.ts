@@ -20,6 +20,8 @@ export interface User {
   currentJobTitle: string;
   areasOfExpertise: string[];
   interests: string[];
+  // connections: string[];
+  // connectionRequests: string[];
   lookingForMentor: boolean;
   willingToMentor: boolean;
   connectionsMade: number;
