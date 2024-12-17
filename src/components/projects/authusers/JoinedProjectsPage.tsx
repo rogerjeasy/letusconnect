@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import ProjectListingObject from "../ListProjectObject";
 import { Project } from "@/store/project";
 import { api, handleError } from "@/helpers/api";
-import { Spinner, Button } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import ProjectCardWhileLoading from "../ProjectCardWhileLoading";
 
 const JoinedProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -45,9 +46,12 @@ const JoinedProjectsPage = () => {
   return (
     <section className="p-6">
       {loading && (
-        <div className="flex justify-center">
-          <Spinner size="lg" />
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
+        {/* Display placeholder cards while loading */}
+        {Array.from({ length: 4 }).map((_, index) => (
+          <ProjectCardWhileLoading key={index} />
+        ))}
+      </div>
       )}
 
       {error && (

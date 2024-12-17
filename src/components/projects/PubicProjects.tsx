@@ -1,8 +1,10 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import ProjectListingsObject from "@/components/projects/ListProjectObject";
 import { api, handleError } from "@/helpers/api";
 import { Project } from "@/store/project";
-import { Spinner } from "@nextui-org/react";
+import ProjectCardWhileLoading from "@/components/projects/ProjectCardWhileLoading";
 
 const PublicProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -24,8 +26,11 @@ const PublicProjectsPage = () => {
   }, []);
 
   return loading ? (
-    <div className="flex justify-center p-6">
-      <Spinner size="lg" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
+      {/* Display placeholder cards while loading */}
+      {Array.from({ length: 4 }).map((_, index) => (
+        <ProjectCardWhileLoading key={index} />
+      ))}
     </div>
   ) : (
     <ProjectListingsObject projects={projects} title="🎯 Public Project Listings" />
