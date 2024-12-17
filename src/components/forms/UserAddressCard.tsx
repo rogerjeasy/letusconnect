@@ -22,8 +22,6 @@ export default function UserAddressCard() {
   const {
     address,
     setAddress,
-    addressResponseStatus,
-    setAddressResponseStatus,
     fetchAddress,
   } = useFetchAddress(token!);
 
@@ -59,24 +57,10 @@ export default function UserAddressCard() {
   const handleSave = async () => {
     setIsUpdating(true);
     try {
-        if (addressResponseStatus === 404) {
-            // Create a new address
-            const response = await api.post("/api/addresses", address, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.status === 201) {
-                setAddressResponseStatus(200);
-                setAddress(response.data.address);
-                console.log("Address created:", response.data.address);
-            }
-        } else {
         const response = await api.put(`/api/addresses/${address.id}`, address, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        setAddress(response.data.address);
-        console.log("Address updated:", response.data);
-        }
-        
+        setAddress(response.data.address);        
         setModalProps({
             isOpen: true,
             title: "Success",

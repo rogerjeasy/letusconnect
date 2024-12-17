@@ -31,6 +31,7 @@ const RegistrationForm = () => {
   const setUser = useUserStore((state) => state.setUser);
   // const setAddress = useUserStore((state) => state.setAddress);
   const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
+  const setAddress = useUserStore((state) => state.setAddress);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -53,6 +54,7 @@ const RegistrationForm = () => {
         username: data.username,
         password: data.password,
         program: data.program,
+        profilePicture: avatarPicture,
       });
   
       const { user, token } = response.data;
@@ -67,6 +69,12 @@ const RegistrationForm = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
+      // Create a new address
+      const addressResponse = await api.post("/api/addresses", {}, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    setAddress(addressResponse.data.address);
   
       const schoolExperienceData = schoolExperienceResponse.data.data;
       setSchoolExperience({
