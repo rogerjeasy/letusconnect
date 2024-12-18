@@ -12,6 +12,10 @@ import { useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import ModalPopup from "../forms/ModalPopup";
 import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
+import GroupChatModal from "@/components/messages/GroupChatModal";
+import GroupChatDrawer from "@/components/messages/GroupChatDrawer";
+
+
 
 interface ViewProjectDetailsProps {
   project: Project;
@@ -40,6 +44,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   const [showParticipants, setShowParticipants] = useState(false);
   const [showJoinRequests, setShowJoinRequests] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isGroupChatModalOpen, setIsGroupChatModalOpen] = useState(false);
   const [joinModalProps, setJoinModalProps] = useState({
     title: "",
     content: "",
@@ -141,8 +146,8 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         {/* Header Section with Dividers */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <Button color="primary" variant="ghost" startContent={<FaTasks />}>
-              Discussion
+            <Button color="primary" variant="ghost" startContent={<FaTasks />} onClick={() => setIsGroupChatModalOpen(true)}>
+                Discussion
             </Button>
             <Divider orientation="vertical" className="hidden md:block h-6" />
           </div>
@@ -290,12 +295,23 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
                     refreshProjectData(); // Refresh project details after handling join requests
                 }}
             />
-
-
             </ModalBody>
           </ModalContent>
         </Modal>
+
       </Card>
+      {/* Group Chat Modal */}
+
+        {isGroupChatModalOpen && (
+        <GroupChatModal
+            projectTitle={formData.title}
+            participants={formData.participants}
+            onClose={() => setIsGroupChatModalOpen(false)}
+            currentUserId={user?.uid || ""}
+            projectId={formData.id}
+        />
+        )}
+
     </div>
   );
 };

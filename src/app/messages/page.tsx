@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
-import ChatInterface from "@/components/realtime/ChatInterface";
+import ChatInterface from "@/components/messages/ChatInterface";
 import { User, useUserStore, generateRandomAvatar } from "@/store/userStore";
 import { Avatar, Spinner, Card } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";

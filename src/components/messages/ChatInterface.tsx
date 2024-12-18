@@ -35,7 +35,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       const conversationChannel = [currentUserId, receiverId].sort().join("-");
       const channel = pusher.subscribe(`private-messages-${conversationChannel}`);
 
-      // Listen for new messages
       channel.bind("new-message", (data: Message) => {
         if (
           (data.senderId === currentUserId && data.receiverId === receiverId) ||
@@ -45,7 +44,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
       });
 
-      // Listen for typing indicator
       channel.bind("user-typing", (data: { senderId: string; receiverId: string }) => {
         if (data.senderId === receiverId) {
           setTypingIndicator(`${receiverName} is typing...`);
@@ -54,11 +52,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
       });
 
-      channel.bind("pusher:subscription_error", (error: Error) => {
-        console.error("Pusher subscription error:", error);
-      });
-
-      // Cleanup on unmount
       return () => {
         channel.unbind_all();
         pusher.unsubscribe(`private-messages-${conversationChannel}`);
@@ -122,7 +115,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
       );
 
-      // Reset typing state after 3 seconds of inactivity
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1000);
     }
@@ -171,7 +163,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </Chip>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
           type="text"
           placeholder="Type a message..."
@@ -180,10 +172,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             setNewMessage(e.target.value);
             handleTyping();
           }}
-          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
           fullWidth
         />
-        <Button color={newMessage.trim() ? "success" : "warning"} onClick={sendMessage} disabled={!newMessage.trim()}>
+        <Button
+          className="w-full sm:w-auto"
+          color={newMessage.trim() ? "success" : "warning"}
+          onClick={sendMessage}
+          disabled={!newMessage.trim()}
+        >
           <FaPaperPlane />
         </Button>
       </div>
