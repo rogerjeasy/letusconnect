@@ -5,6 +5,7 @@ import { api, handleError } from "@/helpers/api";
 import ChatInterface from "@/components/realtime/ChatInterface";
 import { User, useUserStore, generateRandomAvatar } from "@/store/userStore";
 import { Avatar, Spinner, Card } from "@nextui-org/react";
+import AccessDenied from "@/components/accessdenied/AccessDenied";
 
 const ChatPage: React.FC = () => {
   const currentUser = useUserStore((state) => state.user);
@@ -36,6 +37,10 @@ const ChatPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (!currentUser) {
+    return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
+  }
 
   return (
     <div className="relative flex justify-center items-center p-6 min-h-screen overflow-hidden">

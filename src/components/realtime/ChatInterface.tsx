@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import Pusher from "pusher-js";
+// import Pusher from "pusher-js";
 import { api, handleError } from "@/helpers/api";
 import { Message } from "@/store/message";
 import { Input, Button, Avatar, Card } from "@nextui-org/react";
 import { FaPaperPlane, FaUserCircle } from "react-icons/fa";
+import { getPusherInstance } from "@/helpers/pusher";
 
 interface ChatInterfaceProps {
   currentUserId: string;
@@ -26,28 +27,34 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   useEffect(() => {
     fetchMessages();
-
-    // Initialize Pusher for real-time updates
-    const pusher = new Pusher(process.env.PUSHER_KEY!, {
-      cluster: process.env.PUSHER_CLUSTER!,
-    });
-
-    const channel = pusher.subscribe("messages-channel");
-    channel.bind("new-message", (data: Message) => {
-      if (
-        (data.senderId === currentUserId && data.receiverId === receiverId) ||
-        (data.senderId === receiverId && data.receiverId === currentUserId)
-      ) {
-        setMessages((prev) => [...prev, data]);
-      }
-    });
-
-    // Cleanup on unmount
-    return () => {
-      channel.unbind_all();
-      channel.unsubscribe();
-    };
+  
+    const pusher = getPusherInstance();
+    if (pusher) {
+      // Create a sorted list of currentUserId and receiverId
+      const conversationChannel = [currentUserId, receiverId].sort().join("-");
+      const channel = pusher.subscribe(`private-messages-${conversationChannel}`);
+    
+      channel.bind("new-message", (data: Message) => {
+        if (
+          (data.senderId === currentUserId && data.receiverId === receiverId) ||
+          (data.senderId === receiverId && data.receiverId === currentUserId)
+        ) {
+          setMessages((prev) => [...prev, data]);
+        }
+      });
+  
+      channel.bind("pusher:subscription_error", (error: Error) => {
+        console.error("Pusher subscription error:", error);
+      });
+  
+      // Cleanup on unmount
+      return () => {
+        channel.unbind_all();
+        pusher.unsubscribe(`private-messages-${conversationChannel}`);
+      };
+    }
   }, [currentUserId, receiverId]);
+  
 
   const fetchMessages = async () => {
     try {
@@ -60,11 +67,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       } else {
         setMessages([]);
       }
-      console.log("Messages fetched:", response.data);
     } catch (err) {
       const errorMessage = handleError(err);
       console.error(`Failed to fetch messages: ${errorMessage}`);
-      setMessages([]); // Ensure it's set to an empty array on error
+      setMessages([]);
     }
   };
 
