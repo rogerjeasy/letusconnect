@@ -112,11 +112,16 @@ const ChatPage: React.FC = () => {
           <div className="flex-1 p-6">
             {selectedUser ? (
               <ChatInterface
-                currentUserId={currentUser?.uid || ""}
-                receiverId={selectedUser.uid}
-                receiverName={`${selectedUser.firstName} ${selectedUser.lastName}`}
-                receiverAvatar={selectedUser.profilePicture}
-              />
+              currentUserId={currentUser?.uid || ""}
+              receiverId={selectedUser.uid}
+              receiverName={
+                selectedUser.firstName || selectedUser.lastName
+                  ? `${selectedUser.firstName || ""} ${selectedUser.lastName || ""}`.trim()
+                  : selectedUser.username
+              }
+              receiverAvatar={selectedUser.profilePicture}
+            />
+            
             ) : (
               <div className="flex items-center justify-center h-full">
                 <p className="text-black font-semibold">Select a user to start chatting</p>
