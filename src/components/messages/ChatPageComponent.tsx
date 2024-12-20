@@ -10,12 +10,7 @@ import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
 import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
 
-
-// interface ChatPageProps {
-//   updateTotalUnreadCount: (newCount: number) => void;
-// }
-
-const ChatPage = () => {
+const ChatPageComponent = () => {
   const currentUser = useUserStore((state) => state.user);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,11 +50,6 @@ const ChatPage = () => {
     const notificationChannel = pusher?.subscribe(`user-notifications-${currentUser.uid}`);
 
     notificationChannel?.bind("new-unread-message", ({ senderId }: { senderId: string }) => {
-      fetchUnreadCount(undefined, setUnreadCounts, senderId);
-      fetchUnreadCount(setTotalUnreadCount);
-    });
-
-    notificationChannel?.bind("update-unread-count", ({ senderId }: { senderId: string}) => {
       fetchUnreadCount(undefined, setUnreadCounts, senderId);
       fetchUnreadCount(setTotalUnreadCount);
     });
@@ -213,4 +203,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default ChatPageComponent;
