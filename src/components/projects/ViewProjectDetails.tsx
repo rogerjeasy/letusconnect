@@ -144,9 +144,8 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         }
     };
 
-    const handleAddParticipant = async (emailOrUsername: string, role: string) => {
+    const handleAddParticipant = async (emailOrUsername: string, role: string): Promise<{ success: boolean; message: string }> => {
       try {
-        // Send an invitation request to the API
         const response = await api.post(
           `/api/projects/${formData.id}/invite`,
           { emailOrUsername, role },
@@ -154,11 +153,11 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           }
         );
+
+        const responseObtained = response.data;
     
-        // Extract the invited user data from the API response
-        const invitedUser = response.data.invitedUser;
+        const invitedUser = responseObtained.invitedUser;
     
-        // Update the formData state with the new invited user
         setFormData((prev) => ({
           ...prev,
           invitedUsers: [
@@ -172,10 +171,17 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
             },
           ],
         }));
+    
+        return { success: true, message: responseObtained.message };
       } catch (error) {
-        console.error("Error inviting participant:", error);
+        const errorMessage = handleError(error);
+        // console.error("Error inviting participant:", errorMessage);
+
+        return { success: false, message: errorMessage };
       }
-    };        
+    }; 
+    
+    console.log("formData: ", formData);
   
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
