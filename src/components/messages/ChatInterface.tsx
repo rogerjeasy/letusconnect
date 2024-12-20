@@ -179,15 +179,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 key={msg.id}
                 className={`mb-3 flex ${msg.senderId === currentUserId ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`p-2 rounded-lg max-w-[70%] ${
-                    msg.senderId === currentUserId ? "bg-blue-500 text-white" : "bg-gray-200"
-                  }`}
-                >
-                  <p>{msg.content}</p>
-                  <small className="block text-xs mt-1 text-right">
+                <div className="flex flex-col max-w-[70%]">
+                  <div
+                    className={`p-2 rounded-t-lg ${
+                      msg.senderId === currentUserId ? "bg-blue-500 text-white" : "bg-gray-200"
+                    }`}
+                  >
+                    <p>{msg.content}</p>
+                  </div>
+                  <hr className={`border-t-1 ${msg.senderId === currentUserId ? "border-blue-300" : "border-gray-300"}`} />
+                  <div
+                    className={`p-1 rounded-b-lg text-xs text-right ${
+                      msg.senderId === currentUserId ? "bg-blue-200 text-blue-800" : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
                     {new Date(msg.createdAt).toLocaleTimeString()}
-                  </small>
+                  </div>
                 </div>
               </div>
             ))}

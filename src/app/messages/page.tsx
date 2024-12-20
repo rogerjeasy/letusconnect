@@ -4,14 +4,23 @@ import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
 import ChatInterface from "@/components/messages/ChatInterface";
 import { User, useUserStore, generateRandomAvatar } from "@/store/userStore";
-import { Avatar, Spinner, Card } from "@nextui-org/react";
+import { Avatar, Spinner, Card, Badge } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
+import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
+import handleMessagesClick from "@/components/messages/handleMessagesClick";
+import { getPusherInstance } from "@/helpers/pusher";
 
-const ChatPage: React.FC = () => {
+
+interface ChatPageProps {
+  updateTotalUnreadCount: (newCount: number) => void;
+}
+
+const ChatPage: React.FC<ChatPageProps> = ({ updateTotalUnreadCount }) => {
   const currentUser = useUserStore((state) => state.user);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchUsers();
@@ -23,20 +32,54 @@ const ChatPage: React.FC = () => {
       const response = await api.get("/api/users");
       let fetchedUsers = response.data.users;
 
-      // Exclude the currentUser if not null
       if (currentUser) {
         fetchedUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
       }
 
       setUsers(fetchedUsers);
+      fetchedUsers.forEach((user: User) => fetchUnreadCount(undefined, setUnreadCounts, user.uid));
+      fetchUnreadCount(updateTotalUnreadCount);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching users:", errorMessage);
-      alert("Error fetching users: " + errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const pusher = getPusherInstance();
+    const notificationChannel = pusher?.subscribe(`user-notifications-${currentUser.uid}`);
+
+    notificationChannel?.bind("new-unread-message", ({ senderId }: { senderId: string }) => {
+      fetchUnreadCount(undefined, setUnreadCounts, senderId);
+      fetchUnreadCount(updateTotalUnreadCount);
+    });
+
+    notificationChannel?.bind("message-read", ({ senderId }: { senderId: string }) => {
+      fetchUnreadCount(undefined, setUnreadCounts, senderId);
+      fetchUnreadCount(updateTotalUnreadCount);
+    });
+
+    return () => {
+      notificationChannel?.unbind_all();
+      pusher?.unsubscribe(`user-notifications-${currentUser.uid}`);
+    };
+  }, [currentUser, updateTotalUnreadCount]);
+
+
+  const handleUserClick = async (user: User) => {
+    setSelectedUser(user);
+
+    setUnreadCounts((prevCounts) => ({
+      ...prevCounts,
+      [user.uid]: 0,
+    }));
+
+    await handleMessagesClick(user.uid, updateTotalUnreadCount);
+  }; 
 
   if (!currentUser) {
     return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
@@ -94,13 +137,27 @@ const ChatPage: React.FC = () => {
                       className={`flex items-center gap-4 p-2 cursor-pointer rounded-lg ${
                         selectedUser?.uid === user.uid ? "bg-blue-500 text-white" : "hover:bg-blue-100"
                       }`}
-                      onClick={() => setSelectedUser(user)}
+                      onClick={() => handleUserClick(user)}
                     >
                       <Avatar src={user.profilePicture || generateRandomAvatar()} alt={user.username} />
                       <div>
                         <p className="font-semibold text-black">{`${user.firstName} ${user.lastName}`}</p>
                         <p className="text-sm text-black">{user.username}</p>
                       </div>
+                      {unreadCounts[user.uid] > 0 && (
+                        // <Badge color="danger" className="ml-auto" size="sm">
+                        //   {unreadCounts[user.uid]}
+                        // </Badge>
+                        <Badge
+                        content={unreadCounts[user.uid]}
+                        color="danger"
+                        size="md"
+                        shape="circle"
+                        className="absolute -top-2 -right-2"
+                      >
+                        {""}
+                      </Badge>
+                      )}
                     </li>
                   ))}
                 </ul>

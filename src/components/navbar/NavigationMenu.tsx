@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@nextui-org/react";
+import { Badge, Button, Input, Tooltip } from "@nextui-org/react";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { adminOptions } from "../dropdownoptions/adminOptions";
 import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
@@ -13,15 +13,52 @@ import { testimonialsOptions } from "../dropdownoptions/testimonialOptions";
 import { groupsOptions } from "../dropdownoptions/forumOptions";
 import { SearchIcon } from "./SearchIcon";
 import { useRouter } from "next/navigation";
+import { FaComments } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { getPusherInstance } from "@/helpers/pusher";
+import { User } from "@/store/userStore";
+import fetchUnreadCount from "../messages/fetchUnreadCount";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
-  user?: { role?: string[] } | null;
+  user?: User | null;
   closeMenu: () => void;
 }
 
 const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProps) => {
   const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    fetchUnreadCount(setUnreadCount);
+
+    const pusher = getPusherInstance();
+    const notificationChannel = pusher?.subscribe(`user-notifications-${user.uid}`);
+
+    notificationChannel?.bind("new-unread-message", () => {
+      setUnreadCount((prev) => prev + 1);
+    });
+
+    notificationChannel?.bind("update-unread-count", () => {
+      fetchUnreadCount(setUnreadCount);
+    });
+
+    notificationChannel?.bind("message-read", () => {
+      fetchUnreadCount(setUnreadCount);
+    });
+
+    return () => {
+      notificationChannel?.unbind_all();
+      pusher?.unsubscribe(`user-notifications-${user.uid}`);
+    };
+  }, [user?.uid]);
+
+  const handleMessagesClick = () => {
+    closeMenu();
+    router.push("/messages");
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-1 md:gap-2 justify-between w-full">
@@ -30,7 +67,8 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
           <>
             {/* Dashboard Button */}
             <Button
-              variant="bordered"
+              variant="light"
+              className="font-bold text-white"
               size="sm"
               onPress={() => {
                 closeMenu();
@@ -66,6 +104,35 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               closeMenu={closeMenu}
             />
 
+            {/* Messages button */}
+            <Tooltip
+              content={`You have ${unreadCount} unread message${unreadCount > 1 ? "s" : ""}`}
+              isDisabled={unreadCount === 0}
+            >
+              <Button
+                size="sm"
+                variant="light"
+                className="font-bold text-white"
+                onPress={handleMessagesClick}
+              >
+                <div className="relative">
+                  <FaComments className="text-green-500" />
+                  {unreadCount > 0 && (
+                    <Badge
+                      content={unreadCount}
+                      color="danger"
+                      size="sm"
+                      shape="circle"
+                      className="absolute -top-2 -right-2"
+                    >
+                      {unreadCount}
+                    </Badge>
+                  )}
+                  <span className="ml-2">My Chats & Messages</span>
+                </div>
+              </Button>
+            </Tooltip>
+
             {/* Projects Dropdown */}
             <DropDownWithIcon
               buttonLabel="Projects"
@@ -91,12 +158,12 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
             />
 
             {/* Testimonials Dropdown */}
-            <DropDownWithIcon
+            {/* <DropDownWithIcon
               buttonLabel="Testimonials"
               options={testimonialsOptions.testimonials}
               buttonColor="default"
               closeMenu={closeMenu}
-            />
+            /> */}
 
             {/* Groups/Forums Dropdown */}
             <DropDownWithIcon

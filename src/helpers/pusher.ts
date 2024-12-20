@@ -1,7 +1,6 @@
 import Pusher from "pusher-js";
 import { getDomain } from "./getDomain";
 
-
 export const getPusherInstance = () => {
   if (typeof window !== "undefined") {
     return new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
