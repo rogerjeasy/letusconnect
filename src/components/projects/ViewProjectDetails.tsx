@@ -14,6 +14,7 @@ import ModalPopup from "../forms/ModalPopup";
 import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
 import GroupChatModal from "@/components/messages/GroupChatModal";
 import GroupChatDrawer from "@/components/messages/GroupChatDrawer";
+import ProjectHeaderDetails from "./ProjectHeaderDetails";
 
 
 
@@ -39,6 +40,12 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     comments: project.comments || [],
     joinRequests: project.joinRequests || [],
     progress: project.progress || "0%",
+    ownerId: project.ownerId || "",
+    ownerUsername: project.ownerUsername || "",
+    academicFields: project.academicFields || [],
+    invitedUsers: project.invitedUsers || [],
+    createdAt: project.createdAt || new Date().toISOString(),
+    updatedAt: project.updatedAt || new Date().toISOString(),
   });
 
   const [showParticipants, setShowParticipants] = useState(false);
@@ -53,10 +60,11 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   });
 
   // Check if the current user is an owner
-    const isOwner =
+  const isOwner = Boolean(
     user && Array.isArray(formData.participants) && formData.participants.some(
-    (participant) => participant.userId === user.uid && participant.role === "owner"
-    );
+      (participant) => participant.userId === user.uid && participant.role === "owner"
+    )
+  );  
 
     // Check if the user is a participant
     const isParticipant =
@@ -135,6 +143,39 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         handleError(err);
         }
     };
+
+    const handleAddParticipant = async (emailOrUsername: string, role: string) => {
+      try {
+        // Send an invitation request to the API
+        const response = await api.post(
+          `/api/projects/${formData.id}/invite`,
+          { emailOrUsername, role },
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }
+        );
+    
+        // Extract the invited user data from the API response
+        const invitedUser = response.data.invitedUser;
+    
+        // Update the formData state with the new invited user
+        setFormData((prev) => ({
+          ...prev,
+          invitedUsers: [
+            ...prev.invitedUsers,
+            {
+              userId: invitedUser.userId || "",
+              username: invitedUser.username || emailOrUsername,
+              email: invitedUser.email || emailOrUsername,
+              profilePicture: invitedUser.profilePicture || "",
+              role: invitedUser.role || role,
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Error inviting participant:", error);
+      }
+    };        
   
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
@@ -144,71 +185,14 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         </CardHeader>
 
         {/* Header Section with Dividers */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <Button color="primary" variant="ghost" startContent={<FaTasks />} onClick={() => setIsGroupChatModalOpen(true)}>
-                Discussion
-            </Button>
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          {isOwner && (
-            <div className="flex items-center gap-2">
-              <Button
-                color={formData.joinRequests.length > 0 ? "danger" : "primary"}
-                variant="ghost"
-                startContent={<FaUserPlus />}
-                className={formData.joinRequests.length > 0 ? "text-red-500 border-red-500" : ""}
-                onClick={() => setShowJoinRequests(true)}
-              >
-                Join Requests: {formData.joinRequests.length}
-              </Button>
-              <Divider orientation="vertical" className="hidden md:block h-6" />
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold">
-              Status: <span className="text-blue-500">{formData.status}</span>
-            </div>
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button color="primary" variant="ghost" startContent={<FaUsers />} onClick={() => setShowParticipants(true)}>
-                Participants: {Array.isArray(formData.participants) ? formData.participants.length : 0}
-            </Button>
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-semibold">
-              Progress: <span className="text-blue-500">{formData.progress}</span>
-            </div>
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          <div className="flex items-center gap-2">
-          <div className="text-sm font-semibold">
-            Num of Tasks: <span className="text-blue-500">{Array.isArray(formData.tasks) ? formData.tasks.length : 0}</span>
-          </div>
-
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button color="primary" variant="ghost" startContent={<FaCommentDots />}>
-              Feedback
-            </Button>
-            <Divider orientation="vertical" className="hidden md:block h-6" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button color="primary" variant="ghost" startContent={<FaComments />}>
-              Comments
-            </Button>
-          </div>
-        </div>
+        <ProjectHeaderDetails
+          project={formData as Project}
+          isOwner={isOwner}
+          setShowParticipants={setShowParticipants}
+          setShowJoinRequests={setShowJoinRequests}
+          setIsGroupChatModalOpen={setIsGroupChatModalOpen}
+          onAddParticipant={handleAddParticipant}
+        />
 
         <Divider className="my-4" />
 

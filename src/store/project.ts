@@ -18,6 +18,7 @@ export interface InvitedUser {
     userId: string;
     username: string;
     email: string;
+    profilePicture: string;
     role: string; // e.g., "owner", "collaborator"
     // joinedAt: Date;
   }
@@ -94,6 +95,6 @@ export interface Participants {
     chatRoomId: string;
     attachments: Attachment[];
     feedback: Feedback[];
-    // createdAt: Date;
-    // updatedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
   }  
