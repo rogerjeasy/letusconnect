@@ -40,7 +40,6 @@ const LoginForm = () => {
 
       if (response.status === 200) {
         const { user, token } = response.data;
-        user.profilePicture = user.profilePicture;
         setUser(user, token);
 
         setSubmissionError(null);

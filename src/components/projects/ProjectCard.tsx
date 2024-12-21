@@ -4,8 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
 import { FaEdit, FaEye, FaTrash, FaUserPlus, FaClock, FaUserCheck, FaBell } from "react-icons/fa";
 import { Project } from "@/store/project";
-import { useUserStore, generateRandomAvatar } from "@/store/userStore";
-
+import { useUserStore } from "@/store/userStore";
 // Function to get status color
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -79,7 +78,7 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
       )}
 
       <CardHeader className="flex items-center gap-4">
-        <Avatar src={project.participants[0]?.profilePicture || generateRandomAvatar()} alt="Avatar" />
+        <Avatar src={project.participants[0]?.profilePicture} alt="Avatar" />
         <div>
           <h3 className="font-bold">{project.title}</h3>
           <p className="text-sm text-gray-500">Owner: {project.ownerUsername}</p>

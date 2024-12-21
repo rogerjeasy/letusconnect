@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
 import { FaUserPlus, FaEnvelope, FaUserTie, FaGraduationCap } from "react-icons/fa";
-import { User, generateRandomAvatar } from "@/store/userStore";
+import { User } from "@/store/userStore";
 
 interface UserCardProps {
   user: User;
@@ -12,7 +12,7 @@ interface UserCardProps {
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) => {
-  const avatarPicture = user?.profilePicture || generateRandomAvatar();
+  const avatarPicture = user?.profilePicture;
   return (
     <Card className="w-85 h-full flex flex-col justify-between shadow-lg relative overflow-visible">
       <CardHeader className="flex items-center gap-4">
