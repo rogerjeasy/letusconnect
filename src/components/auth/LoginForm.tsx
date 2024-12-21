@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Spinner, Button, Card } from "@nextui-org/react";
 import Image from "next/image";
-import { useUserStore, generateRandomAvatar } from "../../store/userStore";
+import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +24,6 @@ const LoginForm = () => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const avatarPicture = generateRandomAvatar();
 
   const {
     register,
@@ -41,7 +40,7 @@ const LoginForm = () => {
 
       if (response.status === 200) {
         const { user, token } = response.data;
-        user.profilePicture = user.profilePicture || avatarPicture;
+        user.profilePicture = user.profilePicture;
         setUser(user, token);
 
         setSubmissionError(null);

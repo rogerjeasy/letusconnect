@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Button, Spinner, Card } from "@nextui-org/react";
 import { api, handleError } from "../../helpers/api"; 
-import { useUserStore, generateRandomAvatar } from "../../store/userStore";
+import { useUserStore } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -35,7 +35,6 @@ const RegistrationForm = () => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const avatarPicture = generateRandomAvatar();
 
   const {
     register,
@@ -54,11 +53,9 @@ const RegistrationForm = () => {
         username: data.username,
         password: data.password,
         program: data.program,
-        profilePicture: avatarPicture,
       });
   
       const { user, token } = response.data;
-      user.profilePicture = user.profilePicture || avatarPicture;
       setUser(user, token);
   
       // Create school experience for the new user

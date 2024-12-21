@@ -6,6 +6,11 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" }
 });
 
+export const fileApi = axios.create({
+  baseURL: getDomain(),
+  headers: { "Content-Type": "multipart/form-data" },
+});
+
 export const handleError = (error) => {
   const response = error.response;
 

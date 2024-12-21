@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
 import ChatInterface from "@/components/messages/ChatInterface";
-import { User, useUserStore, generateRandomAvatar } from "@/store/userStore";
+import { User, useUserStore } from "@/store/userStore";
 import { Avatar, Spinner, Card, Badge } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
@@ -145,7 +145,7 @@ const ChatPage = () => {
                       }`}
                       onClick={() => handleUserClick(user)}
                     >
-                      <Avatar src={user.profilePicture || generateRandomAvatar()} alt={user.username} />
+                      <Avatar src={user.profilePicture} alt={user.username} />
                       <div>
                         <p className="font-semibold text-black">{`${user.firstName} ${user.lastName}`}</p>
                         <p className="text-sm text-black">{user.username}</p>

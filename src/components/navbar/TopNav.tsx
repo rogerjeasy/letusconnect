@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useUserStore, generateRandomAvatar } from "../../store/userStore";
+import { useUserStore } from "../../store/userStore";
 import ProfileDropDown from "./ProfileDropDown";
 import NavigationMenu from "./NavigationMenu";
 import { useState } from "react";
 
 const Navbar = () => {
   const { user, isAuthenticated } = useUserStore();
-  const avatarPicture = user?.profilePicture || generateRandomAvatar();
+  const avatarPicture = user?.profilePicture || "";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (

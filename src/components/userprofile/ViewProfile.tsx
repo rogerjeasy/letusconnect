@@ -9,7 +9,7 @@ import {
   Button,
   Avatar,
 } from "@nextui-org/react";
-import { useUserStore, generateRandomAvatar } from "../../store/userStore";
+import { useUserStore } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -21,7 +21,7 @@ type ViewUserProfileProps = {
   export default function ViewUserProfile({ isOpen, onClose }: ViewUserProfileProps) {
   const { user, isAuthenticated } = useUserStore();
   const router = useRouter();
-  const avatarPicture = user?.profilePicture || generateRandomAvatar();
+  const avatarPicture = user?.profilePicture;
 
   // Protect the page
   useEffect(() => {

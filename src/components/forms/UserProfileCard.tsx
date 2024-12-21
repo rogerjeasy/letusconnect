@@ -18,7 +18,7 @@ import SelectCountry from "../forms/SelectCountry";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useUserStore } from "../../store/userStore";
-import { api, handleError } from "../../helpers/api";
+import { api, fileApi, handleError } from "../../helpers/api";
 import Scroll from "./Scroll";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 // import InputDate from "../forms/InputDate";
@@ -33,6 +33,9 @@ export default function UserProfileCard() {
   const [profile, setProfile] = useState({ ...user });
   const [originalProfile, setOriginalProfile] = useState({ ...user });
   const [isUpdating, setIsUpdating] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImageName, setSelectedImageName] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [modalProps, setModalProps] = useState({
     isOpen: false,
     title: "",
@@ -94,7 +97,49 @@ export default function UserProfileCard() {
     } finally {
         setIsUpdating(false);
       }
-  };  
+  }; 
+
+  const handleProfilePictureUpdate = async () => {
+    if (!selectedImage) return;
+    setIsUploading(true);
+
+    const formDataPicture = new FormData();
+    formDataPicture.append("file", selectedImage);
+
+    console.log("FormData contents:");
+    for (const [key, value] of formDataPicture.entries()) {
+      console.log(`${key}:`, value);
+    }
+
+
+    try {
+      const response = await fileApi.post(`/api/media-files/upload-images`, formDataPicture, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200) {
+        setProfile((prev) => ({ ...prev, profilePicture: response.data.imageUrl }));
+        setModalProps({
+          isOpen: true,
+          title: "Success",
+          content: "Profile picture updated successfully!",
+          onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        });
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Failed to update profile picture:", errorMessage);
+      setModalProps({
+        isOpen: true,
+        title: "Oops!",
+        content: `Failed to update profile picture. Please try again. ${errorMessage}`,
+        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+      });
+    } finally {
+      setIsUploading(false);
+      setSelectedImage(null);
+    }
+  };
 
   const handleCancel = () => {
     setProfile({ ...originalProfile });
@@ -123,15 +168,47 @@ export default function UserProfileCard() {
         <Card className="max-w-[800px] mx-auto">
         {/* Header */}
         <CardHeader className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
             <Avatar src={profile.profilePicture} alt={profile.username} size="lg" />
+            {isEditing && (
+              <div>
+                <Button size="sm" variant="flat" color="secondary" onClick={() => document.getElementById('profile-picture-input')?.click()}>
+                  Update Profile Picture
+                </Button>
+                <input
+                  id="profile-picture-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSelectedImage(e.target.files[0]);
+                      setSelectedImageName(e.target.files[0].name);
+                    }
+                  }}
+                />
+                {selectedImageName && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600">Selected: {selectedImageName}</p>
+                    <div className="mt-2 flex gap-2">
+                      <Button size="sm" color="primary" onClick={handleProfilePictureUpdate} disabled={isUploading}>
+                        Confirm
+                      </Button>
+                      <Button size="sm" color="danger" onClick={() => { setSelectedImage(null); setSelectedImageName(null); }} disabled={isUploading}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <div>
-                <p className="text-md font-bold">
+              <p className="text-md font-bold">
                 {profile.firstName} {profile.lastName}
-                </p>
-                <p className="text-sm text-default-500">{profile.email}</p>
+              </p>
+              <p className="text-sm text-default-500">{profile.email}</p>
             </div>
-            </div>
+          </div>
             {/* <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
             {isEditing ? "Cancel" : "Edit Profile"}
             </Button> */}

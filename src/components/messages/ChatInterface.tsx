@@ -6,7 +6,7 @@ import { Message } from "@/store/message";
 import { Input, Button, Avatar, Card, Chip } from "@nextui-org/react";
 import { FaPaperPlane } from "react-icons/fa";
 import { getPusherInstance } from "@/helpers/pusher";
-import { generateRandomAvatar, useUserStore } from "@/store/userStore";
+import { useUserStore } from "@/store/userStore";
 import { AxiosError } from "axios";
 
 interface ChatInterfaceProps {
@@ -164,7 +164,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <Card className="max-w-md mx-auto p-4 shadow-lg h-[500px] flex flex-col">
       <div className="flex items-center gap-4 border-b pb-3 mb-3">
-        <Avatar src={receiverAvatar || generateRandomAvatar()} alt={receiverName} size="lg" />
+        <Avatar src={receiverAvatar} alt={receiverName} size="lg" />
         <h2 className="text-xl font-bold">{receiverName}</h2>
       </div>
 

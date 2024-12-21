@@ -188,7 +188,7 @@ export function useAuth() {
 }
 
 // Function to generate a random avatar URL
-export const generateRandomAvatar = (): string => {
-  const uniqueId = Math.random().toString(36).substring(7);
-  return `https://picsum.photos/seed/${uniqueId}/150/150?nature`;
-};
+// export const generateRandomAvatar = (): string => {
+//   const uniqueId = Math.random().toString(36).substring(7);
+//   return `https://picsum.photos/seed/${uniqueId}/150/150?nature`;
+// };
