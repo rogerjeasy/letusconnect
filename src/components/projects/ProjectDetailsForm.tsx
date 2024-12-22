@@ -14,11 +14,7 @@ import {
 } from "@nextui-org/react";
 import { FaEdit, FaSave, FaTimes } from "react-icons/fa";
 import { api, handleError } from "@/helpers/api";
-
-const collaborationTypes = ["Public", "Private"];
-const industries = ["Education", "Finance", "Healthcare", "Technology", "Other"];
-const statuses = ["Open", "In Progress", "Completed"];
-const skills = ["Python", "JavaScript", "GoLang", "TensorFlow", "React"];
+import { collaborationTypes, industries, statuses, skills } from "@/store/project";
 
 interface ProjectDetailsFormProps {
   formData: {

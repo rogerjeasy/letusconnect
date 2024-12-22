@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardHeader, CardBody, CardFooter, Button } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, CardFooter, Button, Avatar } from "@nextui-org/react";
 import { FaTasks, FaEdit, FaSave, FaTimes, FaPlus, FaBoxOpen } from "react-icons/fa";
 import TaskCard from "../../components/projects/authusers/TaskCard";
 import { Task, Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
+import TaskList from "./projectpopup/TaskList";
 
 interface ProjectTaskFormDetailsProps {
   tasks?: Task[];
@@ -115,18 +116,8 @@ const ProjectTaskFormDetails = ({
             </div>
           )
         ) : (
-          Array.isArray(tasks) &&
-          tasks.map((task, index) => (
-            <div key={index} className="mb-4 p-4 border rounded-lg shadow-sm">
-              <p className="font-semibold">Title: {task.title}</p>
-              <p>Description: {task.description}</p>
-              <p>Status: {task.status}</p>
-              <p>Priority: {task.priority}</p>
-              <p>Due Date: {new Date(task.dueDate).toLocaleDateString()}</p>
-            </div>
-          ))
+          <TaskList tasks={tasks} participant={participants[0]} />
         )}
-
         {isEditing && showTaskCard && (
           <TaskCard
             task={
@@ -137,8 +128,7 @@ const ProjectTaskFormDetails = ({
                 status: "todo",
                 priority: "low",
                 dueDate: new Date(),
-                assignedTo: [],
-              }
+                assignedTo: [],              }
             }
             users={participants}
             manageTask={true}

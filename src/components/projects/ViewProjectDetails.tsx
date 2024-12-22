@@ -138,7 +138,6 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setFormData(response.data);
-        console.log("project: ", response.data);
         } catch (err) {
         handleError(err);
         }
@@ -181,7 +180,6 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
       }
     }; 
     
-    console.log("formData: ", formData);
   
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">

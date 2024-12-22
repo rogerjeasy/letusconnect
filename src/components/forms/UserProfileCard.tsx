@@ -14,15 +14,21 @@ import {
 import InputForm from "../forms/InputForm";
 import InputToUpdate from "../forms/InputToUpdate";
 import TextareaForm from "../forms/TextArea";
-import SelectCountry from "../forms/SelectCountry";
+import UserSelction from "../forms/SelectCountry";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useUserStore } from "../../store/userStore";
 import { api, fileApi, handleError } from "../../helpers/api";
 import Scroll from "./Scroll";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
-// import InputDate from "../forms/InputDate";
-// import { parseDate } from "@internationalized/date";
+import { User } from "../../store/userStore";
+
+interface ModalProps {
+  isOpen: boolean;
+  title: string;
+  content: string;
+  onConfirm: () => void;
+}
 
 export default function UserProfileCard() {
   const { user, isAuthenticated, setUser } = useUserStore();
@@ -32,11 +38,11 @@ export default function UserProfileCard() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({ ...user });
   const [originalProfile, setOriginalProfile] = useState({ ...user });
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImageName, setSelectedImageName] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [modalProps, setModalProps] = useState({
+  const [modalProps, setModalProps] = useState<ModalProps>({
     isOpen: false,
     title: "",
     content: "",
@@ -49,7 +55,7 @@ export default function UserProfileCard() {
     }
   }, [isAuthenticated, user, router]);
 
-  const handleUpdateField = (field: keyof typeof profile, value: string | string[]) => {
+  const handleUpdateField = (field: keyof User, value: string | string[]) => {
     setProfile((prev) => ({
       ...prev,
       [field]: value,
@@ -58,18 +64,16 @@ export default function UserProfileCard() {
 
   const toggleEdit = () => {
     if (isEditing) {
-      setProfile({ ...originalProfile }); 
+      setProfile({ ...originalProfile });
     } else {
-      setOriginalProfile({ ...profile }); 
+      setOriginalProfile({ ...profile });
     }
     setIsEditing((prev) => !prev);
   };
 
   const handleSave = async () => {
     setIsUpdating(true);
-
     try {
-      
       const response = await api.put(`/api/users/${user?.uid}`, profile, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -77,14 +81,13 @@ export default function UserProfileCard() {
         setUser(response.data.user, token || "");
         setOriginalProfile(response.data.user);
         setModalProps({
-            isOpen: true,
-            title: "Success",
-            content: "Profile successfully updated!",
-            onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
-          });
+          isOpen: true,
+          title: "Success",
+          content: "Profile successfully updated!",
+          onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
+        });
         setIsEditing(false);
       }
-      setIsEditing(false);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Failed to update profile:", errorMessage);
@@ -92,12 +95,12 @@ export default function UserProfileCard() {
         isOpen: true,
         title: "Oops!",
         content: `Failed to save profile. Please try again. ${errorMessage}`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
       });
     } finally {
-        setIsUpdating(false);
-      }
-  }; 
+      setIsUpdating(false);
+    }
+  };
 
   const handleProfilePictureUpdate = async () => {
     if (!selectedImage) return;
@@ -106,14 +109,8 @@ export default function UserProfileCard() {
     const formDataPicture = new FormData();
     formDataPicture.append("file", selectedImage);
 
-    console.log("FormData contents:");
-    for (const [key, value] of formDataPicture.entries()) {
-      console.log(`${key}:`, value);
-    }
-
-
     try {
-      const response = await fileApi.post(`/api/media-files/upload-images`, formDataPicture, {
+      const response = await fileApi.post("/api/media-files/upload-images", formDataPicture, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -123,7 +120,7 @@ export default function UserProfileCard() {
           isOpen: true,
           title: "Success",
           content: "Profile picture updated successfully!",
-          onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+          onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
         });
       }
     } catch (error) {
@@ -133,7 +130,7 @@ export default function UserProfileCard() {
         isOpen: true,
         title: "Oops!",
         content: `Failed to update profile picture. Please try again. ${errorMessage}`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
       });
     } finally {
       setIsUploading(false);
@@ -152,27 +149,32 @@ export default function UserProfileCard() {
 
   return (
     <div className="relative">
-        {isUpdating && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                {isUpdating && <SpinnerUI label="Updating profile..." color="primary" labelColor="primary" />}
-            </div>
-        )}
-        
-        <ModalPopup
-            title={modalProps.title}
-            content={modalProps.content}
-            confirmLabel="Close"
-            onConfirm={modalProps.onConfirm}
-            isOpen={modalProps.isOpen}
-        />
-        <Card className="max-w-[800px] mx-auto">
-        {/* Header */}
+      {isUpdating && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <SpinnerUI label="Updating profile..." color="primary" labelColor="primary" />
+        </div>
+      )}
+
+      <ModalPopup
+        title={modalProps.title}
+        content={modalProps.content}
+        confirmLabel="Close"
+        onConfirm={modalProps.onConfirm}
+        isOpen={modalProps.isOpen}
+      />
+
+      <Card className="max-w-[800px] mx-auto">
         <CardHeader className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
             <Avatar src={profile.profilePicture} alt={profile.username} size="lg" />
             {isEditing && (
               <div>
-                <Button size="sm" variant="flat" color="secondary" onClick={() => document.getElementById('profile-picture-input')?.click()}>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="secondary"
+                  onClick={() => document.getElementById("profile-picture-input")?.click()}
+                >
                   Update Profile Picture
                 </Button>
                 <input
@@ -191,10 +193,23 @@ export default function UserProfileCard() {
                   <div className="mt-2">
                     <p className="text-sm text-gray-600">Selected: {selectedImageName}</p>
                     <div className="mt-2 flex gap-2">
-                      <Button size="sm" color="primary" onClick={handleProfilePictureUpdate} disabled={isUploading}>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        onClick={handleProfilePictureUpdate}
+                        disabled={isUploading}
+                      >
                         Confirm
                       </Button>
-                      <Button size="sm" color="danger" onClick={() => { setSelectedImage(null); setSelectedImageName(null); }} disabled={isUploading}>
+                      <Button
+                        size="sm"
+                        color="danger"
+                        onClick={() => {
+                          setSelectedImage(null);
+                          setSelectedImageName(null);
+                        }}
+                        disabled={isUploading}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -209,215 +224,206 @@ export default function UserProfileCard() {
               <p className="text-sm text-default-500">{profile.email}</p>
             </div>
           </div>
-            {/* <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
-            {isEditing ? "Cancel" : "Edit Profile"}
-            </Button> */}
 
-            <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
+          <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
             {isEditing ? (
-            <>
+              <>
                 <EditDocumentIcon className="mr-2" />
                 Editing...
-            </>
+              </>
             ) : (
-            <>
+              <>
                 <EditDocumentIcon className="mr-2" />
                 Update Profile
-            </>
+              </>
             )}
-        </Button>
+          </Button>
         </CardHeader>
+
         <Divider />
-        {/* Body */}
+
         <CardBody>
-            <div className="flex flex-wrap gap-4">
+          {/* Basic Information */}
+          <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
-                <InputForm type="text" label="Your UserID:" value={profile.uid || ""} />
+              <InputForm type="text" label="Your UserID:" value={profile.uid || ""} />
             </div>
             <div className="flex-1 min-w-[200px]">
-                <InputForm type="text" label="Verified Profile" value={profile.isVerified ? "Verified" : "Not Verified"} />
+              <InputForm
+                type="text"
+                label="Verified Profile"
+                value={profile.isVerified ? "Verified" : "Not Verified"}
+              />
             </div>
             <div className="flex-1 min-w-[200px]">
-                <InputForm type="text" label="Created" 
-                value={profile.accountCreatedAt ? profile.accountCreatedAt : "Not specified"} 
-                />
+              <InputForm
+                type="text"
+                label="Created"
+                value={profile.accountCreatedAt || "Not specified"}
+              />
             </div>
+          </div>
+
+          {/* User Information */}
+          <div className="flex flex-wrap gap-4 mt-4">
             <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
+              {isEditing ? (
                 <InputToUpdate
-                    type="text"
-                    label="Username"
-                    placeholder="Enter username"
-                    value={profile.username || ""}
-                    onChange={(value) => handleUpdateField("username", value)}
+                  type="text"
+                  label="Username"
+                  placeholder="Enter username"
+                  value={profile.username || ""}
+                  onChange={(value) => handleUpdateField("username", value)}
                 />
-                ) : (
+              ) : (
                 <InputForm type="text" label="Username" value={profile.username || ""} />
-                )}
+              )}
             </div>
             <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
+              {isEditing ? (
                 <InputToUpdate
-                    type="text"
-                    label="First Name"
-                    placeholder="Enter first name"
-                    value={profile.firstName || ""}
-                    onChange={(value) => handleUpdateField("firstName", value)}
+                  type="text"
+                  label="First Name"
+                  placeholder="Enter first name"
+                  value={profile.firstName || ""}
+                  onChange={(value) => handleUpdateField("firstName", value)}
                 />
-                ) : (
+              ) : (
                 <InputForm type="text" label="First Name" value={profile.firstName || ""} />
-                )}
+              )}
             </div>
             <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
+              {isEditing ? (
                 <InputToUpdate
-                    type="text"
-                    label="Last Name"
-                    placeholder="Enter last name"
-                    value={profile.lastName || ""}
-                    onChange={(value) => handleUpdateField("lastName", value)}
+                  type="text"
+                  label="Last Name"
+                  placeholder="Enter last name"
+                  value={profile.lastName || ""}
+                  onChange={(value) => handleUpdateField("lastName", value)}
                 />
-                ) : (
+              ) : (
                 <InputForm type="text" label="Last Name" value={profile.lastName || ""} />
-                )}
+              )}
             </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className="flex flex-wrap gap-4 mt-4">
+            <div className="flex-1 min-w-[200px]">
+              <InputForm
+                type="text"
+                label="Role"
+                value={profile.role?.join(", ") || "No roles available"}
+              />
             </div>
 
-            <div className="flex flex-wrap gap-4 mt-4">
             <div className="flex-1 min-w-[200px]">
-              <InputForm type="text" label="Role" value={profile.role?.join(", ") || "No roles available"} />
-            </div>
-
-            <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
-                <SelectCountry
-                    selectionMode="phone"
-                    defaultValue={profile.phoneCode || ""}
-                    onChange={(selected) => handleUpdateField("phoneCode", selected as string)}
+              {isEditing ? (
+                <UserSelction
+                  selectionMode="phone"
+                  defaultValue={profile.phoneCode || ""}
+                  onChange={(selected) => handleUpdateField("phoneCode", selected as string)}
                 />
-                ) : (
-                <InputForm type="text" label="Phone Code" 
-                value={
-                    profile.phoneCode
-                      ? `${profile.phoneCode}`
-                      : "No phone code"
-                  }
+              ) : (
+                <InputForm
+                  type="text"
+                  label="Phone Code"
+                  value={profile.phoneCode || "No phone code"}
                 />
-                )}
+              )}
             </div>
 
             <div className="flex-1 min-w-[200px]">
-                {isEditing ? (
+              {isEditing ? (
                 <InputToUpdate
-                    type="text"
-                    label="Phone Number"
-                    placeholder="Enter phone number"
-                    value={profile.phoneNumber || ""}
-                    onChange={(value) => handleUpdateField("phoneNumber", value)}
+                  type="text"
+                  label="Phone Number"
+                  placeholder="Enter phone number"
+                  value={profile.phoneNumber || ""}
+                  onChange={(value) => handleUpdateField("phoneNumber", value)}
                 />
-                ) : (
-                <InputForm type="text" label="Phone Number" 
+              ) : (
+                <InputForm
+                  type="text"
+                  label="Phone Number"
                   value={
                     profile.phoneCode && profile.phoneNumber
                       ? `(${profile.phoneCode}) ${profile.phoneNumber}`
                       : "No phone number available"
-                  } 
+                  }
                 />
-                )}
+              )}
             </div>
+          </div>
+
+          {/* Bio */}
+          <div className="flex flex-wrap gap-4 mt-4">
+            <div className="flex-1">
+              {isEditing ? (
+                <TextareaForm
+                  value={profile.bio || ""}
+                  label="Bio"
+                  placeholder="Enter your bio"
+                  description=""
+                  onChange={(value) => handleUpdateField("bio", value)}
+                  labelColor="text-black"
+                />
+              ) : (
+                <TextareaForm
+                  value={profile.bio || ""}
+                  isReadOnly
+                  label="Bio"
+                  variant="faded"
+                  placeholder=""
+                  description=""
+                  labelColor="text-black"
+                />
+              )}
             </div>
+          </div>
 
-            <div className="flex flex-wrap gap-4 mt-4">
-                <div className="flex-1">
-                    {isEditing ? (
-                    <TextareaForm
-                      value={profile.bio || ""}
-                      label="Bio"
-                      placeholder="Enter your bio"
-                      description=""
-                      onChange={(value) => handleUpdateField("bio", value)}
-                      labelColor="text-black"
-                    />
-                    ) : (
-                    <TextareaForm
-                        value={profile.bio || ""}
-                        isReadOnly
-                        label="Bio"
-                        variant="faded"
-                        // defaultValue={profile.bio || ""}
-                        placeholder=""
-                        description=""
-                        labelColor="text-black"
-                    />
-                    )}
-                </div>
+          {/* Languages */}
+          <div className="flex flex-wrap gap-4 mt-4">
+            <div className="flex-1 min-w-[200px]">
+              {isEditing ? (
+                <Scroll>
+                  <UserSelction
+                    selectionMode="language"
+                    defaultValue={profile.languages || []}
+                    onChange={(selectedLanguages) =>
+                      handleUpdateField("languages", selectedLanguages as string[])
+                    }
+                  />
+                </Scroll>
+              ) : (
+                <InputForm
+                  type="text"
+                  label="Languages"
+                  value={
+                    profile.languages && profile.languages.length > 0
+                      ? profile.languages.join(", ")
+                      : "No languages selected"
+                  }
+                />
+              )}
             </div>
-
-            <div className="flex flex-wrap gap-4 mt-4">
-                
-                <div className="flex-1 min-w-[200px]">
-                    {isEditing ? (
-                        <Scroll>
-                        <SelectCountry
-                            selectionMode="language"
-                            defaultValue={profile.languages || []} // Pass current languages as default
-                            onChange={(selectedLanguages) => {
-                            handleUpdateField("languages", selectedLanguages as string[]); // Update languages in the profile
-                            }}
-                        />
-                        </Scroll>
-                    ) : (
-                        <InputForm
-                        type="text"
-                        label="Languages"
-                        value={
-                            profile.languages && profile.languages.length > 0
-                            ? profile.languages.join(", ") // Display selected languages as a comma-separated string
-                            : "No languages selected"
-                        }
-                        />
-                    )}
-                </div>
-
-
-                {/* <div className="flex-1 min-w-[200px]">
-                    {isEditing ? (
-                        <InputDate
-                            label="Birth Date"
-                            defaultValue={profile.dateOfBirth ? parseDate(profile.dateOfBirth.toString()) : null}
-                            onChange={(date) => {
-                                if (date) {
-                                    handleUpdateField("dateOfBirth", date.toString()); // Update the date in the profile
-                                }
-                            }}
-                        />
-                    ) : (
-                        <InputForm
-                            type="text"
-                            label="Birth Date"
-                            value={
-                                profile.dateOfBirth
-                                  ? profile.dateOfBirth.toString() // Convert `DateValue` to string for display
-                                  : "Not specified"
-                              }
-                        />
-                    )}
-                </div> */}
-            </div>
+          </div>
         </CardBody>
+
         <Divider />
+
         {/* Footer */}
         {isEditing && (
-            <CardFooter className="flex justify-end gap-4">
-                <Button color="primary" onPress={handleSave} disabled={isUpdating}>
-                {isUpdating ? "Saving..." : "Save Changes"}
-                </Button>
-                <Button color="danger" variant="flat" onPress={handleCancel} disabled={isUpdating}>
-                Cancel
-                </Button>
+          <CardFooter className="flex justify-end gap-4">
+            <Button color="primary" onPress={handleSave} disabled={isUpdating}>
+              {isUpdating ? "Saving..." : "Save Changes"}
+            </Button>
+            <Button color="danger" variant="flat" onPress={handleCancel} disabled={isUpdating}>
+              Cancel
+            </Button>
           </CardFooter>
         )}
-        </Card>
+      </Card>
     </div>
   );
 }

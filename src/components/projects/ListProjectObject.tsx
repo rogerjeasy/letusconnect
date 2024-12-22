@@ -62,7 +62,9 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
     if (!selectedProjectId) return;
     setLoading(true);
     try {
-      await api.delete(`/api/projects/${selectedProjectId}`);
+      await api.delete(`/api/projects/${selectedProjectId}`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
       setUpdatedProjects((prevProjects) => prevProjects.filter((p) => p.id !== selectedProjectId));
       setIsDeleteModalOpen(false);
       setSelectedProjectId(null);
