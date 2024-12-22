@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardHeader, CardBody, Avatar, Textarea, Input, Divider } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Avatar, Textarea, Input, Divider, Tooltip } from "@nextui-org/react";
 import { FaCalendarAlt } from "react-icons/fa";
 import { Task, Participants } from "@/store/project";
 
@@ -19,14 +19,16 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, participant }) => {
           {/* Header */}
           <CardHeader className="flex justify-between items-center">
             {/* Creator's Avatar */}
-            <div className="flex items-center gap-2">
-              <Avatar
-                src={participant.profilePicture || ""}
-                alt={participant.username || "User"}
-                className="w-8 h-8 border border-gray-300"
-              />
-              <span className="font-medium">{participant.username}</span>
-            </div>
+            <Tooltip content={`This task was created by ${participant.username}`} placement="top">
+              <div className="flex items-center gap-2">
+                <Avatar
+                  src={participant.profilePicture || ""}
+                  alt={participant.username || "User"}
+                  className="w-8 h-8 border border-gray-300"
+                />
+                <span className="font-medium">{participant.username}</span>
+              </div>
+            </Tooltip>
 
             {/* Status */}
             <div className="text-sm font-semibold">
