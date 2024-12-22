@@ -18,7 +18,7 @@ interface ProjectListingsSectionProps {
   title: string;
 }
 
-const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) => {
+const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProps) => {
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -133,7 +133,7 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
       <h2 className="text-2xl font-bold mb-6 text-center">{title}</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
-        {updatedProjects.length > 0 ? (
+        {updatedProjects && updatedProjects.length > 0 ? (
           updatedProjects.slice(0, displayCount).map((project) => (
             <div key={project.id} className="flex justify-center transition-transform transform hover:scale-105 hover:shadow-2xl">
               <ProjectCard
@@ -154,7 +154,7 @@ const ProjectListingObject = ({ projects, title }: ProjectListingsSectionProps) 
       </div>
 
       <div className="flex justify-center gap-4 mt-8">
-        {displayCount < updatedProjects.length && (
+        {updatedProjects && displayCount < updatedProjects.length &&  (
           <Button
             color="primary"
             className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition-transform hover:scale-105"
