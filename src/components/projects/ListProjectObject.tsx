@@ -93,7 +93,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
             ? {
                 ...project,
                 joinRequests: [
-                  ...project.joinRequests,
+                  ...(project.joinRequests || []),
                   {
                     userId: user.uid,
                     username: user.username || "Unknown User",
@@ -106,7 +106,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
               }
             : project
         )
-      ); 
+      );       
 
       setJoinModalProps({
         title: "Success",
@@ -147,7 +147,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
           ))
         ) : (
           <div className="text-center col-span-full text-gray-500 flex flex-col items-center gap-2">
-            <FaFolderOpen size={50} />
+            <FaFolderOpen size={100} />
             <p>No projects available.</p>
           </div>
         )}

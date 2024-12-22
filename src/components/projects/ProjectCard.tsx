@@ -1,10 +1,9 @@
-"use client";
-
 import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
 import { FaEdit, FaEye, FaTrash, FaUserPlus, FaClock, FaUserCheck, FaBell } from "react-icons/fa";
 import { Project } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
+
 // Function to get status color
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
@@ -41,20 +40,22 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
   // Check if the user is the owner
   const isOwner =
     user?.uid === project.ownerId ||
-    project.participants.some((participant) => participant.userId === user?.uid && participant.role === "owner");
+    (Array.isArray(project.participants) &&
+      project.participants.some((participant) => participant.userId === user?.uid && participant.role === "owner"));
 
   // Check if the user is in the join requests list
-  const isPendingApproval = project.joinRequests.some((request) => request.userId === user?.uid);
+  const isPendingApproval =
+    Array.isArray(project.joinRequests) && project.joinRequests.some((request) => request.userId === user?.uid);
 
   // Check if the user is a participant (but not the owner)
-  const isParticipant = project.participants.some(
-    (participant) => participant.userId === user?.uid && participant.role !== "owner"
-  );
+  const isParticipant =
+    Array.isArray(project.participants) &&
+    project.participants.some((participant) => participant.userId === user?.uid && participant.role !== "owner");
 
   return (
     <Card className="w-85 h-85 flex flex-col justify-between shadow-lg relative overflow-visible">
       {/* Notification Icon for Pending Join Requests */}
-      {isOwner && project.joinRequests.length > 0 && (
+      {isOwner && Array.isArray(project.joinRequests) && project.joinRequests.length > 0 && (
         <div className="absolute top-4 right-4 z-10">
           <Tooltip
             content={
@@ -97,7 +98,8 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
           <strong>Industry:</strong> {project.industry}
         </p>
         <p className="text-sm text-gray-600">
-          <strong>Number of Participant{project.participants.length > 1 ? "s" : ""}:</strong> {project.participants.length}
+          <strong>Number of Participant{project.participants.length > 1 ? "s" : ""}:</strong>{" "}
+          {Array.isArray(project.participants) ? project.participants.length : 0}
         </p>
         <p className={`text-sm font-semibold ${getStatusColor(project.status)}`}>
           <strong>Status:</strong> {project.status}
