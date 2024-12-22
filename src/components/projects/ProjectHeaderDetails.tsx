@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Divider } from "@nextui-org/react";
+import { Button, Divider, Modal } from "@nextui-org/react";
 import { FaTasks, FaUserPlus, FaUsers, FaCommentDots, FaComments, FaUserFriends } from "react-icons/fa";
 import { Project } from "@/store/project";
 import InvitedUsersPopup from "./projectpopup/InvitedUsersPopup";
+import { api, handleError } from "@/helpers/api";
+import { GroupChat, BaseMessage } from "@/store/groupChat";
+import ModalGroupChat from "@/components/messages/ModalGroupChat";
+
 
 interface ProjectHeaderDetailsProps {
   project: Project;
@@ -24,14 +28,33 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
   onAddParticipant,
 }) => {
   const [showInvitedUsers, setShowInvitedUsers] = useState(false);
+  const [groupChat, setGroupChat] = useState<GroupChat | null>(null);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [loadingChat, setLoadingChat] = useState(false);
+
+  const handleOpenGroupChat = () => {
+    setIsChatModalOpen(true);
+  };
+
+  const handleCloseGroupChat = () => {
+    setIsChatModalOpen(false);
+  };
+  
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-2">
-        <Button color="primary" variant="ghost" startContent={<FaTasks />} onClick={() => setIsGroupChatModalOpen(true)}>
-          Discussion
+      <Button
+        color="primary"
+        variant="ghost"
+        startContent={<FaTasks />}
+        onClick={handleOpenGroupChat}
+        isDisabled={loadingChat} 
+        >
+        {loadingChat ? "Loading..." : "Discussion"}
         </Button>
-        <Divider orientation="vertical" className="hidden md:block h-6" />
+
+    <Divider orientation="vertical" className="hidden md:block h-6" />
       </div>
 
       {isOwner && (
@@ -110,6 +133,13 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
           Comments
         </Button>
       </div>
+      <ModalGroupChat
+        isOpen={isChatModalOpen}
+        onClose={handleCloseGroupChat}
+        groupId={project.id}
+        token={localStorage.getItem("token") || ""}
+      />
+
     </div>
   );
 };
