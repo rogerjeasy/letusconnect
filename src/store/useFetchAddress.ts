@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { api, handleError } from "../helpers/api";
 
 export const useFetchAddress = (token: string) => {
@@ -17,7 +17,7 @@ export const useFetchAddress = (token: string) => {
   });
   const [addressResponseStatus, setAddressResponseStatus] = useState<number | null>(null);
 
-  const fetchAddress = async () => {
+  const fetchAddress = useCallback(async () => {
     try {
       const response = await api.get("/api/addresses", {
         headers: { Authorization: `Bearer ${token}` },
@@ -35,7 +35,7 @@ export const useFetchAddress = (token: string) => {
         console.error("Failed to fetch address:", errorMessage);
       }
     }
-  };
+  }, [token]);
 
   return {
     address,

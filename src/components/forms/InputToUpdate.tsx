@@ -13,8 +13,8 @@ interface InputToUpdateProps<T = string> {
   variant?: "bordered" | "faded";
   width?: string;
   onChange: (value: T) => void;
-  isInvalid?: boolean;       // New prop for validation state
-  errorMessage?: string;     // New prop for error message
+  isInvalid?: boolean;      
+  errorMessage?: string; 
 }
 
 export default function InputToUpdate<T>({

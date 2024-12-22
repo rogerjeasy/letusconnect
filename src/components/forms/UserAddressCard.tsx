@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardBody, CardFooter, Divider, Button } from "@nextui-org/react";
 import InputForm from "../forms/InputForm";
 import InputToUpdate from "../forms/InputToUpdate";
-import SelectCountry from "../forms/SelectCountry";
 import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
 import SpinnerUI from "./SpinnerUI";
 import ModalPopup from "./ModalPopup";
 import { useFetchAddress } from "../../store/useFetchAddress";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
+import UserSelection from "../forms/SelectCountry";
 
 export default function UserAddressCard() {
   const { user, isAuthenticated } = useUserStore();
@@ -25,7 +25,16 @@ export default function UserAddressCard() {
     fetchAddress,
   } = useFetchAddress(token!);
 
-  const [isUpdating, setIsUpdating] = useState(false)
+  // Add local form state to handle continuous typing
+  const [formData, setFormData] = useState(address);
+  const hasFetchedAddress = useRef(false);
+
+  // Update form data when address changes
+  useEffect(() => {
+    setFormData(address);
+  }, [address]);
+
+  const [isUpdating, setIsUpdating] = useState(false);
   const [modalProps, setModalProps] = useState({
     isOpen: false,
     title: "",
@@ -33,18 +42,18 @@ export default function UserAddressCard() {
     onConfirm: () => {},
   });
 
-
   useEffect(() => {
     if (!isAuthenticated || !user) {
       router.push("/login");
-    } else {
+    } else if (!hasFetchedAddress.current) {
       fetchAddress();
+      hasFetchedAddress.current = true;
     }
   }, [isAuthenticated, user, router, fetchAddress]);
   
+  // Update the handleUpdateField to use local form state
   const handleUpdateField = (field: keyof typeof address, value: string) => {
-    
-    setAddress((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -52,12 +61,14 @@ export default function UserAddressCard() {
 
   const toggleEdit = () => {
     setIsEditing((prev) => !prev);
+    setFormData(address);
   };
 
   const handleSave = async () => {
     setIsUpdating(true);
     try {
-        const response = await api.put(`/api/addresses/${address.id}`, address, {
+        // Use formData instead of address when saving
+        const response = await api.put(`/api/addresses/${address.id}`, formData, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setAddress(response.data.address);        
@@ -65,26 +76,27 @@ export default function UserAddressCard() {
             isOpen: true,
             title: "Success",
             content: "Address successfully updated!",
-            onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
-          });
+            onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
+        });
         setIsUpdating(false);
         setIsEditing(false);
     } catch (error) {
       const errorMessage = handleError(error);
-      console.error("Failed to save address:",  errorMessage);
+      console.error("Failed to save address:", errorMessage);
       setModalProps({
         isOpen: true,
         title: "Oops!",
         content: `Failed to save address. Please try again. ${errorMessage}`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps((prev) => ({ ...prev, isOpen: false })),
       });
     } finally {
-        setIsUpdating(false);
-      }
+      setIsUpdating(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    setFormData(address);
   };
 
   if (!isAuthenticated || !user) {
@@ -107,156 +119,154 @@ export default function UserAddressCard() {
         />
 
         <Card className="max-w-[800px] mx-auto">
-      {/* Header */}
-      <CardHeader className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-            <p className="text-md font-bold">Current Address</p>
-        </div>
-        <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
-            {isEditing ? (
-            <>
-                <EditDocumentIcon className="mr-2" />
-                Editing...
-            </>
-            ) : (
-            <>
-                <EditDocumentIcon className="mr-2" />
-                Update Address
-            </>
-            )}
-        </Button>
-      </CardHeader>
+          <CardHeader className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+                <p className="text-md font-bold">Current Address</p>
+            </div>
+            <Button size="sm" variant="flat" color="primary" onPress={toggleEdit}>
+                {isEditing ? (
+                <>
+                    <EditDocumentIcon className="mr-2" />
+                    Editing...
+                </>
+                ) : (
+                <>
+                    <EditDocumentIcon className="mr-2" />
+                    Update Address
+                </>
+                )}
+            </Button>
+          </CardHeader>
 
-      <Divider />
-      {/* Body */}
-      <CardBody>
-        {/* First Row: Country, State, City */}
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <SelectCountry
-                selectionMode="country"
-                defaultValue={address.country}
-                onChange={(value) => {
-                    handleUpdateField("country", value as string);
-                  }}
-              />
-            ) : (
-              <InputForm type="text" label="Country" value={address.country} />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="State"
-                placeholder="Enter state"
-                value={address.state}
-                onChange={(value) => handleUpdateField("state", value)}
-              />
-            ) : (
-              <InputForm type="text" label="State" value={address.state} />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="City"
-                placeholder="Enter city"
-                value={address.city}
-                onChange={(value) => handleUpdateField("city", value)}
-              />
-            ) : (
-              <InputForm type="text" label="City" value={address.city} />
-            )}
-          </div>
-        </div>
-        {/* Second Row: Postal Code, House Number, Apartment */}
-        <div className="flex flex-wrap gap-4 mt-4">
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="Postal Code"
-                placeholder="Enter postal code"
-                value={address.postalCode}
-                onChange={(value) => handleUpdateField("postalCode", value)}
-              />
-            ) : (
-              <InputForm type="text" label="Postal Code" value={address.postalCode} />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="House Number"
-                placeholder="Enter house number"
-                value={address.houseNumber}
-                onChange={(value) => handleUpdateField("houseNumber", value)}
-              />
-            ) : (
-              <InputForm type="text" label="House Number" value={address.houseNumber} />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="Apartment"
-                placeholder="Enter apartment"
-                value={address.apartment}
-                onChange={(value) => handleUpdateField("apartment", value)}
-              />
-            ) : (
-              <InputForm type="text" label="Apartment" value={address.apartment} />
-            )}
-          </div>
-        </div>
-        {/* Third Row: Street, Region */}
-        <div className="flex flex-wrap gap-4 mt-4">
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="Street"
-                placeholder="Enter street"
-                value={address.street}
-                onChange={(value) => handleUpdateField("street", value)}
-              />
-            ) : (
-              <InputForm type="text" label="Street" value={address.street} />
-            )}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            {isEditing ? (
-              <InputToUpdate
-                type="text"
-                label="Region"
-                placeholder="Enter region"
-                value={address.region}
-                onChange={(value) => handleUpdateField("region", value)}
-              />
-            ) : (
-              <InputForm type="text" label="Region" value={address.region} />
-            )}
-          </div>
-        </div>
-      </CardBody>
-      <Divider />
-      {/* Footer */}
-      {isEditing && (
-        <CardFooter className="flex justify-end gap-4">
-            <Button color="primary" onPress={handleSave} disabled={isUpdating}>
-            {isUpdating ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button color="danger" variant="flat" onPress={handleCancel} disabled={isUpdating}>
-                Cancel
-            </Button>
-        </CardFooter>
-      )}
-    </Card>
+          <Divider />
+          <CardBody>
+            {/* First Row: Country, State, City */}
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <UserSelection
+                    selectionMode="country"
+                    defaultValue={formData.country}
+                    onChange={(value) => {
+                        handleUpdateField("country", value as string);
+                      }}
+                  />
+                ) : (
+                  <InputForm type="text" label="Country" value={address.country} />
+                )}
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="State"
+                    placeholder="Enter state"
+                    value={formData.state || ""}
+                    onChange={(value) => handleUpdateField("state", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="State" value={address.state} />
+                )}
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="City"
+                    placeholder="Enter city"
+                    value={formData.city || ""}
+                    onChange={(value) => handleUpdateField("city", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="City" value={address.city} />
+                )}
+              </div>
+            </div>
+            {/* Second Row: Postal Code, House Number, Apartment */}
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="Postal Code"
+                    placeholder="Enter postal code"
+                    value={formData.postalCode}
+                    onChange={(value) => handleUpdateField("postalCode", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="Postal Code" value={address.postalCode} />
+                )}
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="House Number"
+                    placeholder="Enter house number"
+                    value={formData.houseNumber}
+                    onChange={(value) => handleUpdateField("houseNumber", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="House Number" value={address.houseNumber} />
+                )}
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="Apartment"
+                    placeholder="Enter apartment"
+                    value={formData.apartment}
+                    onChange={(value) => handleUpdateField("apartment", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="Apartment" value={address.apartment} />
+                )}
+              </div>
+            </div>
+            {/* Third Row: Street, Region */}
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="Street"
+                    placeholder="Enter street"
+                    value={formData.street}
+                    onChange={(value) => handleUpdateField("street", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="Street" value={address.street} />
+                )}
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                {isEditing ? (
+                  <InputToUpdate
+                    type="text"
+                    label="Region"
+                    placeholder="Enter region"
+                    value={formData.region}
+                    onChange={(value) => handleUpdateField("region", value)}
+                  />
+                ) : (
+                  <InputForm type="text" label="Region" value={address.region} />
+                )}
+              </div>
+            </div>
+          </CardBody>
+          <Divider />
+          {/* Footer */}
+          {isEditing && (
+            <CardFooter className="flex justify-end gap-4">
+                <Button color="primary" onPress={handleSave} disabled={isUpdating}>
+                {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button color="danger" variant="flat" onPress={handleCancel} disabled={isUpdating}>
+                    Cancel
+                </Button>
+            </CardFooter>
+          )}
+        </Card>
     </div>
   );
 }
