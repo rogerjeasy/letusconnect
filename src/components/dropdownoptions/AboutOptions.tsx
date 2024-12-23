@@ -10,12 +10,14 @@ import {
     FaBriefcase,
     FaHandshake,
     FaQuestionCircle,
+    FaRocket,
   } from "react-icons/fa";
 
 export const aboutOptions = {
     // About Us
     aboutUs: [
     { label: "About Us", icon: <FaInfoCircle className="text-teal-500" />, link: "/about-us" },
+    { label: "Get Started", icon: <FaRocket className="text-blue-500" />, link: "/get-started" },
     { label: "Contact Us", icon: <FaEnvelope className="text-orange-500" />, link: "/contact-us" },
     { label: "Our Team", icon: <FaUserPlus className="text-cyan-500" />, link: "/our-team" },
     { label: "Careers", icon: <FaBriefcase className="text-green-500" />, link: "/careers" },

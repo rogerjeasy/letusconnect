@@ -73,6 +73,7 @@ export type DropdownContentItem = {
     ],
     About: [
       { key: "about-us", label: "About Us", href: "/about-us" },
+      { key: "get-started", label: "Get Started", href: "/get-started" },
       { key: "contact-us", label: "Contact Us", href: "/contact-us" },
       { key: "careers", label: "Careers", href: "/careers" },
       { key: "partnerships", label: "Partnership Opportunities", href: "/partnerships" },
