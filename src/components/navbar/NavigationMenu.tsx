@@ -56,6 +56,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
   }, [user?.uid]);
 
   const handleMessagesClick = () => {
+    // setUnreadCount(0);
     closeMenu();
     router.push("/messages");
   };

@@ -3,12 +3,20 @@ import React, { useState, useEffect } from "react";
 import { api, handleError } from "@/helpers/api";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { useSpring, animated } from "@react-spring/web";
-import { Card, CardHeader, CardBody, CardFooter, Input, Button } from "@nextui-org/react";
-
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Input,
+  Button,
+} from "@nextui-org/react";
 
 const NewsLetter: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
   const [message, setMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
@@ -57,70 +65,77 @@ const NewsLetter: React.FC = () => {
     config: { duration: 1000 },
   });
 
+  const isEmailValid = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   return (
     <section className="py-12 relative text-white">
-    <div className="container mx-auto px-1 flex justify-center items-center">
+      <div className="container mx-auto px-1 flex justify-center items-center">
         <Card className="w-full max-w-screen-xl mx-auto shadow-2xl rounded-xl">
-        {/* Card Header */}
-        <CardHeader className="flex justify-center bg-white text-black rounded-t-xl py-4">
+          {/* Card Header */}
+          <CardHeader className="flex justify-center bg-white text-black rounded-t-xl py-4">
             <h2 className="text-3xl font-bold flex items-center gap-2">
-            📬 Join Our Newsletter
+              📬 Join Our Newsletter
             </h2>
-        </CardHeader>
+          </CardHeader>
 
-        {/* Card Body */}
-        <CardBody className="py-6 text-center space-y-4">
+          {/* Card Body */}
+          <CardBody className="py-6 text-center space-y-4">
             <p className="text-gray-700 text-lg">
-            Stay updated with the latest news, articles, and updates from our team.
+              Stay updated with the latest news, articles, and updates from our
+              team.
             </p>
             <form
-            onSubmit={handleSubscribe}
-            className="flex flex-wrap gap-4 items-center justify-center px-4"
+              onSubmit={handleSubscribe}
+              className="flex flex-wrap gap-4 items-center justify-center px-4"
             >
-            <Input
+              <Input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="flex-1 min-w-[300px] rounded-lg caret-black"
-            />
-            <Button
+              />
+              <Button
                 onClick={handleSubscribe}
                 color="primary"
-                isDisabled={status === "loading"}
+                isDisabled={status === "loading" || !isEmailValid()}
                 className="py-3 px-6 font-semibold"
-            >
+              >
                 {status === "loading" ? "Subscribing..." : "Subscribe"}
-            </Button>
+              </Button>
             </form>
-        </CardBody>
+          </CardBody>
 
-        {/* Card Footer */}
-        <CardFooter className="flex justify-center bg-gray-100 py-4 rounded-b-xl">
+          {/* Card Footer */}
+          <CardFooter className="flex justify-center bg-gray-100 py-4 rounded-b-xl">
             <p className="text-gray-700 text-xl font-semibold">
-            🌟 Total Subscribers:{" "}
-            <animated.span className="text-blue-600 text-2xl font-bold">
+              🌟 Total Subscribers:{" "}
+              <animated.span className="text-blue-600 text-2xl font-bold">
                 {animatedSubscribers.number.to((n) => Math.floor(n))}
-            </animated.span>
+              </animated.span>
             </p>
-        </CardFooter>
+          </CardFooter>
         </Card>
-    </div>
+      </div>
 
-    {/* Modal Popup */}
-    <ModalPopup
+      {/* Modal Popup */}
+      <ModalPopup
         isOpen={isModalOpen}
-        title={status === "success" ? "🎉 Subscription Successful!" : "❌ Subscription Failed"}
+        title={
+          status === "success"
+            ? "🎉 Subscription Successful!"
+            : "❌ Subscription Failed"
+        }
         content={message}
         confirmLabel="Close"
         onConfirm={() => setIsModalOpen(false)}
         confirmColor={status === "success" ? "success" : "danger"}
-    />
+      />
     </section>
-
-
-
   );
 };
 

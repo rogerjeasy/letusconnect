@@ -1,13 +1,9 @@
 "use client";
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-
 import Link from "next/link";
 import ImageZoom from "../forms/ImageZoom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Testimonial {
   name: string;
@@ -79,67 +75,103 @@ const testimonials: Testimonial[] = [
     },
   ];  
 
-export default function TestimonialsCarousel() {
-  return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 leading-tight">
-          Success Stories from Our Community
-        </h2>
-
-        <Swiper
-          modules={[Navigation, Pagination, Autoplay]}
-          spaceBetween={20}
-          slidesPerView={1}
-          navigation
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 5000 }}
-          loop
-          breakpoints={{
-            640: { slidesPerView: 1 },
-            768: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-          }}
-          className="w-full max-w-6xl mx-auto"
-        >
-          {testimonials.map((testimonial, index) => (
-            <SwiperSlide key={index}>
-              <div className="p-4 sm:p-6 bg-white rounded-lg shadow-lg flex flex-col items-center text-center">
-                {/* Responsive Image */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-4">
-                  <ImageZoom
-                    src={testimonial.photo}
-                    alt={testimonial.name}
-                    // width={112}
-                    // height={112}
-                    className="rounded-full w-full h-full object-cover"
-                  />
+  export default function TestimonialsCarousel() {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [slidesPerView, setSlidesPerView] = useState(3);
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentIndex((prevIndex) =>
+          prevIndex >= testimonials.length - slidesPerView ? 0 : prevIndex + 1
+        );
+      }, 5000);
+      return () => clearInterval(interval);
+    }, [slidesPerView]);
+  
+    const handlePrev = () => {
+      setCurrentIndex((prevIndex) =>
+        prevIndex === 0 ? testimonials.length - slidesPerView : prevIndex - 1
+      );
+    };
+  
+    const handleNext = () => {
+      setCurrentIndex((prevIndex) =>
+        prevIndex >= testimonials.length - slidesPerView ? 0 : prevIndex + 1
+      );
+    };
+  
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 leading-tight">
+            Success Stories from Our Community
+          </h2>
+  
+          <div className="relative max-w-6xl mx-auto overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: `translateX(-${(currentIndex * 100) / slidesPerView}%)`,
+                width: `${(100 * testimonials.length) / slidesPerView}%`,
+              }}
+            >
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 px-2"
+                  style={{ width: `${100 / slidesPerView}%` }}
+                >
+                  <div className="h-full p-4 sm:p-6 bg-white rounded-lg shadow-lg flex flex-col items-center text-center justify-between">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 mb-4 flex-shrink-0">
+                      <ImageZoom
+                        src={testimonial.photo}
+                        alt={testimonial.name}
+                        className="rounded-full w-full h-full object-cover"
+                      />
+                    </div>
+  
+                    <div className="flex-grow flex flex-col justify-center">
+                      <p className="text-sm sm:text-base md:text-lg lg:text-xl italic mb-4 line-clamp-4 sm:line-clamp-none">
+                        &ldquo;{testimonial.quote}&rdquo;
+                      </p>
+  
+                      <div className="mt-auto">
+                        <h3 className="text-base sm:text-lg font-bold">
+                          {testimonial.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          {testimonial.title}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Responsive Quote */}
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl italic mb-4 leading-snug sm:leading-relaxed md:leading-loose max-w-prose mx-auto">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-
-                {/* Responsive Name */}
-                <h3 className="text-lg sm:text-xl font-bold">{testimonial.name}</h3>
-
-                {/* Responsive Title */}
-                <p className="text-sm sm:text-base text-gray-500">{testimonial.title}</p>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* CTA Button */}
-        <div className="mt-8">
-          <Link href="/testimonials">
-            <button className="bg-teal-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-teal-600 transition">
-              Read More Stories
+              ))}
+            </div>
+  
+            {/* Navigation */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg z-10"
+            >
+              <ChevronLeft className="w-6 h-6" />
             </button>
-          </Link>
+            <button
+              onClick={handleNext}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-lg z-10"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </div>
+  
+          <div className="mt-8">
+            <Link href="/testimonials">
+              <button className="bg-teal-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-teal-600 transition">
+                Read More Stories
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
+    );
+  }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   FaLightbulb,
   FaComments,
@@ -34,7 +35,7 @@ const milestones: Milestone[] = [
     year: "Mid-November 2024",
     title: "Implementation Kickoff",
     description:
-      "Started the development journey to create a platform fostering networking, mentoring, and collaboration among the university's vibrant community.",
+      "Started the development journey to create a platform fostering networking, mentoring, and collaboration among the university&rsquo;s vibrant community.",
     icon: <FaRocket className="text-teal-500" size={40} />,
   },
   {
@@ -80,7 +81,9 @@ export default function OurStorySection() {
                 <h4 className="text-xl font-semibold text-gray-600 mb-2">
                   {milestone.title}
                 </h4>
-                <p className="text-gray-600 text-md">{milestone.description}</p>
+                <p className="text-gray-600 text-md">
+                  {milestone.description.replace("’", "&rsquo;")}
+                </p>
               </div>
             </div>
           ))}
@@ -94,7 +97,7 @@ export default function OurStorySection() {
             A Platform with a Purpose
           </h2>
           <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-            <strong>LetUsConnect</strong> is more than just an application—it’s a
+            <strong>LetUsConnect</strong> is more than just an application&mdash;it&rsquo;s a
             mission to empower communities through meaningful connections. By
             bridging the gap between students, alumni, and industry experts, we
             aim to inspire innovation, mentorship, and career growth.
@@ -110,42 +113,51 @@ export default function OurStorySection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-6 bg-white rounded-lg shadow-lg">
             <p className="text-gray-600 italic">
-              “This platform is a game-changer! I’ve been able to connect with
-              alumni who’ve given me invaluable career advice.”
+              &ldquo;This platform is a game-changer! I&rsquo;ve been able to connect with
+              alumni who&rsquo;ve given me invaluable career advice.&rdquo;
             </p>
-            <div className="mt-4 text-gray-800 font-bold">— Jane Doe</div>
+            <div className="mt-4 text-gray-800 font-bold">&mdash; Jane Doe</div>
           </div>
           <div className="p-6 bg-white rounded-lg shadow-lg">
             <p className="text-gray-600 italic">
-              “I’ve always struggled to find project partners, but LetUsConnect
-              has made it incredibly easy.”
+              &ldquo;I&rsquo;ve always struggled to find project partners, but LetUsConnect
+              has made it incredibly easy.&rdquo;
             </p>
-            <div className="mt-4 text-gray-800 font-bold">— John Smith</div>
+            <div className="mt-4 text-gray-800 font-bold">&mdash; John Smith</div>
           </div>
           <div className="p-6 bg-white rounded-lg shadow-lg">
             <p className="text-gray-600 italic">
-              “The idea of fostering collaboration and mentorship within our
-              university community is truly inspiring.”
+              &ldquo;The idea of fostering collaboration and mentorship within our
+              university community is truly inspiring.&rdquo;
             </p>
-            <div className="mt-4 text-gray-800 font-bold">— Emily Johnson</div>
+            <div className="mt-4 text-gray-800 font-bold">&mdash; Emily Johnson</div>
           </div>
         </div>
       </div>
 
       {/* Call to Action Section */}
-      <div className="bg-blue-600 py-16 mt-20 text-center text-white">
+      <div className="bg-slate-100 py-16 mt-20 text-center text-black">
         <div className="container mx-auto px-6 lg:px-20">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Join the Movement
           </h2>
           <p className="text-lg md:text-xl mb-8 leading-relaxed">
-            Be part of a community that’s redefining what it means to connect,
+            Be part of a community that&rsquo;s redefining what it means to connect,
             collaborate, and grow. Together, we can achieve extraordinary
             things.
           </p>
-          <button className="px-6 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition">
-            Get Started
-          </button>
+          <Link href="/get-started">
+            <button
+              className="rounded-lg px-6 py-3 text-lg font-bold bg-blue-600 text-white hover:bg-teal-500 hover:text-white w-full md:w-auto group transition-transform duration-300 hover:scale-105"
+            >
+              <span className="flex items-center gap-2">
+                Get Started
+                <span className="transition-transform duration-300 transform group-hover:translate-x-2">
+                  ➔
+                </span>
+              </span>
+            </button>
+          </Link>
         </div>
       </div>
 

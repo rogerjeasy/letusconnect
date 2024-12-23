@@ -12,7 +12,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-600 text-white w-full z-50 shadow fixed top-0 left-0 right-0">
+    <nav className="bg-gray-800 text-white w-full z-50 shadow fixed top-0 left-0 right-0">
       <div className="w-full px-2 md:px-4 lg:px-6 py-2 md:py-3 lg:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
         
         {/* Logo Section */}

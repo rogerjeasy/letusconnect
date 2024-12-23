@@ -65,7 +65,7 @@ export default function HeroSection() {
           </Link>
 
           {/* Explore Community Button */}
-          <Link href="/community">
+          <Link href="/explore-the-community">
             <button
               className="rounded-lg px-6 py-3 text-lg font-bold text-white border border-white hover:bg-white/10 w-full md:w-auto transition-transform duration-300 hover:scale-105"
             >
