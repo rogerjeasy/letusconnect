@@ -1,14 +1,24 @@
-// components/ProjectHeaderSection.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import { useUserStore } from "@/store/userStore";
 
 const ProjectHeaderSection = () => {
+  const { user, isAuthenticated, restoreUser } = useUserStore();
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
+
   return (
-    <div className="relative bg-cover bg-center h-[60vh] md:h-[50vh] flex items-center justify-center text-center text-white"
-      style={{ backgroundImage: "url('https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg')" }}>
-      
+    <div
+      className="relative bg-cover bg-center h-[60vh] md:h-[50vh] flex items-center justify-center text-center text-white"
+      style={{
+        backgroundImage:
+          "url('https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg')",
+      }}
+    >
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
@@ -19,14 +29,17 @@ const ProjectHeaderSection = () => {
         <p className="text-lg md:text-2xl mb-6 max-w-3xl mx-auto">
           Explore a diverse range of projects in data science, AI, and beyond. Find the perfect project to match your interests and skills.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href="/register"
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg text-lg transition duration-300"
-          >
-            Sign Up to Join Projects
-          </Link>
+          {/* Show Sign Up button only if the user is not authenticated */}
+          {!isAuthenticated && (
+            <Link
+              href="/register"
+              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg text-lg transition duration-300"
+            >
+              Sign Up to Join Projects
+            </Link>
+          )}
           <a
             href="/projects/why-projects"
             className="bg-white text-gray-800 hover:bg-gray-200 font-semibold py-3 px-6 rounded-lg text-lg transition duration-300"
