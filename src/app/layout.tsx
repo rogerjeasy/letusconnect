@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import TopNav from "@/components/navbar/TopNav";
 import AuthWrapper from "@/components/AuthWrapper";
+import Footer from "@/components/homepage/Footer";
 
 export const metadata: Metadata = {
   title: "Let Us Connect",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthWrapper>
             <TopNav />
             <main className="pt-16">{children}</main>
+            <Footer />
           </AuthWrapper>
         </Providers>
       </body>

@@ -8,7 +8,7 @@ export default function HeroSection() {
     <Card
       isFooterBlurred
       radius="none"
-      className="relative w-screen max-w-full h-[500px] md:h-[600px] border-none overflow-hidden text-white"
+      className="relative w-screen max-w-full h-[500px] md:h-[650px] border-none overflow-hidden text-white"
     >
       {/* Background Image Slider */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
