@@ -130,7 +130,7 @@ export default function ExploreCommunityPage() {
                     {group.icon}
                 </div>
                 <h3 className="text-xl font-bold">{group.name}</h3>
-                <p className="text-gray-600 mt-2">{group.description.replace("’", "&rsquo;")}</p>
+                <p className="text-gray-600 mt-2">{group.description}</p>
                 <div className="flex items-center justify-center mt-4 gap-2">
                     <FaUsers className="text-gray-500" />
                     <span className="text-gray-600 font-semibold">{group.members} members</span>

@@ -12,7 +12,7 @@ export default function GetStartedPage() {
         </h1>
         <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
           Your gateway to meaningful connections, career growth, and
-          collaboration. Let's start your journey!
+          collaboration. Let&rsquo;s start your journey!
         </p>
         <div className="mt-8">
           <button className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
@@ -98,10 +98,10 @@ export default function GetStartedPage() {
             Hear from Our Community
           </h2>
           <p className="text-gray-600 italic">
-            “LetUsConnect has been instrumental in helping me find the right
-            mentors and collaborate on exciting projects.”
+            &ldquo;LetUsConnect has been instrumental in helping me find the right
+            mentors and collaborate on exciting projects.&rdquo;
           </p>
-          <p className="text-gray-800 font-bold mt-4">— Jane Doe</p>
+          <p className="text-gray-800 font-bold mt-4">&mdash; Jane Doe</p>
         </div>
       </div>
     </section>
