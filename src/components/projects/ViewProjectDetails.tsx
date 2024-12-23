@@ -17,7 +17,6 @@ import GroupChatDrawer from "@/components/messages/GroupChatDrawer";
 import ProjectHeaderDetails from "./ProjectHeaderDetails";
 
 
-
 interface ViewProjectDetailsProps {
   project: Project;
 }
@@ -25,6 +24,7 @@ interface ViewProjectDetailsProps {
 const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
 
   const [formData, setFormData] = useState({
@@ -58,6 +58,20 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     confirmLabel: "Close",
     confirmColor: "primary" as "primary" | "success" | "warning" | "danger",
   });
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (formData.id) {
+        console.log(`Fetching unread messages for project ID: ${formData.id}`);
+        const unreadMessagesCount = await countUnreadMessages(formData.id);
+        setUnreadMessages(unreadMessagesCount);
+        console.log(`Unread messages: ${unreadMessagesCount}`);
+      }
+    };
+  
+    fetchUnreadMessages();
+  }, [formData.id]);
+  
 
   // Check if the current user is an owner
   const isOwner = Boolean(
@@ -179,6 +193,29 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         return { success: false, message: errorMessage };
       }
     }; 
+
+  const countUnreadMessages = async (projectId: string): Promise<number> => {
+    if (!projectId) {
+      console.error("Group Chat ID is required");
+      return 0;
+    }
+    
+    try {
+      const response = await api.get(`/api/group-chats/unread-messages/count?projectId=${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    
+      // Extract the unreadCount from the response
+      const unreadCount = response.data.unreadCount;
+      return unreadCount;
+    } catch (err) {
+      console.error("Failed to fetch unread messages count", err);
+      return 0;
+    }
+  };
+             
     
   
   return (
@@ -192,6 +229,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         <ProjectHeaderDetails
           project={formData as Project}
           isOwner={isOwner}
+          unreadMessages={unreadMessages}
           setShowParticipants={setShowParticipants}
           setShowJoinRequests={setShowJoinRequests}
           setIsGroupChatModalOpen={setIsGroupChatModalOpen}

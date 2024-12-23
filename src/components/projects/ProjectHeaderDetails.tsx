@@ -13,6 +13,7 @@ import ModalGroupChat from "@/components/messages/ModalGroupChat";
 interface ProjectHeaderDetailsProps {
   project: Project;
   isOwner: boolean;
+  unreadMessages: number;
   setShowParticipants: (value: boolean) => void;
   setShowJoinRequests: (value: boolean) => void;
   setIsGroupChatModalOpen: (value: boolean) => void;
@@ -22,6 +23,7 @@ interface ProjectHeaderDetailsProps {
 const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
   project,
   isOwner,
+  unreadMessages,
   setShowParticipants,
   setShowJoinRequests,
   setIsGroupChatModalOpen,
@@ -44,18 +46,25 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
       <div className="flex items-center gap-2">
-      <Button
-        color="primary"
-        variant="ghost"
-        startContent={<FaTasks />}
-        onClick={handleOpenGroupChat}
-        isDisabled={loadingChat} 
-        >
-        {loadingChat ? "Loading..." : "Discussion"}
-        </Button>
+        <div className="relative">
+            <Button
+            color="primary"
+            variant="ghost"
+            startContent={<FaTasks />}
+            onClick={handleOpenGroupChat}
+            isDisabled={loadingChat}
+            >
+            {loadingChat ? "Loading..." : "Discussion"}
+            </Button>
+            {unreadMessages > 0 && (
+            <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {unreadMessages}
+            </div>
+            )}
+        </div>
+        <Divider orientation="vertical" className="hidden md:block h-6" />
+    </div>
 
-    <Divider orientation="vertical" className="hidden md:block h-6" />
-      </div>
 
       {isOwner && (
         <>

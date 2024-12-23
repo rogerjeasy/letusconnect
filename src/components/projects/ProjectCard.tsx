@@ -79,12 +79,20 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
       )}
 
       <CardHeader className="flex items-center gap-4">
-        <Avatar src={project.participants[0]?.profilePicture} alt="Avatar" />
+        <Avatar
+          src={
+            Array.isArray(project.participants) && project.participants.length > 0
+              ? project.participants[0]?.profilePicture
+              : undefined
+          }
+          alt="Avatar"
+        />
         <div>
           <h3 className="font-bold">{project.title}</h3>
           <p className="text-sm text-gray-500">Owner: {project.ownerUsername}</p>
         </div>
       </CardHeader>
+
 
       <CardBody className="flex-grow">
         <p className="text-gray-700 mb-2">{truncateDescription(project.description)}</p>
@@ -98,9 +106,12 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
           <strong>Industry:</strong> {project.industry}
         </p>
         <p className="text-sm text-gray-600">
-          <strong>Number of Participant{project.participants.length > 1 ? "s" : ""}:</strong>{" "}
+        <strong>
+          Number of Participant{Array.isArray(project.participants) && project.participants.length > 1 ? "s" : ""}:
+        </strong>{" "}
           {Array.isArray(project.participants) ? project.participants.length : 0}
         </p>
+
         <p className={`text-sm font-semibold ${getStatusColor(project.status)}`}>
           <strong>Status:</strong> {project.status}
         </p>
