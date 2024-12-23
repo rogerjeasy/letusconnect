@@ -51,7 +51,7 @@ export default function HeroSection() {
         {/* Buttons */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
           {/* Sign Up Button with Animated Arrow */}
-          <Link href="/register">
+          <Link href="/get-started">
             <button
               className="rounded-lg px-6 py-3 text-lg font-bold bg-white text-teal-600 hover:bg-teal-100 w-full md:w-auto group transition-transform duration-300 hover:scale-105"
             >
