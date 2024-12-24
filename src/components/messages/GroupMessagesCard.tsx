@@ -66,7 +66,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       }
       if (participants.length > 1) {
         return (
-          <AvatarGroup size="lg">
+          <AvatarGroup size="md">
             {participants.map((participant) => (
               <Avatar
                 key={participant.userId}

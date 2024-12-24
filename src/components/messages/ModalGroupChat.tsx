@@ -5,21 +5,18 @@ import {
   Modal,
   ModalContent,
   Button,
-  Divider,
   Card,
   CardHeader,
   CardBody,
-  Avatar,
-  Input,
   Tooltip,
 } from "@nextui-org/react";
-import { GroupChat, BaseMessage } from "@/store/groupChat";
+import { BaseMessage } from "@/store/groupChat";
 import { Participants } from "@/store/project";
 import { FaCog, FaTimes } from "react-icons/fa";
 import { fetchGroupChatDetails } from "@/utils/groupChatUtils";
 import GroupMessagesCard from "./GroupMessagesCard";
 import ParticipantsCard from "./ParticipantsCard";
-
+import ChatManagement from "./ChatManagement";
 
 interface ModalGroupChatProps {
   isOpen: boolean;
@@ -40,6 +37,7 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
   const [groupName, setGroupName] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [groupChatId, setGroupChatId] = useState("");
+  const [isChatManagementOpen, setIsChatManagementOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -56,6 +54,7 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
   }, [isOpen, groupId, token]);
 
   return (
+    <>
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
@@ -65,7 +64,13 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
     >
       <ModalContent className="w-[80vw] h-[75vh] max-w-[98vw]">
         <Card className="w-full h-full">
-            <CardHeader className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-cyan-50 to-blue-50 p-6 rounded-t-lg">
+            <CardHeader className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-cyan-50 to-blue-50 p-6 rounded-t-lg relative">
+                <div className="absolute top-4 left-4">
+                <div className="flex items-center bg-green-500 hover:bg-green-600 rounded-full transition-colors">
+                    <ChatManagement />
+                </div>
+                </div>
+
                 <h2 className="text-lg font-semibold text-center w-full text-blue-900">
                     {groupName}
                 </h2>
@@ -119,12 +124,25 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
                 groupChatId={groupChatId}
                 token={token}
                 initialMessages={messages}
+                participants={participants}
               />
             </div>
           </CardBody>
         </Card>
       </ModalContent>
     </Modal>
+    {/* Chat Management Modal */}
+    <Modal
+        isOpen={isChatManagementOpen}
+        onClose={() => setIsChatManagementOpen(false)}
+        backdrop="opaque"
+        className="max-w-[90vw]"
+      >
+        <ModalContent>
+          <ChatManagement />
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
