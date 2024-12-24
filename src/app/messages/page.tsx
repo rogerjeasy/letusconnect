@@ -11,9 +11,12 @@ import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
 
 
-// interface ChatPageProps {
-//   updateTotalUnreadCount: (newCount: number) => void;
-// }
+interface ChatEntity {
+  id: string;
+  name: string;
+  avatar: string;
+  type: "user" | "group";
+}
 
 const ChatPage = () => {
   const currentUser = useUserStore((state) => state.user);
@@ -22,35 +25,52 @@ const ChatPage = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [totalUnreadCount, setTotalUnreadCount] = useState<number>(0);
+  const [entities, setEntities] = useState<ChatEntity[]>([]);
+  const [selectedEntity, setSelectedEntity] = useState<ChatEntity | null>(null);
 
   useEffect(() => {
-    fetchUsers();
+    fetchChatEntities();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchChatEntities = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/api/users");
-      let fetchedUsers: User[] = response.data.users;
-
-      if (currentUser) {
-        fetchedUsers = fetchedUsers.filter((user) => user.uid !== currentUser.uid);
-      }
-
-      const receiverNames = await fetchUserMessages();
-      fetchedUsers = fetchedUsers.filter((user) => receiverNames.includes(user.username));
-      console.log("fetchedUsers", fetchedUsers);
-
-      setUsers(fetchedUsers);
-      fetchedUsers.forEach((user) => fetchUnreadCount(undefined, setUnreadCounts, user.uid));
+      const [usersResponse, groupEntities, receiverNames] = await Promise.all([
+        api.get("/api/users"),
+        fetchGroupChatMessages(),
+        fetchUserMessages(),
+      ]);
+  
+      const fetchedUsers: User[] = usersResponse.data.users;
+  
+      const userEntities: ChatEntity[] = fetchedUsers
+        .filter((user) => user.uid !== currentUser?.uid)
+        .filter((user) => receiverNames.includes(user.username))
+        .map((user) => ({
+          id: user.uid,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
+          avatar: user.profilePicture,
+          type: "user",
+        }));
+  
+      const combinedEntities = [...userEntities, ...groupEntities];
+  
+      console.log("Combined entities:", combinedEntities);
+  
+      setEntities(combinedEntities);
+  
+      combinedEntities.forEach((entity) =>
+        fetchUnreadCount(undefined, setUnreadCounts, entity.id)
+      );
+  
       fetchUnreadCount(setTotalUnreadCount);
     } catch (error) {
       const errorMessage = handleError(error);
-      console.error("Error fetching users:", errorMessage);
+      console.error("Error fetching chat entities:", errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const fetchUserMessages = async (): Promise<string[]> => {
     const token = localStorage.getItem("token");
@@ -75,6 +95,31 @@ const ChatPage = () => {
       return [];
     }
   };
+
+  const fetchGroupChatMessages = async (): Promise<ChatEntity[]> => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await api.get("/api/group-chats/my/group-chats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const groupMessages = response.data.data;
+      const groupEntities: ChatEntity[] = groupMessages.map(
+        (group: { id: string; name: string }) => ({
+          id: group.id, 
+          name: group.name, 
+          avatar: "", 
+          type: "group", 
+        })
+      );
+  
+      return groupEntities;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Error fetching group messages:", errorMessage);
+      return [];
+    }
+  };    
 
   useEffect(() => {
     if (!currentUser) return;
@@ -104,16 +149,16 @@ const ChatPage = () => {
   }, [currentUser, totalUnreadCount]);
 
 
-  const handleUserClick = async (user: User) => {
-    setSelectedUser(user);
+  const handleEntityClick = async (entity: ChatEntity) => {
+    setSelectedEntity(entity);
 
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,
-      [user.uid]: 0,
+      [entity.id]: 0,
     }));
 
-    await handleMessagesClick(user.uid, setTotalUnreadCount);
-  }; 
+    await handleMessagesClick(entity.id, setTotalUnreadCount);
+  };
 
   if (!currentUser) {
     return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
@@ -161,29 +206,29 @@ const ChatPage = () => {
                 <div className="flex justify-center items-center h-full">
                   <Spinner size="lg" />
                 </div>
-              ) : users.length === 0 ? (
+              ) : entities.length === 0 ? (
                 <p className="text-black font-semibold">No users available.</p>
               ) : (
                 <ul className="space-y-4">
-                  {users.map((user) => (
+                  {entities.map((entity) => (
                     <li
-                      key={user.uid}
+                      key={entity.id}
                       className={`flex items-center gap-4 p-2 cursor-pointer rounded-lg ${
-                        selectedUser?.uid === user.uid ? "bg-blue-500 text-white" : "hover:bg-blue-100"
+                        selectedEntity?.id === entity.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
                       }`}
-                      onClick={() => handleUserClick(user)}
+                      onClick={() => handleEntityClick(entity)}
                     >
-                      <Avatar src={user.profilePicture} alt={user.username} />
+                      <Avatar src={entity.avatar} alt={entity.name} />
                       <div>
-                        <p className="font-semibold text-black">{`${user.firstName} ${user.lastName}`}</p>
-                        <p className="text-sm text-black">{user.username}</p>
+                        <p className="font-semibold text-black">{entity.name}</p>
+                        <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
                       </div>
-                      {unreadCounts[user.uid] > 0 && (
+                      {unreadCounts[entity.id] > 0 && (
                         // <Badge color="danger" className="ml-auto" size="sm">
                         //   {unreadCounts[user.uid]}
                         // </Badge>
                         <Badge
-                        content={unreadCounts[user.uid]}
+                        content={unreadCounts[entity.id]}
                         color="danger"
                         size="md"
                         shape="circle"
@@ -201,21 +246,16 @@ const ChatPage = () => {
 
           {/* Chat Interface on the Right Side */}
           <div className="flex-1 p-6">
-            {selectedUser ? (
+            {selectedEntity ? (
               <ChatInterface
-              currentUserId={currentUser?.uid || ""}
-              receiverId={selectedUser.uid}
-              receiverName={
-                selectedUser.firstName || selectedUser.lastName
-                  ? `${selectedUser.firstName || ""} ${selectedUser.lastName || ""}`.trim()
-                  : selectedUser.username
-              }
-              receiverAvatar={selectedUser.profilePicture}
-            />
-            
+                currentUserId={currentUser?.uid || ""}
+                receiverId={selectedEntity.id}
+                receiverName={selectedEntity.name}
+                receiverAvatar={selectedEntity.avatar}
+              />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-black font-semibold">Select a user to start chatting</p>
+                <p className="text-black font-semibold">Select a chat to start messaging</p>
               </div>
             )}
           </div>

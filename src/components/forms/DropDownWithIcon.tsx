@@ -32,7 +32,7 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
   };
 
   return (
-    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div className="relative">
       <Dropdown isOpen={isOpen} onOpenChange={setIsOpen}>
         <DropdownTrigger>
           <Button
