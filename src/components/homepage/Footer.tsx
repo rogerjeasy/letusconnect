@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import {
-  FaFacebookF,
   FaTwitter,
-  FaLinkedinIn,
-  FaGithub,
   FaLinkedin,
   FaInstagram,
   FaFacebook,
