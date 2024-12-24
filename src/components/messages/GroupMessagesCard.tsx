@@ -32,7 +32,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     if (groupChatId) {
       // Fetch messages for the provided groupChatId if needed
       setLoadingMessages(true);
-      setMessages(initialMessages); // Assuming the parent updates initialMessages when groupChatId changes
+      setMessages(initialMessages);
       setLoadingMessages(false);
     }
   }, [groupChatId, initialMessages]);

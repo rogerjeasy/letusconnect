@@ -15,7 +15,7 @@ import {
 import { FaExclamationCircle, FaSearch } from "react-icons/fa";
 import { api, handleError } from "@/helpers/api";
 import { Participants } from "@/store/project";
-import { User } from "@/store/userStore";
+import { User, useUserStore } from "@/store/userStore";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -27,6 +27,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
   const [selectedUsers, setSelectedUsers] = useState<Participants[]>([]);
   const [participants, setParticipants] = useState<Participants[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const currentUser = useUserStore((state) => state.user);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -34,7 +35,9 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
       try {
         const response = await api.get("/api/users");
         
-        const fetchedParticipants = response.data.users.map((user: User) => ({
+        const fetchedParticipants = response.data.users
+        .filter((user: User) => user.uid !== currentUser?.uid)
+        .map((user: User) => ({
           userId: user.uid,
           username: user.username,
           email: user.email,
@@ -53,7 +56,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
     if (isOpen) {
       fetchUsers();
     }
-  }, [isOpen]);
+  }, [isOpen, currentUser]);
 
   const handleUserSelection = (user: Participants) => {
     setSelectedUsers((prev) =>

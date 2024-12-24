@@ -31,20 +31,48 @@ const ChatPage = () => {
     setLoading(true);
     try {
       const response = await api.get("/api/users");
-      let fetchedUsers = response.data.users;
+      let fetchedUsers: User[] = response.data.users;
 
       if (currentUser) {
-        fetchedUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
+        fetchedUsers = fetchedUsers.filter((user) => user.uid !== currentUser.uid);
       }
 
+      const receiverNames = await fetchUserMessages();
+      fetchedUsers = fetchedUsers.filter((user) => receiverNames.includes(user.username));
+      console.log("fetchedUsers", fetchedUsers);
+
       setUsers(fetchedUsers);
-      fetchedUsers.forEach((user: User) => fetchUnreadCount(undefined, setUnreadCounts, user.uid));
+      fetchedUsers.forEach((user) => fetchUnreadCount(undefined, setUnreadCounts, user.uid));
       fetchUnreadCount(setTotalUnreadCount);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching users:", errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserMessages = async (): Promise<string[]> => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await api.get("/api/messages/direct", 
+        { headers: { Authorization: `Bearer ${token}` } }
+      
+      );
+      const messages = response.data.messages;
+
+      const receiverNames: Set<string> = new Set();
+      messages.forEach((message: { directMessages: { receiverName: string }[] }) => {
+        message.directMessages.forEach((dm) => {
+          receiverNames.add(dm.receiverName);
+        });
+      });
+
+      return Array.from(receiverNames);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Error fetching messages:", errorMessage);
+      return [];
     }
   };
 
