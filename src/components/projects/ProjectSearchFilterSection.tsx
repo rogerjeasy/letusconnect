@@ -24,6 +24,7 @@ const ProjectSearchFilterSection = () => {
   };
 
   return (
+    <div className="mx-auto pt-16">
     <Card className="p-6 shadow-lg">
       <CardBody>
         {/* Title */}
@@ -133,6 +134,7 @@ const ProjectSearchFilterSection = () => {
         </div>
       </CardBody>
     </Card>
+    </div>
   );
 };
 
