@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
-import { Card, CardHeader, CardBody, Divider, Input, Button, CardFooter, Tooltip } from "@nextui-org/react";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, CardHeader, CardBody, Divider, Input, Button, 
+  Tooltip, DropdownTrigger, DropdownMenu, DropdownItem, Dropdown } from "@nextui-org/react";
 import { Avatar, AvatarGroup } from "@nextui-org/react";
 import { BaseMessage } from "@/store/groupChat";
 import { sendMessageToGroup } from "@/utils/groupChatUtils";
@@ -9,8 +10,11 @@ import { Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
 import { sendDirectMessage } from "@/utils/directMessageUtils";
 import { DirectMessage } from "@/store/message";
-import { FaCog } from "react-icons/fa";
 import ChatSettings from "./ChatSettings";
+import { FaCamera, FaCopy, FaEllipsisH, FaFile, FaImage, FaMapMarkerAlt, 
+  FaPlus, FaReply, FaShare, FaSmile, FaStar, FaThumbtack, FaTrash } from "react-icons/fa";
+
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -33,15 +37,30 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const [sendingMessage, setSendingMessage] = useState(false);
   const user = useUserStore((state) => state.user);
   const currentUserId = user?.uid || "";
-  const [isChatSettingsOpen, setIsChatSettingsOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const isAdmin = participants.some(
+    (participant) =>
+      participant.userId === currentUserId && participant.role === "owner"
+  );
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (groupChatId) {
       setLoadingMessages(true);
       setMessages(initialMessages);
       setLoadingMessages(false);
+      scrollToBottom();
     }
   }, [groupChatId, initialMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
     
 
   const handleSendMessage = async () => {
@@ -96,7 +115,10 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         return (
           <AvatarGroup size="md">
             {participants.map((participant) => (
-              <Tooltip key={participant.userId} content={participant.username}>
+              <Tooltip
+                key={participant.userId}
+                content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
+              >
                 <Avatar
                   key={participant.userId}
                   src={participant.profilePicture || ""}
@@ -129,6 +151,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     }, {});
   };  
 
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
   const groupedMessages = groupMessagesByDate();
   const currentDate = new Date().toLocaleDateString();
 
@@ -159,15 +186,74 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
               </div>
               {messages.map((msg, index) => (
                 <div
-                key={`${msg.id}-${index}`}
+                  key={`${msg.id}-${index}`}
                   className={`mb-3 flex ${
                     msg.senderId === currentUserId ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="flex flex-col max-w-[70%]">
+                  <div className="flex flex-col max-w-[70%] relative">
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <button
+                          className="absolute top-0 right-0 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100"
+                          aria-label="Message Options"
+                        >
+                          <FaEllipsisH className="text-red-500 text-sm" />
+                        </button>
+                      </DropdownTrigger>
+                      <DropdownMenu aria-label="Message Options">
+                      {isAdmin ? (
+                        <DropdownItem
+                          key="pinMessage"
+                          startContent={<FaThumbtack className="text-gray-500" />}
+                          onClick={() => console.log(`Pin message ${msg.id}`)}
+                        >
+                          Pin Message
+                        </DropdownItem>
+                      ) : null}
+                        <DropdownItem
+                          key="reply"
+                          startContent={<FaReply className="text-gray-500" />}
+                          onClick={() => console.log("Reply clicked")}
+                        >
+                          Reply
+                        </DropdownItem>
+                        <DropdownItem
+                          key="forwardMessage"
+                          startContent={<FaShare className="text-blue-500" />}
+                          onClick={() => console.log("Forward message clicked")}
+                        >
+                          Forward Message
+                        </DropdownItem>
+                        <DropdownItem
+                          key="copyMessage"
+                          startContent={<FaCopy className="text-green-500" />}
+                          onClick={() => console.log("Copy message clicked")}
+                        >
+                          Copy Message
+                        </DropdownItem>
+                        <DropdownItem
+                          key="starMessage"
+                          startContent={<FaStar className="text-yellow-500" />}
+                          onClick={() => console.log("Star message clicked")}
+                        >
+                          Star Message
+                        </DropdownItem>
+                        <DropdownItem
+                          key="deleteMessage"
+                          startContent={<FaTrash className="text-red-500" />}
+                          onClick={() => console.log("Delete message clicked")}
+                        >
+                          Delete Message
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+
                     <div
                       className={`p-2 rounded-t-lg ${
-                        msg.senderId === currentUserId ? "bg-blue-500 text-white" : "bg-gray-200"
+                        msg.senderId === currentUserId
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-200"
                       }`}
                     >
                       {msg.senderId !== currentUserId && "senderName" in msg && (
@@ -202,6 +288,61 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       </CardBody>
       <Divider />
       <div className="p-4 flex items-center gap-2">
+        <Dropdown>
+          <DropdownTrigger>
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
+              aria-label="Add options"
+            >
+              <FaPlus className="text-blue-500 text-lg" />
+            </button>
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Add Options">
+            <DropdownItem
+              key="document"
+              startContent={<FaFile className="text-gray-500" />}
+              onClick={() => console.log("Document clicked")}
+            >
+              Document
+            </DropdownItem>
+            <DropdownItem
+              key="photos"
+              startContent={<FaImage className="text-blue-500" />}
+              onClick={() => console.log("Photos clicked")}
+            >
+              Photos
+            </DropdownItem>
+            <DropdownItem
+              key="camera"
+              startContent={<FaCamera className="text-green-500" />}
+              onClick={() => console.log("Camera clicked")}
+            >
+              Camera
+            </DropdownItem>
+            <DropdownItem
+              key="location"
+              startContent={<FaMapMarkerAlt className="text-red-500" />}
+              onClick={() => console.log("Location clicked")}
+            >
+              Location
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+
+        {/* Emoji Picker */}
+        <button
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          aria-label="Add Emoji"
+          onClick={() => setShowEmojiPicker((prev) => !prev)}
+        >
+          <FaSmile className="text-yellow-500 text-lg" />
+        </button>
+        {showEmojiPicker && (
+          <div className="absolute bottom-14 left-0 z-10 bg-white shadow-lg rounded-md">
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </div>
+        )}
+
         <Input
           placeholder="Type a message..."
           fullWidth

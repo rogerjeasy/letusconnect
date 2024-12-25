@@ -239,7 +239,7 @@ const ChatPage = () => {
         </div>
       </div>
 
-      <Card className="w-full max-w-5xl h-[600px] p-4 shadow-lg rounded-lg flex flex-col relative z-10 bg-white">
+      <Card className="w-full max-w-5xl h-[650px] p-4 shadow-lg rounded-lg flex flex-col relative z-10 bg-white">
         <CardHeader className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-cyan-50 to-blue-50 p-6 rounded-t-lg relative">
           <div className="absolute top-4 left-4">
             <div className="flex items-center bg-green-500 hover:bg-green-600 rounded-full transition-colors">
