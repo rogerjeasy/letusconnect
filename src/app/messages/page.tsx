@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
 import ChatInterface from "@/components/messages/ChatInterface";
 import { User, useUserStore } from "@/store/userStore";
-import { Avatar, Spinner, Card, Badge, Button } from "@nextui-org/react";
+import { Avatar, Spinner, Card, Badge, Button, CardHeader, Tooltip, CardBody } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
 import handleMessagesClick from "@/components/messages/handleMessagesClick";
@@ -14,6 +14,8 @@ import { DirectMessage, Messages } from "@/store/message";
 import { Participants } from "@/store/project";
 import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
 import UsersToChatWith from "@/components/messages/UsersToChatWith";
+import { FaCog, FaTimes } from "react-icons/fa";
+import ChatManagement from "@/components/messages/ChatManagement";
 
 
 interface ChatEntity {
@@ -192,6 +194,8 @@ const ChatPage = () => {
   const handleEntityClick = async (entity: ChatEntity) => {
     setSelectedEntity(entity);
 
+    console.log("Selected entity:", entity.directMessages);
+
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,
       [entity.id]: 0,
@@ -237,89 +241,123 @@ const ChatPage = () => {
       </div>
 
       <Card className="w-full max-w-5xl h-[600px] p-4 shadow-lg rounded-lg flex flex-col relative z-10 bg-white">
-        <div className="flex h-full">
-          {/* User List on the Left Side */}
-          <Card className="w-1/3 p-4 shadow-md flex-shrink-0 overflow-hidden">
-            <h2 className="text-lg font-bold mb-4 text-black">Users</h2>
-            <div className="h-full overflow-y-auto">
-              {loading ? (
-                <div className="flex justify-center items-center h-full">
-                  <Spinner size="lg" />
-                </div>
-              ) : entities.length === 0 ? (
-                <>
-                  <p className="text-black font-semibold">No users available.</p>
-                  <Button
-                    color="primary"
-                    onClick={() => setShowModal(true)}
-                    className="mt-4"
-                  >
-                    Start Conversation
-                  </Button>
-                  {showModal && (
-                    <UsersToChatWith
-                      users={users}
-                      onSelectUser={(user) => {
-                        const newParticipant: Participants = {
-                          userId: user.uid,
-                          username: user.username,
-                          email: user.email,
-                          profilePicture: user.profilePicture,
-                          role: "User",
-                        };
-                        const newChatEntity: ChatEntity = {
-                          id: user.uid,
-                          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
-                          avatar: user.profilePicture,
-                          type: "user",
-                          directMessages: [],
-                          groupMessages: [],
-                          participants: [newParticipant],
-                        };
-                        setEntities((prevEntities) => [...prevEntities, newChatEntity]);
-                      }}
-                      onClose={() => setShowModal(false)}
-                    />
-                  )}
-                </>
-              ) : (
-                <ul className="space-y-4">
-                  {entities.map((entity) => (
-                    <li
-                      key={entity.id}
-                      className={`flex items-center gap-4 p-2 cursor-pointer rounded-lg ${
-                        selectedEntity?.id === entity.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
-                      }`}
-                      onClick={() => handleEntityClick(entity)}
-                    >
-                      <Avatar src={entity.avatar} alt={entity.name} />
-                      <div>
-                        <p className="font-semibold text-black">{entity.name}</p>
-                        <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
-                      </div>
-                      {unreadCounts[entity.id] > 0 && (
-                        // <Badge color="danger" className="ml-auto" size="sm">
-                        //   {unreadCounts[user.uid]}
-                        // </Badge>
-                        <Badge
-                        content={unreadCounts[entity.id]}
-                        color="danger"
-                        size="md"
-                        shape="circle"
-                        className="absolute -top-2 -right-2"
-                      >
-                        {""}
-                      </Badge>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+        <CardHeader className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-cyan-50 to-blue-50 p-6 rounded-t-lg relative">
+          <div className="absolute top-4 left-4">
+            <div className="flex items-center bg-green-500 hover:bg-green-600 rounded-full transition-colors">
+              <ChatManagement />
             </div>
-          </Card>
+          </div>
+
+          <h2 className="text-lg font-semibold text-center w-full text-blue-900">
+            {selectedEntity?.name && selectedEntity?.type === "group" ? selectedEntity.name : "Messages"}
+          </h2>
+
+          <div className="absolute top-4 right-4 flex gap-2">
+            <Tooltip 
+              content="Group Settings" 
+              placement="bottom" 
+              delay={200} 
+              closeDelay={0}
+              className="text-sm"
+            >
+              <Button
+                isIconOnly
+                variant="light"
+                color="primary"
+                className="bg-green/50 hover:bg-white/80 transition-colors"
+              >
+                <FaCog className="text-blue-600" />
+              </Button>
+            </Tooltip>
+          </div>
+        </CardHeader>
+        
+        <CardBody className="flex flex-row gap-4 h-full">
+
+          {/* User List on the Left Side */}
+          <div className="w-1/4 h-full">
+            <Card className="h-full border shadow-md">
+              {/* <h2 className="text-lg font-bold mb-4 text-black">Users</h2> */}
+              <div className="h-full overflow-y-auto">
+                {loading ? (
+                  <div className="flex justify-center items-center h-full">
+                    <Spinner size="lg" />
+                  </div>
+                ) : entities.length === 0 ? (
+                  <>
+                    <p className="text-black font-semibold">No users available.</p>
+                    <Button
+                      color="primary"
+                      onClick={() => setShowModal(true)}
+                      className="mt-4"
+                    >
+                      Start Conversation
+                    </Button>
+                    {showModal && (
+                      <UsersToChatWith
+                        users={users}
+                        onSelectUser={(user) => {
+                          const newParticipant: Participants = {
+                            userId: user.uid,
+                            username: user.username,
+                            email: user.email,
+                            profilePicture: user.profilePicture,
+                            role: "User",
+                          };
+                          const newChatEntity: ChatEntity = {
+                            id: user.uid,
+                            name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
+                            avatar: user.profilePicture,
+                            type: "user",
+                            directMessages: [],
+                            groupMessages: [],
+                            participants: [newParticipant],
+                          };
+                          setEntities((prevEntities) => [...prevEntities, newChatEntity]);
+                        }}
+                        onClose={() => setShowModal(false)}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <ul className="space-y-4">
+                    {entities.map((entity) => (
+                      <li
+                        key={entity.id}
+                        className={`flex items-center gap-4 p-2 cursor-pointer rounded-lg ${
+                          selectedEntity?.id === entity.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
+                        }`}
+                        onClick={() => handleEntityClick(entity)}
+                      >
+                        <Avatar src={entity.avatar} alt={entity.name} />
+                        <div>
+                          <p className="font-semibold text-black">{entity.name}</p>
+                          <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
+                        </div>
+                        {unreadCounts[entity.id] > 0 && (
+                          // <Badge color="danger" className="ml-auto" size="sm">
+                          //   {unreadCounts[user.uid]}
+                          // </Badge>
+                          <Badge
+                          content={unreadCounts[entity.id]}
+                          color="danger"
+                          size="md"
+                          shape="circle"
+                          className="absolute -top-2 -right-2"
+                        >
+                          {""}
+                        </Badge>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </Card>
+          </div>
 
           {/* Chat Interface on the Right Side */}
-          <div className="flex-1 p-6">
+          <div className="w-3/4 h-full">
             {selectedEntity ? (
               <GroupMessagesCard
                 groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
@@ -336,7 +374,7 @@ const ChatPage = () => {
             )}
           </div>
 
-        </div>
+        </CardBody>
       </Card>
 
       {/* Custom CSS for Animation */}

@@ -11,7 +11,6 @@ import {
   Button,
 } from "@nextui-org/react";
 import { User } from "@/store/userStore";
-import { Participants } from "@/store/project";
 
 interface UsersToChatWithProps {
   users: User[];

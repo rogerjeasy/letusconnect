@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownItem,
-  Button,
 } from "@nextui-org/react";
 import {
   FaPlusCircle,
@@ -18,6 +17,7 @@ import {
 import { SVGProps, useState } from "react";
 import { FaMessage } from "react-icons/fa6";
 import { ModalToCreateGroup } from "./ChatManagementContentModals";
+import UsersToChatWith from "./UsersToChatWith";
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />
@@ -41,12 +41,17 @@ const ArchivedChatsIcon = (props: SVGProps<SVGSVGElement>) => (
 
 export default function ChatManagement() {
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+  const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
   
   return (
     <>
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="bordered">Chat Management</Button>
+        <button
+          className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-md hover:bg-gray-100 transition duration-200"
+        >
+          <FaPlusCircle className="text-green-500 text-2xl" />
+        </button>
       </DropdownTrigger>
       <DropdownMenu aria-label="Chat Management Options" variant="faded">
         <DropdownSection showDivider title="Quick Actions">
@@ -72,6 +77,7 @@ export default function ChatManagement() {
             description="Find and connect with other users"
             shortcut="⌘B"
             startContent={<BrowseUsersIcon />}
+            onClick={() => setIsUsersModalOpen(true) }
           >
             Browse All Users
           </DropdownItem>
@@ -101,6 +107,12 @@ export default function ChatManagement() {
         isOpen={isCreateGroupModalOpen}
         onClose={() => setIsCreateGroupModalOpen(false)}
       />
+
+      {/* Modal to Browse Users */}
+      {/* <UsersToChatWith
+        isOpen={isUsersModalOpen}
+        onClose={() => setIsUsersModalOpen(false)}
+      /> */}
     </>
   );
 }
