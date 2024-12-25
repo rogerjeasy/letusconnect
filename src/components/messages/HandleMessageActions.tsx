@@ -2,54 +2,74 @@ import { api } from "@/helpers/api";
 import { toast } from "react-toastify";
 
 /**
+ * Function to update the pinned messages state.
+ * @param groupChatId - The ID of the group chat.
+ * @param messageId - The ID of the message.
+ * @param isUnpin - Optional flag indicating whether the message is being unpinned.
+ */
+type UpdatePinnedMessages = (
+    groupChatId: string,
+    messageId: string,
+    isUnpin?: boolean
+  ) => void;
+  
+
+/**
  * Function to pin a message.
  * @param groupChatId - The ID of the group chat.
  * @param messageId - The ID of the message to pin.
  * @param token - The user authorization token.
+ * @param updatePinnedMessages - Callback to update the pinned messages state.
  */
 export const handlePinMessage = async (
-  groupChatId: string,
-  messageId: string,
-  token: string
-): Promise<void> => {
-  try {
-    const payload = { groupChatId, messageId };
-
-    const response = await api.post(`/api/group-chats/pin-message`, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    toast.success(response.data.message || "Message pinned successfully");
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    toast.error(errorMessage || "An error occurred while pinning the message");
-  }
-};
-
-/**
- * Function to unpin a message.
- * @param groupChatId - The ID of the group chat.
- * @param messageId - The ID of the message to unpin.
- * @param token - The user authorization token.
- */
-export const handleUnPinMessage = async (
-  groupChatId: string,
-  messageId: string,
-  token: string
-): Promise<void> => {
-  try {
-    const payload = { groupChatId, messageId };
-
-    const response = await api.post(`/api/group-chats/unpin-message`, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    toast.success(response.data.message || "Message unpinned successfully");
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    toast.error(errorMessage || "An error occurred while unpinning the message");
-  }
-};
+    groupChatId: string,
+    messageId: string,
+    token: string,
+    updatePinnedMessages: UpdatePinnedMessages
+  ): Promise<void> => {
+    try {
+      const payload = { groupChatId, messageId };
+  
+      const response = await api.post(`/api/group-chats/pin-message`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      updatePinnedMessages(groupChatId, messageId); // Update pinned messages state
+      toast.success(response.data.message || "Message pinned successfully");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error(errorMessage || "An error occurred while pinning the message");
+    }
+  };
+  
+  /**
+   * Function to unpin a message.
+   * @param groupChatId - The ID of the group chat.
+   * @param messageId - The ID of the message to unpin.
+   * @param token - The user authorization token.
+   * @param updatePinnedMessages - Callback to update the pinned messages state.
+   */
+  export const handleUnPinMessage = async (
+    groupChatId: string,
+    messageId: string,
+    token: string,
+    updatePinnedMessages: UpdatePinnedMessages
+  ): Promise<void> => {
+    try {
+      const payload = { groupChatId, messageId };
+  
+      const response = await api.post(`/api/group-chats/unpin-message`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      updatePinnedMessages(groupChatId, messageId, true); // Update pinned messages state with unpin flag
+      toast.success(response.data.message || "Message unpinned successfully");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      toast.error(errorMessage || "An error occurred while unpinning the message");
+    }
+  };
+  
 
 /**
  * Function to reply to a message.

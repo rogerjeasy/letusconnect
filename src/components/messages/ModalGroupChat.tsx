@@ -24,6 +24,7 @@ interface ModalGroupChatProps {
   groupId: string; 
   token: string;
   pinnedMessageIDs?: string[];
+  updatePinnedMessages: (groupChatId: string, messageId: string, isUnpin?: boolean) => void;
 }
 
 const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
@@ -32,6 +33,7 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
   groupId,
   token,
   pinnedMessageIDs = [],
+  updatePinnedMessages,
 }) => {
   const [messages, setMessages] = useState<BaseMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -128,6 +130,7 @@ const ModalGroupChat: React.FC<ModalGroupChatProps> = ({
                 initialMessages={messages}
                 participants={participants}
                 pinnedMessages={pinnedMessageIDs}
+                updatePinnedMessages={updatePinnedMessages}
               />
             </div>
           </CardBody>

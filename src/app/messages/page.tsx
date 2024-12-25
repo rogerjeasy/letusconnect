@@ -15,8 +15,6 @@ import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
 import UsersToChatWith from "@/components/messages/UsersToChatWith";
 import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
-import { set } from "zod";
-import { group } from "console";
 
 
 interface ChatEntity {
@@ -215,6 +213,19 @@ const ChatPage = () => {
     await handleMessagesClick(entity.id, setTotalUnreadCount);
   };
 
+  const updatePinnedMessages = (groupChatId: string, messageId: string, isUnpin = false) => {
+    setPinnedMessagesMap((prev) => {
+      const updated = { ...prev };
+      if (isUnpin) {
+        updated[groupChatId] = updated[groupChatId].filter((id) => id !== messageId);
+      } else {
+        updated[groupChatId] = [...(updated[groupChatId] || []), messageId];
+      }
+      return updated;
+    });
+  };  
+  
+
   if (!currentUser) {
     return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
   }
@@ -380,7 +391,8 @@ const ChatPage = () => {
               }
               participants={selectedEntity.participants}
               pinnedMessages={pinnedMessagesMap[selectedEntity.id] || []}
-            />            
+              updatePinnedMessages={updatePinnedMessages}
+            />                       
             ) : (
               <p className="text-center">Select a chat to start messaging.</p>
             )}

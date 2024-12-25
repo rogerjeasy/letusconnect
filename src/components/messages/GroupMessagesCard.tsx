@@ -25,6 +25,7 @@ interface GroupMessagesCardProps {
   initialMessages: Message[];
   participants?: Participants[];
   pinnedMessages: string[];
+  updatePinnedMessages: (groupChatId: string, messageId: string, isUnpin?: boolean) => void;
 }
 
 const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
@@ -33,6 +34,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   initialMessages,
   participants = [],
   pinnedMessages = [],
+  updatePinnedMessages,
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
@@ -194,82 +196,87 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                     msg.senderId === currentUserId ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className="flex flex-col max-w-[70%] relative">
-                    {/* Pin Icon for Pinned Messages */}
-                    {pinnedMessages.includes(msg.id) && (
-                      <div className="absolute top-0 left-0 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500">
-                        <FaThumbtack className="text-white text-xs" />
-                      </div>
-                    )}
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <button
-                          className="absolute top-0 right-0 w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-100"
-                          aria-label="Message Options"
-                        >
-                          <FaEllipsisH className="text-red-500 text-sm" />
-                        </button>
-                      </DropdownTrigger>
-                      <DropdownMenu aria-label="Message Options">
+                  <div className="flex flex-col max-w-[70%] bg-white rounded-lg shadow">
+                    {/* First Section (Pin Icon and Options) */}
+                    <div className="flex justify-between items-center p-2">
+                      {pinnedMessages.includes(msg.id) && (
+                        <FaThumbtack className="text-blue-500 text-lg" />
+                      )}
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <button
+                            className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100"
+                            aria-label="Message Options"
+                          >
+                            <FaEllipsisH className="text-red-500 text-sm" />
+                          </button>
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Message Options">
                         {isAdmin ? (
-                          pinnedMessages.includes(msg.id) ? (
-                            <DropdownItem
-                              key="unpinMessage"
-                              startContent={<FaThumbtack className="text-gray-500" />}
-                              onClick={() => handleUnPinMessage(groupChatId || "", msg.id, token)}
-                            >
-                              Unpin Message
-                            </DropdownItem>
-                          ) : (
-                            <DropdownItem
-                              key="pinMessage"
-                              startContent={<FaThumbtack className="text-gray-500" />}
-                              onClick={() => handlePinMessage(groupChatId || "", msg.id, token)}
-                            >
-                              Pin Message
-                            </DropdownItem>
-                          )
-                        ) : null}
-                        <DropdownItem
-                          key="reply"
-                          startContent={<FaReply className="text-gray-500" />}
-                          onClick={() => console.log("Reply clicked")}
-                        >
-                          Reply
-                        </DropdownItem>
-                        <DropdownItem
-                          key="forwardMessage"
-                          startContent={<FaShare className="text-blue-500" />}
-                          onClick={() => console.log("Forward message clicked")}
-                        >
-                          Forward Message
-                        </DropdownItem>
-                        <DropdownItem
-                          key="copyMessage"
-                          startContent={<FaCopy className="text-green-500" />}
-                          onClick={() => console.log("Copy message clicked")}
-                        >
-                          Copy Message
-                        </DropdownItem>
-                        <DropdownItem
-                          key="starMessage"
-                          startContent={<FaStar className="text-yellow-500" />}
-                          onClick={() => console.log("Star message clicked")}
-                        >
-                          Star Message
-                        </DropdownItem>
-                        <DropdownItem
-                          key="deleteMessage"
-                          startContent={<FaTrash className="text-red-500" />}
-                          onClick={() => console.log("Delete message clicked")}
-                        >
-                          Delete Message
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </Dropdown>
+                            pinnedMessages.includes(msg.id) ? (
+                              <DropdownItem
+                                key="unpinMessage"
+                                startContent={<FaThumbtack className="text-gray-500" />}
+                                onClick={() =>
+                                  handleUnPinMessage(groupChatId || "", msg.id, token, updatePinnedMessages)
+                                }
+                              >
+                                Unpin Message
+                              </DropdownItem>
+                            ) : (
+                              <DropdownItem
+                                key="pinMessage"
+                                startContent={<FaThumbtack className="text-gray-500" />}
+                                onClick={() =>
+                                  handlePinMessage(groupChatId || "", msg.id, token, updatePinnedMessages)
+                                }
+                              >
+                                Pin Message
+                              </DropdownItem>
+                            )
+                          ) : null}
+                          <DropdownItem
+                            key="reply"
+                            startContent={<FaReply className="text-gray-500" />}
+                            onClick={() => console.log("Reply clicked")}
+                          >
+                            Reply
+                          </DropdownItem>
+                          <DropdownItem
+                            key="forwardMessage"
+                            startContent={<FaShare className="text-blue-500" />}
+                            onClick={() => console.log("Forward message clicked")}
+                          >
+                            Forward Message
+                          </DropdownItem>
+                          <DropdownItem
+                            key="copyMessage"
+                            startContent={<FaCopy className="text-green-500" />}
+                            onClick={() => console.log("Copy message clicked")}
+                          >
+                            Copy Message
+                          </DropdownItem>
+                          <DropdownItem
+                            key="starMessage"
+                            startContent={<FaStar className="text-yellow-500" />}
+                            onClick={() => console.log("Star message clicked")}
+                          >
+                            Star Message
+                          </DropdownItem>
+                          <DropdownItem
+                            key="deleteMessage"
+                            startContent={<FaTrash className="text-red-500" />}
+                            onClick={() => console.log("Delete message clicked")}
+                          >
+                            Delete Message
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </div>
 
+                    {/* Second Section (Message Content) */}
                     <div
-                      className={`p-2 rounded-t-lg ${
+                      className={`p-3 ${
                         msg.senderId === currentUserId
                           ? "bg-blue-500 text-white"
                           : "bg-gray-200"
@@ -280,15 +287,10 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                       )}
                       <p>{msg.content}</p>
                     </div>
-                    <hr
-                      className={`border-t-1 ${
-                        msg.senderId === currentUserId
-                          ? "border-blue-300"
-                          : "border-gray-300"
-                      }`}
-                    />
+
+                    {/* Third Section (Timestamp) */}
                     <div
-                      className={`p-1 rounded-b-lg text-xs text-right ${
+                      className={`p-2 text-xs text-right ${
                         msg.senderId === currentUserId
                           ? "bg-blue-200 text-blue-800"
                           : "bg-gray-100 text-gray-700"
@@ -299,6 +301,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                   </div>
                 </div>
               ))}
+
             </div>
           ))
         ) : (
