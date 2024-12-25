@@ -15,6 +15,8 @@ import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
 import UsersToChatWith from "@/components/messages/UsersToChatWith";
 import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
+import { set } from "zod";
+import { group } from "console";
 
 
 interface ChatEntity {
@@ -27,6 +29,8 @@ interface ChatEntity {
   participants?: Participants[];
 }
 
+type PinnedMessagesMap = Record<string, string[]>;
+
 const ChatPage = () => {
   const currentUser = useUserStore((state) => state.user);
   const [users, setUsers] = useState<User[]>([]);
@@ -37,6 +41,7 @@ const ChatPage = () => {
   const [entities, setEntities] = useState<ChatEntity[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<ChatEntity | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [pinnedMessagesMap, setPinnedMessagesMap] = useState<PinnedMessagesMap>({});
 
   useEffect(() => {
     fetchChatEntities();
@@ -137,6 +142,13 @@ const ChatPage = () => {
       });
   
       const groupData: GroupChat[] = response.data.data;
+
+      // Map each group's pinned messages
+      const newPinnedMessagesMap: PinnedMessagesMap = {};
+      groupData.forEach((group) => {
+        newPinnedMessagesMap[group.id] = group.pinnedMessages || [];
+      });
+      setPinnedMessagesMap(newPinnedMessagesMap);
   
       const groupEntities: ChatEntity[] = groupData.map((group) => {
         const groupMessages: BaseMessage[] = group.messages || []; 
@@ -359,15 +371,16 @@ const ChatPage = () => {
           <div className="w-3/4 h-full">
             {selectedEntity ? (
               <GroupMessagesCard
-                groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
-                token={localStorage.getItem("token") || ""}
-                initialMessages={
-                  selectedEntity.type === "group"
-                    ? selectedEntity.groupMessages
-                    : selectedEntity.directMessages
-                }
-                participants={selectedEntity.participants}
-              />
+              groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
+              token={localStorage.getItem("token") || ""}
+              initialMessages={
+                selectedEntity.type === "group"
+                  ? selectedEntity.groupMessages
+                  : selectedEntity.directMessages
+              }
+              participants={selectedEntity.participants}
+              pinnedMessages={pinnedMessagesMap[selectedEntity.id] || []}
+            />            
             ) : (
               <p className="text-center">Select a chat to start messaging.</p>
             )}

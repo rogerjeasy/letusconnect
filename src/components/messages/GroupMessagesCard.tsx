@@ -15,6 +15,7 @@ import { FaCamera, FaCopy, FaEllipsisH, FaFile, FaImage, FaMapMarkerAlt,
   FaPlus, FaReply, FaShare, FaSmile, FaStar, FaThumbtack, FaTrash } from "react-icons/fa";
 
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { handlePinMessage, handleUnPinMessage } from "@/components/messages/HandleMessageActions"
 
 type Message = BaseMessage | DirectMessage;
 
@@ -23,6 +24,7 @@ interface GroupMessagesCardProps {
   token: string;
   initialMessages: Message[];
   participants?: Participants[];
+  pinnedMessages: string[];
 }
 
 const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
@@ -30,6 +32,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   token,
   initialMessages,
   participants = [],
+  pinnedMessages = [],
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
@@ -192,6 +195,12 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                   }`}
                 >
                   <div className="flex flex-col max-w-[70%] relative">
+                    {/* Pin Icon for Pinned Messages */}
+                    {pinnedMessages.includes(msg.id) && (
+                      <div className="absolute top-0 left-0 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500">
+                        <FaThumbtack className="text-white text-xs" />
+                      </div>
+                    )}
                     <Dropdown>
                       <DropdownTrigger>
                         <button
@@ -202,15 +211,25 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                         </button>
                       </DropdownTrigger>
                       <DropdownMenu aria-label="Message Options">
-                      {isAdmin ? (
-                        <DropdownItem
-                          key="pinMessage"
-                          startContent={<FaThumbtack className="text-gray-500" />}
-                          onClick={() => console.log(`Pin message ${msg.id}`)}
-                        >
-                          Pin Message
-                        </DropdownItem>
-                      ) : null}
+                        {isAdmin ? (
+                          pinnedMessages.includes(msg.id) ? (
+                            <DropdownItem
+                              key="unpinMessage"
+                              startContent={<FaThumbtack className="text-gray-500" />}
+                              onClick={() => handleUnPinMessage(groupChatId || "", msg.id, token)}
+                            >
+                              Unpin Message
+                            </DropdownItem>
+                          ) : (
+                            <DropdownItem
+                              key="pinMessage"
+                              startContent={<FaThumbtack className="text-gray-500" />}
+                              onClick={() => handlePinMessage(groupChatId || "", msg.id, token)}
+                            >
+                              Pin Message
+                            </DropdownItem>
+                          )
+                        ) : null}
                         <DropdownItem
                           key="reply"
                           startContent={<FaReply className="text-gray-500" />}
