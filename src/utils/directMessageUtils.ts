@@ -39,8 +39,8 @@ export const sendDirectMessage = async (
     const response = await api.post("/api/messages/direct", payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    const sentMessage: DirectMessage = response.data.data;
+    
+    const sentMessage: DirectMessage = response.data.message;
     setMessages((prevMessages) => [...prevMessages, sentMessage]);
     setNewMessage("");
   } catch (error) {

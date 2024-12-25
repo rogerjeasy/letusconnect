@@ -43,7 +43,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
 
   const handleSendMessage = async () => {
     if (groupChatId) {
-      console.log("Sending group message..."+groupChatId);
       await sendMessageToGroup(
         groupChatId,
         newMessage,
@@ -58,7 +57,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         setSendingMessage
       );
     } else if (participants.length === 1) {
-      console.log("Sending direct message..."+participants[0].userId);
       await sendDirectMessage(
         participants[0].userId,
         newMessage,
@@ -109,9 +107,14 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     return <span className="text-lg font-semibold">Messages</span>;
   };
 
-  // Group messages by date
   const groupMessagesByDate = () => {
     return messages.reduce((groups: Record<string, Message[]>, message) => {
+      // Ensure the message has a valid createdAt
+      if (!message.createdAt) {
+        console.warn("Message without createdAt:", message);
+        return groups;
+      }
+  
       const date = new Date(message.createdAt).toLocaleDateString();
       if (!groups[date]) {
         groups[date] = [];
@@ -119,7 +122,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       groups[date].push(message);
       return groups;
     }, {});
-  };
+  };  
 
   const groupedMessages = groupMessagesByDate();
   const currentDate = new Date().toLocaleDateString();
