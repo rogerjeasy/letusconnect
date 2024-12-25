@@ -3,6 +3,9 @@ import { Dispatch, SetStateAction } from "react";
 import { BaseMessage, GroupChat } from "@/store/groupChat";
 import { Participants } from "@/store/project";
 import { handleError } from "@/helpers/api";
+import { DirectMessage } from "@/store/message";
+
+type Message = BaseMessage | DirectMessage;
 
 /**
  * Send a new message to a group chat.
@@ -17,7 +20,7 @@ export const sendMessageToGroup = async (
   groupChatId: string,
   content: string,
   token: string,
-  setMessages: Dispatch<SetStateAction<BaseMessage[]>>,
+  setMessages: Dispatch<SetStateAction<Message[]>>,
   setNewMessage: Dispatch<SetStateAction<string>>,
   setSendingMessage: Dispatch<SetStateAction<boolean>>
 ) => {

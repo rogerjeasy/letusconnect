@@ -7,11 +7,15 @@ import { BaseMessage } from "@/store/groupChat";
 import { sendMessageToGroup } from "@/utils/groupChatUtils";
 import { Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
+import { sendDirectMessage } from "@/utils/directMessageUtils";
+import { DirectMessage } from "@/store/message";
+
+type Message = BaseMessage | DirectMessage;
 
 interface GroupMessagesCardProps {
-  groupChatId: string;
+  groupChatId?: string;
   token: string;
-  initialMessages: BaseMessage[];
+  initialMessages: Message[];
   participants?: Participants[];
 }
 
@@ -19,9 +23,9 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   groupChatId,
   token,
   initialMessages,
-  participants,
+  participants = [],
 }) => {
-  const [messages, setMessages] = useState<BaseMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -30,7 +34,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
 
   useEffect(() => {
     if (groupChatId) {
-      // Fetch messages for the provided groupChatId if needed
       setLoadingMessages(true);
       setMessages(initialMessages);
       setLoadingMessages(false);
@@ -39,15 +42,39 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     
 
   const handleSendMessage = async () => {
-    await sendMessageToGroup(
-      groupChatId,
-      newMessage,
-      token,
-      setMessages,
-      setNewMessage,
-      setSendingMessage
-    );
-  };
+    if (groupChatId) {
+      console.log("Sending group message..."+groupChatId);
+      await sendMessageToGroup(
+        groupChatId,
+        newMessage,
+        token,
+        (groupMessages) =>
+          setMessages((prevMessages) =>
+            typeof groupMessages === "function"
+              ? [...prevMessages, ...groupMessages(prevMessages)]
+              : [...prevMessages, ...groupMessages]
+          ),
+        setNewMessage,
+        setSendingMessage
+      );
+    } else if (participants.length === 1) {
+      console.log("Sending direct message..."+participants[0].userId);
+      await sendDirectMessage(
+        participants[0].userId,
+        newMessage,
+        token,
+        (directMessages) =>
+          setMessages((prevMessages) =>
+            typeof directMessages === "function"
+              ? [...prevMessages, ...directMessages(prevMessages)]
+              : [...prevMessages, ...directMessages]
+          ),
+        setNewMessage,
+        setSendingMessage
+      );
+    }
+  };  
+  
 
   const renderHeaderContent = () => {
     if (participants) {
@@ -84,7 +111,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
 
   // Group messages by date
   const groupMessagesByDate = () => {
-    return messages.reduce((groups: Record<string, BaseMessage[]>, message) => {
+    return messages.reduce((groups: Record<string, Message[]>, message) => {
       const date = new Date(message.createdAt).toLocaleDateString();
       if (!groups[date]) {
         groups[date] = [];
@@ -110,9 +137,9 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
               <div className="text-center text-sm font-bold text-gray-500 my-2">
                 {date === currentDate ? "Today" : date}
               </div>
-              {messages.map((msg) => (
+              {messages.map((msg, index) => (
                 <div
-                  key={msg.id}
+                key={`${msg.id}-${index}`}
                   className={`mb-3 flex ${
                     msg.senderId === currentUserId ? "justify-end" : "justify-start"
                   }`}
@@ -123,7 +150,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                         msg.senderId === currentUserId ? "bg-blue-500 text-white" : "bg-gray-200"
                       }`}
                     >
-                      {msg.senderId !== currentUserId && (
+                      {msg.senderId !== currentUserId && "senderName" in msg && (
                         <p className="text-xs font-bold">{msg.senderName}</p>
                       )}
                       <p>{msg.content}</p>

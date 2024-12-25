@@ -5,3 +5,13 @@ export interface Message {
     content: string;
     createdAt: string;
   }
+
+export interface DirectMessage extends Message {
+    receiverId: string;
+    receiverName: string;
+}
+
+export interface Messages {
+  channelID: string;
+  directMessages: DirectMessage[];
+}

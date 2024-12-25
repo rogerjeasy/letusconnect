@@ -4,11 +4,16 @@ import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
 import ChatInterface from "@/components/messages/ChatInterface";
 import { User, useUserStore } from "@/store/userStore";
-import { Avatar, Spinner, Card, Badge } from "@nextui-org/react";
+import { Avatar, Spinner, Card, Badge, Button } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
 import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
+import { BaseMessage, GroupChat } from "@/store/groupChat";
+import { DirectMessage, Messages } from "@/store/message";
+import { Participants } from "@/store/project";
+import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
+import UsersToChatWith from "@/components/messages/UsersToChatWith";
 
 
 interface ChatEntity {
@@ -16,6 +21,9 @@ interface ChatEntity {
   name: string;
   avatar: string;
   type: "user" | "group";
+  directMessages: DirectMessage[];
+  groupMessages: BaseMessage[];
+  participants?: Participants[];
 }
 
 const ChatPage = () => {
@@ -27,6 +35,7 @@ const ChatPage = () => {
   const [totalUnreadCount, setTotalUnreadCount] = useState<number>(0);
   const [entities, setEntities] = useState<ChatEntity[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<ChatEntity | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchChatEntities();
@@ -35,34 +44,26 @@ const ChatPage = () => {
   const fetchChatEntities = async () => {
     setLoading(true);
     try {
-      const [usersResponse, groupEntities, receiverNames] = await Promise.all([
-        api.get("/api/users"),
-        fetchGroupChatMessages(),
+      // Fetch user and group entities in parallel
+      const [userEntities, groupEntities] = await Promise.all([
         fetchUserMessages(),
+        fetchGroupChatMessages(),
       ]);
   
-      const fetchedUsers: User[] = usersResponse.data.users;
-  
-      const userEntities: ChatEntity[] = fetchedUsers
-        .filter((user) => user.uid !== currentUser?.uid)
-        .filter((user) => receiverNames.includes(user.username))
-        .map((user) => ({
-          id: user.uid,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
-          avatar: user.profilePicture,
-          type: "user",
-        }));
-  
+      // Combine user and group entities
       const combinedEntities = [...userEntities, ...groupEntities];
   
       console.log("Combined entities:", combinedEntities);
   
+      // Set the combined entities
       setEntities(combinedEntities);
   
+      // Fetch unread counts for each entity
       combinedEntities.forEach((entity) =>
         fetchUnreadCount(undefined, setUnreadCounts, entity.id)
       );
   
+      // Fetch the total unread count
       fetchUnreadCount(setTotalUnreadCount);
     } catch (error) {
       const errorMessage = handleError(error);
@@ -70,31 +71,62 @@ const ChatPage = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };    
 
-  const fetchUserMessages = async (): Promise<string[]> => {
+  const fetchUserMessages = async (): Promise<ChatEntity[]> => {
     const token = localStorage.getItem("token");
     try {
-      const response = await api.get("/api/messages/direct", 
-        { headers: { Authorization: `Bearer ${token}` } }
-      
-      );
-      const messages = response.data.messages;
-
-      const receiverNames: Set<string> = new Set();
-      messages.forEach((message: { directMessages: { receiverName: string }[] }) => {
+      const response = await api.get("/api/messages/direct", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const messages: Messages[] = response.data.messages;
+      const receiverMessagesMap: Record<string, DirectMessage[]> = {};
+  
+      messages.forEach((message) => {
         message.directMessages.forEach((dm) => {
-          receiverNames.add(dm.receiverName);
+          if (!receiverMessagesMap[dm.receiverName]) {
+            receiverMessagesMap[dm.receiverName] = [];
+          }
+          receiverMessagesMap[dm.receiverName].push(dm);
         });
       });
+  
+      const usersResponse = await api.get("/api/users");
+      const fetchedUsers: User[] = usersResponse.data.users;
 
-      return Array.from(receiverNames);
+      // Filter all users except the current user
+      const allUsers: User[] = fetchedUsers.filter((user) => user.uid !== currentUser?.uid);
+      setUsers(allUsers);
+  
+      const userEntities: ChatEntity[] = fetchedUsers
+        .filter((user) => user.uid !== currentUser?.uid)
+        .filter((user) => receiverMessagesMap[user.username])
+        .map((user) => ({
+          id: user.uid,
+          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
+          avatar: user.profilePicture,
+          type: "user",
+          directMessages: receiverMessagesMap[user.username] || [],
+          groupMessages: [],
+          participants: [
+            {
+              userId: user.uid,
+              username: user.username,
+              email: user.email,
+              profilePicture: user.profilePicture,
+              role: "User",
+            },
+          ],
+        }));
+  
+      return userEntities;
     } catch (error) {
       const errorMessage = handleError(error);
-      console.error("Error fetching messages:", errorMessage);
+      console.error("Error fetching user messages:", errorMessage);
       return [];
     }
-  };
+  };  
 
   const fetchGroupChatMessages = async (): Promise<ChatEntity[]> => {
     const token = localStorage.getItem("token");
@@ -103,15 +135,22 @@ const ChatPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
   
-      const groupMessages = response.data.data;
-      const groupEntities: ChatEntity[] = groupMessages.map(
-        (group: { id: string; name: string }) => ({
-          id: group.id, 
-          name: group.name, 
+      const groupData: GroupChat[] = response.data.data;
+  
+      const groupEntities: ChatEntity[] = groupData.map((group) => {
+        const groupMessages: BaseMessage[] = group.messages || []; 
+        const participants: Participants[] = group.participants || [];
+  
+        return {
+          id: group.id,
+          name: group.name,
           avatar: "", 
-          type: "group", 
-        })
-      );
+          type: "group",
+          groupMessages: groupMessages,
+          directMessages: [],
+          participants: participants,
+        };
+      });
   
       return groupEntities;
     } catch (error) {
@@ -119,7 +158,8 @@ const ChatPage = () => {
       console.error("Error fetching group messages:", errorMessage);
       return [];
     }
-  };    
+  };
+       
 
   useEffect(() => {
     if (!currentUser) return;
@@ -207,7 +247,41 @@ const ChatPage = () => {
                   <Spinner size="lg" />
                 </div>
               ) : entities.length === 0 ? (
-                <p className="text-black font-semibold">No users available.</p>
+                <>
+                  <p className="text-black font-semibold">No users available.</p>
+                  <Button
+                    color="primary"
+                    onClick={() => setShowModal(true)}
+                    className="mt-4"
+                  >
+                    Start Conversation
+                  </Button>
+                  {showModal && (
+                    <UsersToChatWith
+                      users={users}
+                      onSelectUser={(user) => {
+                        const newParticipant: Participants = {
+                          userId: user.uid,
+                          username: user.username,
+                          email: user.email,
+                          profilePicture: user.profilePicture,
+                          role: "User",
+                        };
+                        const newChatEntity: ChatEntity = {
+                          id: user.uid,
+                          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
+                          avatar: user.profilePicture,
+                          type: "user",
+                          directMessages: [],
+                          groupMessages: [],
+                          participants: [newParticipant],
+                        };
+                        setEntities((prevEntities) => [...prevEntities, newChatEntity]);
+                      }}
+                      onClose={() => setShowModal(false)}
+                    />
+                  )}
+                </>
               ) : (
                 <ul className="space-y-4">
                   {entities.map((entity) => (
@@ -247,18 +321,21 @@ const ChatPage = () => {
           {/* Chat Interface on the Right Side */}
           <div className="flex-1 p-6">
             {selectedEntity ? (
-              <ChatInterface
-                currentUserId={currentUser?.uid || ""}
-                receiverId={selectedEntity.id}
-                receiverName={selectedEntity.name}
-                receiverAvatar={selectedEntity.avatar}
+              <GroupMessagesCard
+                groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
+                token={localStorage.getItem("token") || ""}
+                initialMessages={
+                  selectedEntity.type === "group"
+                    ? selectedEntity.groupMessages
+                    : selectedEntity.directMessages
+                }
+                participants={selectedEntity.participants}
               />
             ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-black font-semibold">Select a chat to start messaging</p>
-              </div>
+              <p className="text-center">Select a chat to start messaging.</p>
             )}
           </div>
+
         </div>
       </Card>
 
