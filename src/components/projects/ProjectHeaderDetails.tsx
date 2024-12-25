@@ -147,7 +147,18 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
         onClose={handleCloseGroupChat}
         groupId={project.id}
         token={localStorage.getItem("token") || ""}
+        pinnedMessageIDs={groupChat?.pinnedMessages || []}
+        updatePinnedMessages={(groupChatId, messageId, isUnpin) => {
+          setGroupChat((prevGroupChat) => {
+            if (!prevGroupChat) return null;
+            const updatedPinnedMessages = isUnpin
+              ? prevGroupChat.pinnedMessages.filter((id) => id !== messageId)
+              : [...prevGroupChat.pinnedMessages, messageId];
+            return { ...prevGroupChat, pinnedMessages: updatedPinnedMessages };
+          });
+        }}
       />
+
 
     </div>
   );
