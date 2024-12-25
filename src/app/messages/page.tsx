@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
-import ChatInterface from "@/components/messages/ChatInterface";
 import { User, useUserStore } from "@/store/userStore";
 import { Avatar, Spinner, Card, Badge, Button, CardHeader, Tooltip, CardBody } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
@@ -117,7 +116,7 @@ const ChatPage = () => {
               username: user.username,
               email: user.email,
               profilePicture: user.profilePicture,
-              role: "User",
+              role: "",
             },
           ],
         }));

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
-import { Card, CardHeader, CardBody, Divider, Input, Button, CardFooter } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Divider, Input, Button, CardFooter, Tooltip } from "@nextui-org/react";
 import { Avatar, AvatarGroup } from "@nextui-org/react";
 import { BaseMessage } from "@/store/groupChat";
 import { sendMessageToGroup } from "@/utils/groupChatUtils";
@@ -9,6 +9,8 @@ import { Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
 import { sendDirectMessage } from "@/utils/directMessageUtils";
 import { DirectMessage } from "@/store/message";
+import { FaCog } from "react-icons/fa";
+import ChatSettings from "./ChatSettings";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -31,6 +33,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const [sendingMessage, setSendingMessage] = useState(false);
   const user = useUserStore((state) => state.user);
   const currentUserId = user?.uid || "";
+  const [isChatSettingsOpen, setIsChatSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (groupChatId) {
@@ -93,12 +96,14 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         return (
           <AvatarGroup size="md">
             {participants.map((participant) => (
-              <Avatar
-                key={participant.userId}
-                src={participant.profilePicture || ""}
-                alt={participant.username}
-                className="shadow-md"
-              />
+              <Tooltip key={participant.userId} content={participant.username}>
+                <Avatar
+                  key={participant.userId}
+                  src={participant.profilePicture || ""}
+                  alt={participant.username}
+                  className="shadow-md"
+                />
+              </Tooltip>
             ))}
           </AvatarGroup>
         );
@@ -129,7 +134,19 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
 
   return (
     <Card className="h-full border shadow-md">
-      <CardHeader className="flex items-center gap-2">{renderHeaderContent()}</CardHeader>
+       <CardHeader className="flex items-center justify-between gap-2">
+        {renderHeaderContent()}
+        <ChatSettings
+          isGroup={!!groupChatId}
+          participants={participants}
+          currentUserId={currentUserId}
+          onAddUser={() => console.log("Add user clicked")}
+          onRemoveUser={() => console.log("Remove user clicked")}
+          onEditGroup={() => console.log("Edit group clicked")}
+          onDeleteGroup={() => console.log("Delete group clicked")}
+          onLeaveGroup={() => console.log("Leave group clicked")}
+        />
+      </CardHeader>
       <Divider />
       <CardBody className="overflow-y-auto space-y-4">
         {loadingMessages ? (
@@ -200,6 +217,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           {sendingMessage ? "Sending..." : "Send"}
         </Button>
       </div>
+
     </Card>
   );
 };
