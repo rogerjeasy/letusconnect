@@ -31,17 +31,22 @@ export const handleAddParticipants = async (
     groupChatId: string,
     participants: Participants[],
     token: string
-  ): Promise<void> => {
+): Promise<void> => {
     try {
-      const response = await api.put(
-        `/api/group-chats/${groupChatId}/participants`,
-        { participants },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-  
-      toast.success(response.data.message || "Participants added successfully");
+        const response = await api.put(
+            `/api/group-chats/${groupChatId}/participants`,
+            { participants },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.status >= 200 && response.status < 300) {
+            toast.success(response.data.message || "Participants added successfully");
+        } else {
+            throw new Error(response.data.error || "Failed to add participants");
+        }
     } catch (error) {
-      const errorMessage = handleError(error);
-      toast.error(errorMessage || "An error occurred while adding participants");
+        const errorMessage = handleError(error);
+        toast.error(errorMessage || "An error occurred while adding participants");
+        throw errorMessage;
     }
-  };
+};

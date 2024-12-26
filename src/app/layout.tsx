@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="pt-16">{children}</main>
             <Footer />
           </AuthWrapper>
-          <ToastContainer position="top-right" autoClose={5000} /> 
+          <ToastContainer position="top-center" autoClose={10000} /> 
         </Providers>
       </body>
     </html>

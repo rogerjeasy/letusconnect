@@ -20,6 +20,7 @@ import { fetchUsersForGroup } from "./HandleParticipants";
 import { toast } from "react-toastify";
 import UsersSelection from "./UsersSelection";
 import { handleAddParticipants } from "./HandleGroupActions";
+import { useParticipantsStore } from "@/store/participantsStore";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -196,15 +197,16 @@ export const ModalAddMemberToGroup: React.FC<{
 }> = ({ isOpen, onClose, groupChatId, token }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<Participants[]>([]);
-  const [participants, setParticipants] = useState<Participants[]>([]);
+  const [participantsList, setParticipantsList] = useState<Participants[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { addParticipant } = useParticipantsStore();
 
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const users = await fetchUsersForGroup();
-        setParticipants(users);
+        setParticipantsList(users);
       } catch (error) {
         const errorMessage = handleError(error);
         toast.error("Failed to fetch users: " + errorMessage);
@@ -231,14 +233,18 @@ export const ModalAddMemberToGroup: React.FC<{
       toast.error("Please select at least one participant.");
       return;
     }
-
+  
     try {
       await handleAddParticipants(groupChatId, selectedUsers, token);
-      toast.success("Participants added successfully!");
+        selectedUsers.forEach(user => {
+        addParticipant(groupChatId, user);
+      });
+  
+      setSelectedUsers([]);
       onClose();
     } catch (error) {
       const errorMessage = handleError(error);
-      toast.error(errorMessage || "An error occurred while adding participants.");
+      // toast.error(errorMessage || "An error occurred while adding participants.");
     }
   };
 
@@ -246,7 +252,7 @@ export const ModalAddMemberToGroup: React.FC<{
     <UsersSelection
       isOpen={isOpen}
       title="Add Members to Group"
-      participants={participants}
+      participants={participantsList}
       selectedUsers={selectedUsers}
       onSelectUser={handleUserSelection}
       searchTerm={searchTerm}

@@ -21,6 +21,7 @@ import PDFAttachment from "./PDFAttachment";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { toast } from "react-toastify";
 import { ModalAddMemberToGroup } from "./ChatManagementContentModals";
+import { useParticipantsStore } from "@/store/participantsStore";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -37,7 +38,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   groupChatId,
   token,
   initialMessages,
-  participants = [],
   pinnedMessages = [],
   updatePinnedMessages,
 }) => {
@@ -51,8 +51,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [participantsList, setParticipantsList] = useState<Participants[]>(participants);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const { setParticipants, removeParticipant } = useParticipantsStore();
+  const participants = useParticipantsStore((state) => state.participants);
+
+  const chatParticipants = groupChatId ? participants[groupChatId] || [] : [];
 
   const [modalData, setModalData] = useState({
     isOpen: false,
@@ -62,7 +65,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     onConfirm: undefined as (() => void) | undefined,
   });
 
-  const isAdmin = participants.some(
+  const isAdmin = chatParticipants.some(
     (participant) =>
       participant.userId === currentUserId && participant.role === "owner"
   );
@@ -83,6 +86,14 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (groupChatId && initialMessages.length > 0) {
+      if (Array.isArray(participants)) {
+        setParticipants(groupChatId, participants);
+      }
+    }
+  }, [groupChatId]);
     
 
   const handleSendMessage = async () => {
@@ -105,21 +116,22 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         setNewMessage,
         setSendingMessage
       );
-    } else if (participants.length === 1) {
-      await sendDirectMessage(
-        participants[0].userId,
-        newMessage,
-        token,
-        (directMessages) =>
-          setMessages((prevMessages) =>
-            typeof directMessages === "function"
-              ? [...prevMessages, ...directMessages(prevMessages)]
-              : [...prevMessages, ...directMessages]
-          ),
-        setNewMessage,
-        setSendingMessage
-      );
-    }
+    } 
+    // else if (groupChatId && participants[groupChatId]?.length === 1) {
+    //   await sendDirectMessage(
+    //     participants[groupChatId][0].userId,
+    //     newMessage,
+    //     token,
+    //     (directMessages) =>
+    //       setMessages((prevMessages) =>
+    //         typeof directMessages === "function"
+    //           ? [...prevMessages, ...directMessages(prevMessages)]
+    //           : [...prevMessages, ...directMessages]
+    //       ),
+    //     setNewMessage,
+    //     setSendingMessage
+    //       );
+    //     }
   };  
 
   const handleLeaveGroupClick = () => {
@@ -132,21 +144,22 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         setModalData((prev) => ({ ...prev, isOpen: false }));
         try {
           await handleLeaveGroup(groupChatId || "", token);
-          setParticipantsList((prev) =>
-            prev.filter((participant) => participant.userId !== currentUserId)
-          );
+          if (groupChatId) {
+            removeParticipant(groupChatId, currentUserId);
+          }
         } catch (error) {
           toast.error("An error occurred while leaving the group.");
         }
       },
     });
-  };  
-  
+  };
 
   const renderHeaderContent = () => {
-    if (participants) {
-      if (participants.length === 1) {
-        const participant = participants[0];
+    if (groupChatId && participants[groupChatId]) {
+      const chatParticipants = participants[groupChatId];
+      
+      if (chatParticipants.length === 1) {
+        const participant = chatParticipants[0];
         return (
           <div className="flex items-center gap-2">
             <Avatar
@@ -158,10 +171,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           </div>
         );
       }
-      if (participants.length > 1) {
+      
+      if (chatParticipants.length > 1) {
         return (
           <AvatarGroup size="md">
-            {participants.map((participant) => (
+            {chatParticipants.map((participant) => (
               <Tooltip
                 key={participant.userId}
                 content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
@@ -236,7 +250,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           {renderHeaderContent()}
           <ChatSettings
             isGroup={!!groupChatId}
-            participants={participantsList}
+            participants={groupChatId ? participants[groupChatId] || [] : []}
             currentUserId={currentUserId}
             onAddUser={() => setIsAddMemberModalOpen(true)}
             onRemoveUser={() => console.log("Remove user clicked")}

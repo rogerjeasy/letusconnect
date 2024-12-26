@@ -15,6 +15,7 @@ import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
 import UsersToChatWith from "@/components/messages/UsersToChatWith";
 import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
+import { useParticipantsStore } from "@/store/participantsStore";
 
 
 interface ChatEntity {
@@ -40,6 +41,7 @@ const ChatPage = () => {
   const [selectedEntity, setSelectedEntity] = useState<ChatEntity | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [pinnedMessagesMap, setPinnedMessagesMap] = useState<PinnedMessagesMap>({});
+  const { participants, addParticipant } = useParticipantsStore();
 
   useEffect(() => {
     fetchChatEntities();
@@ -116,6 +118,11 @@ const ChatPage = () => {
             },
           ],
         }));
+      
+      // Add participants to the store
+    userEntities.forEach((entity) => {
+      addParticipant(entity.id, entity.participants || []);
+    });
   
       return userEntities;
     } catch (error) {
@@ -144,6 +151,7 @@ const ChatPage = () => {
       const groupEntities: ChatEntity[] = groupData.map((group) => {
         const groupMessages: BaseMessage[] = group.messages || []; 
         const participants: Participants[] = group.participants || [];
+        addParticipant(group.id, participants);
   
         return {
           id: group.id,
@@ -214,8 +222,7 @@ const ChatPage = () => {
       }
       return updated;
     });
-  };  
-  
+  };   
 
   if (!currentUser) {
     return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
@@ -380,7 +387,9 @@ const ChatPage = () => {
                   ? selectedEntity.groupMessages
                   : selectedEntity.directMessages
               }
-              participants={selectedEntity.participants}
+              participants={
+                selectedEntity.id ? participants[selectedEntity.id] || [] : []
+              }
               pinnedMessages={pinnedMessagesMap[selectedEntity.id] || []}
               updatePinnedMessages={updatePinnedMessages}
             />                       
