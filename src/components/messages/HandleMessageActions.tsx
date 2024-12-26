@@ -1,4 +1,4 @@
-import { api } from "@/helpers/api";
+import { api, fileApi, handleError } from "@/helpers/api";
 import { toast } from "react-toastify";
 
 /**
@@ -117,25 +117,27 @@ export const handleCopyMessage = (messageContent: string): void => {
  * @param token - The user authorization token.
  */
 export const handleAddDocuments = async (
-  files: FileList,
-  groupChatId: string,
-  token: string
-): Promise<void> => {
-  try {
-    const formData = new FormData();
-    formData.append("groupChatId", groupChatId);
-    Array.from(files).forEach((file) => formData.append("documents", file));
-
-    const response = await api.post(`/group-chats/add-documents`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    toast.success(response.data.message || "Documents added successfully");
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    toast.error(errorMessage || "An error occurred while adding documents");
-  }
-};
+    files: File[],
+    groupChatId: string,
+    content: string,
+    token: string
+  ): Promise<void> => {
+    try {
+      const formData = new FormData();
+      formData.append("groupChatId", groupChatId);
+      formData.append("content", content);
+      files.forEach((file) => formData.append("files", file)); // Updated field name to match the server
+  
+      const response = await fileApi.post(`/api/group-chats/attach-files`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      toast.success(response.data.message || "Documents added successfully");
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while adding documents");
+    }
+  };
+  

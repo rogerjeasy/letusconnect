@@ -48,26 +48,19 @@ const ChatPage = () => {
   const fetchChatEntities = async () => {
     setLoading(true);
     try {
-      // Fetch user and group entities in parallel
       const [userEntities, groupEntities] = await Promise.all([
         fetchUserMessages(),
         fetchGroupChatMessages(),
       ]);
   
-      // Combine user and group entities
       const combinedEntities = [...userEntities, ...groupEntities];
-  
-      console.log("Combined entities:", combinedEntities);
-  
-      // Set the combined entities
+    
       setEntities(combinedEntities);
   
-      // Fetch unread counts for each entity
       combinedEntities.forEach((entity) =>
         fetchUnreadCount(undefined, setUnreadCounts, entity.id)
       );
   
-      // Fetch the total unread count
       fetchUnreadCount(setTotalUnreadCount);
     } catch (error) {
       const errorMessage = handleError(error);
@@ -202,8 +195,6 @@ const ChatPage = () => {
 
   const handleEntityClick = async (entity: ChatEntity) => {
     setSelectedEntity(entity);
-
-    console.log("Selected entity:", entity.directMessages);
 
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,

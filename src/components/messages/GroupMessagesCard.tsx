@@ -15,7 +15,7 @@ import { FaCamera, FaCopy, FaEllipsisH, FaFile, FaImage, FaMapMarkerAlt,
   FaPlus, FaReply, FaShare, FaSmile, FaStar, FaThumbtack, FaTrash } from "react-icons/fa";
 
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import { handlePinMessage, handleUnPinMessage } from "@/components/messages/HandleMessageActions"
+import { handlePinMessage, handleUnPinMessage, handleCopyMessage, handleAddDocuments } from "@/components/messages/HandleMessageActions"
 
 type Message = BaseMessage | DirectMessage;
 
@@ -44,6 +44,8 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const currentUserId = user?.uid || "";
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isAdmin = participants.some(
     (participant) =>
@@ -69,6 +71,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     
 
   const handleSendMessage = async () => {
+    if (selectedFiles.length > 0) {
+      await handleAddDocuments(selectedFiles, groupChatId || "", newMessage, token);
+      setSelectedFiles([]);
+      return;
+    }
     if (groupChatId) {
       await sendMessageToGroup(
         groupChatId,
@@ -160,6 +167,12 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     setNewMessage((prev) => prev + emojiData.emoji);
     setShowEmojiPicker(false);
   };
+  
+  
+  const handleRemoveFile = (fileToRemove: File) => {
+    setSelectedFiles((prevFiles) => prevFiles.filter((file) => file !== fileToRemove));
+  };
+  
 
   const groupedMessages = groupMessagesByDate();
   const currentDate = new Date().toLocaleDateString();
@@ -252,7 +265,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                           <DropdownItem
                             key="copyMessage"
                             startContent={<FaCopy className="text-green-500" />}
-                            onClick={() => console.log("Copy message clicked")}
+                            onClick={() => handleCopyMessage(msg.content)}
                           >
                             Copy Message
                           </DropdownItem>
@@ -301,7 +314,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                   </div>
                 </div>
               ))}
-
             </div>
           ))
         ) : (
@@ -322,11 +334,14 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           <DropdownMenu aria-label="Add Options">
             <DropdownItem
               key="document"
-              startContent={<FaFile className="text-gray-500" />}
-              onClick={() => console.log("Document clicked")}
+              onClick={() => fileInputRef.current?.click()}
             >
-              Document
+              <div className="flex items-center gap-2">
+                <FaFile className="text-gray-500" />
+                <span>Document</span>
+              </div>
             </DropdownItem>
+
             <DropdownItem
               key="photos"
               startContent={<FaImage className="text-blue-500" />}
@@ -365,6 +380,38 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           </div>
         )}
 
+        <input 
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          multiple
+          onChange={(e) => {
+            if (e.target.files) {
+              const filesArray = Array.from(e.target.files);
+              setSelectedFiles(prev => [...prev, ...filesArray]);
+            }
+          }}
+        />
+
+        {selectedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {selectedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center p-2 bg-gray-200 rounded shadow-sm"
+              >
+                <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                <button
+                  onClick={() => handleRemoveFile(file)}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <Input
           placeholder="Type a message..."
           fullWidth
@@ -375,7 +422,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         <Button
           color="primary"
           onClick={handleSendMessage}
-          isDisabled={sendingMessage || !newMessage.trim() || loadingMessages}
+          isDisabled={sendingMessage || loadingMessages || (!newMessage.trim() && selectedFiles.length === 0)}
         >
           {sendingMessage ? "Sending..." : "Send"}
         </Button>
