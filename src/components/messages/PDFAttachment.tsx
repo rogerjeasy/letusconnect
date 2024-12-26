@@ -8,13 +8,15 @@ interface PDFAttachmentProps {
 }
 
 const PDFAttachment: React.FC<PDFAttachmentProps> = ({ url, filename }) => {
+  const extractedFilename = filename || decodeURIComponent(url.split('/').pop() || 'PDF Document');
+
   return (
     <div className="flex flex-col gap-2 p-2 border rounded-lg bg-gray-50">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FaFile className="text-red-500 text-xl" />
           <span className="text-sm font-medium truncate text-black">
-            {filename || 'PDF Document'}
+            {extractedFilename}
           </span>
         </div>
         <div className="flex gap-2">

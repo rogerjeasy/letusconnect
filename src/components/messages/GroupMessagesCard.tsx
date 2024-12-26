@@ -311,7 +311,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                                 <PDFAttachment
                                   key={`${msg.id}-attachment-${index}`}
                                   url={attachment}
-                                  filename={`Attachment ${index + 1}`}
                                 />
                               );
                             }
