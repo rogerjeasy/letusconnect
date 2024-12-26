@@ -4,6 +4,8 @@ export interface Message {
     receiverId: string;
     content: string;
     createdAt: string;
+    messageType: string;
+    attachments: string[];
   }
 
 export interface DirectMessage extends Message {

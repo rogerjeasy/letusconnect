@@ -16,6 +16,7 @@ import { FaCamera, FaCopy, FaEllipsisH, FaFile, FaImage, FaMapMarkerAlt,
 
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { handlePinMessage, handleUnPinMessage, handleCopyMessage, handleAddDocuments } from "@/components/messages/HandleMessageActions"
+import PDFAttachment from "./PDFAttachment";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -298,7 +299,26 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
                       {msg.senderId !== currentUserId && "senderName" in msg && (
                         <p className="text-xs font-bold">{msg.senderName}</p>
                       )}
-                      <p>{msg.content}</p>
+                      {/* Message content */}
+                      {msg.content && <p>{msg.content}</p>}
+                      
+                      {/* PDF attachments */}
+                      {msg.messageType === 'attachment' && msg.attachments && msg.attachments.length > 0 && (
+                        <div className="space-y-2 mt-2">
+                          {msg.attachments.map((attachment, index) => {
+                            if (attachment.toLowerCase().endsWith('.pdf')) {
+                              return (
+                                <PDFAttachment
+                                  key={`${msg.id}-attachment-${index}`}
+                                  url={attachment}
+                                  filename={`Attachment ${index + 1}`}
+                                />
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* Third Section (Timestamp) */}
