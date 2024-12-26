@@ -119,6 +119,14 @@ export default function ChatSettings({
                   Remove Member
                 </DropdownItem>
                 <DropdownItem
+                  key="leaveGroup"
+                  description="Leave this group"
+                  startContent={<RemoveUserIcon />}
+                  onClick={onLeaveGroup}
+                >
+                  Leave Group
+                </DropdownItem>
+                <DropdownItem
                   key="editGroup"
                   description="Edit group details"
                   startContent={<EditGroupIcon />}

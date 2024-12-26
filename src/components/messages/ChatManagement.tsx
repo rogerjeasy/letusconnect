@@ -17,7 +17,6 @@ import {
 import { SVGProps, useState } from "react";
 import { FaMessage } from "react-icons/fa6";
 import { ModalToCreateGroup } from "./ChatManagementContentModals";
-import UsersToChatWith from "./UsersToChatWith";
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />

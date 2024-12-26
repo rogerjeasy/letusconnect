@@ -1,10 +1,11 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import TopNav from "@/components/navbar/TopNav";
 import AuthWrapper from "@/components/AuthWrapper";
 import Footer from "@/components/homepage/Footer";
+import { ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 export const metadata: Metadata = {
   title: "Let Us Connect",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="pt-16">{children}</main>
             <Footer />
           </AuthWrapper>
+          <ToastContainer position="top-right" autoClose={5000} /> 
         </Providers>
       </body>
     </html>

@@ -12,10 +12,14 @@ import {
   Button,
   Spinner,
 } from "@nextui-org/react";
-import { FaExclamationCircle, FaSearch } from "react-icons/fa";
+import { FaExclamationCircle, FaSearch, FaTrash } from "react-icons/fa";
 import { api, handleError } from "@/helpers/api";
 import { Participants } from "@/store/project";
 import { User, useUserStore } from "@/store/userStore";
+import { fetchUsersForGroup } from "./HandleParticipants";
+import { toast } from "react-toastify";
+import UsersSelection from "./UsersSelection";
+import { handleAddParticipants } from "./HandleGroupActions";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -183,6 +187,78 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
     </Modal>
   );
 };
+
+export const ModalAddMemberToGroup: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  groupChatId: string;
+  token: string;
+}> = ({ isOpen, onClose, groupChatId, token }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<Participants[]>([]);
+  const [participants, setParticipants] = useState<Participants[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const users = await fetchUsersForGroup();
+        setParticipants(users);
+      } catch (error) {
+        const errorMessage = handleError(error);
+        toast.error("Failed to fetch users: " + errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
+
+  const handleUserSelection = (user: Participants) => {
+    setSelectedUsers((prev) =>
+      prev.find((selected) => selected.userId === user.userId)
+        ? prev.filter((selected) => selected.userId !== user.userId)
+        : [...prev, user]
+    );
+  };
+
+  const handleConfirm = async () => {
+    if (selectedUsers.length === 0) {
+      toast.error("Please select at least one participant.");
+      return;
+    }
+
+    try {
+      await handleAddParticipants(groupChatId, selectedUsers, token);
+      toast.success("Participants added successfully!");
+      onClose();
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while adding participants.");
+    }
+  };
+
+  return (
+    <UsersSelection
+      isOpen={isOpen}
+      title="Add Members to Group"
+      participants={participants}
+      selectedUsers={selectedUsers}
+      onSelectUser={handleUserSelection}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      isLoading={isLoading}
+      buttonLabel={`Add Selected Participant${selectedUsers.length > 1 ? "s" : ""}`}
+      onConfirm={handleConfirm}
+      onCancel={onClose}
+    />
+  );
+};
+
 
 export const BrowseAllUsers: React.FC = () => {
   return (
