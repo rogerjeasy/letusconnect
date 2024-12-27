@@ -82,16 +82,14 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
       const response = await api.post("/api/group-chats", groupData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(response.data);
-      alert(response.data.message);
+      toast.success(response.data.message || "Group created successfully.");
       setGroupName("");
       setGroupDescription("");
       setSelectedUsers([]);
       onClose();
     } catch (error) {
       const errorMessage = handleError(error);
-      console.error("Failed to create group:", errorMessage);
-      alert("Failed to create group. " + errorMessage);
+      toast.error("Failed to create group: " + errorMessage);      
     }
   };
 

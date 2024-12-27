@@ -16,17 +16,7 @@ import UsersToChatWith from "@/components/messages/UsersToChatWith";
 import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
 import { useParticipantsStore } from "@/store/participantsStore";
-
-
-interface ChatEntity {
-  id: string;
-  name: string;
-  avatar: string;
-  type: "user" | "group";
-  directMessages: DirectMessage[];
-  groupMessages: BaseMessage[];
-  participants?: Participants[];
-}
+import { useChatEntitiesStore, ChatEntity } from "@/store/chatEntitiesStore";
 
 type PinnedMessagesMap = Record<string, string[]>;
 
@@ -37,8 +27,13 @@ const ChatPage = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [totalUnreadCount, setTotalUnreadCount] = useState<number>(0);
-  const [entities, setEntities] = useState<ChatEntity[]>([]);
-  const [selectedEntity, setSelectedEntity] = useState<ChatEntity | null>(null);
+  const {
+    entities,
+    selectedEntity,
+    setEntities,
+    addEntity,
+    setSelectedEntity,
+  } = useChatEntitiesStore();
   const [showModal, setShowModal] = useState(false);
   const [pinnedMessagesMap, setPinnedMessagesMap] = useState<PinnedMessagesMap>({});
   const { participants, addParticipant } = useParticipantsStore();
@@ -324,6 +319,7 @@ const ChatPage = () => {
                             profilePicture: user.profilePicture,
                             role: "User",
                           };
+                          addParticipant(user.uid, newParticipant);
                           const newChatEntity: ChatEntity = {
                             id: user.uid,
                             name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
@@ -333,7 +329,8 @@ const ChatPage = () => {
                             groupMessages: [],
                             participants: [newParticipant],
                           };
-                          setEntities((prevEntities) => [...prevEntities, newChatEntity]);
+                          addParticipant(user.uid, [newParticipant]);
+                          addEntity(newChatEntity);
                         }}
                         onClose={() => setShowModal(false)}
                       />

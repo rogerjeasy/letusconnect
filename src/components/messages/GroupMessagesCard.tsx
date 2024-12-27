@@ -22,6 +22,7 @@ import ModalPopup from "@/components/forms/ModalPopup";
 import { toast } from "react-toastify";
 import { ModalAddMemberToGroup } from "./ChatManagementContentModals";
 import { useParticipantsStore } from "@/store/participantsStore";
+import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -56,6 +57,8 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const participants = useParticipantsStore((state) => state.participants);
 
   const chatParticipants = groupChatId ? participants[groupChatId] || [] : [];
+
+  const { updateEntity, entities } = useChatEntitiesStore();
 
   const [modalData, setModalData] = useState({
     isOpen: false,
@@ -92,10 +95,10 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       if (Array.isArray(participants)) {
         setParticipants(groupChatId, participants);
       }
+      updateEntity(groupChatId, { participants: chatParticipants });
     }
   }, [groupChatId]);
     
-
   const handleSendMessage = async () => {
     if (selectedFiles.length > 0) {
       await handleAddDocuments(selectedFiles, groupChatId || "", newMessage, token);
@@ -116,22 +119,25 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         setNewMessage,
         setSendingMessage
       );
-    } 
-    // else if (groupChatId && participants[groupChatId]?.length === 1) {
-    //   await sendDirectMessage(
-    //     participants[groupChatId][0].userId,
-    //     newMessage,
-    //     token,
-    //     (directMessages) =>
-    //       setMessages((prevMessages) =>
-    //         typeof directMessages === "function"
-    //           ? [...prevMessages, ...directMessages(prevMessages)]
-    //           : [...prevMessages, ...directMessages]
-    //       ),
-    //     setNewMessage,
-    //     setSendingMessage
-    //       );
-    //     }
+    } else if (!groupChatId && entities.length === 1) {
+      // Handle direct messages
+      const directRecipient = entities[0];
+      await sendDirectMessage(
+        directRecipient.id,
+        newMessage,
+        token,
+        (directMessages) =>
+          setMessages((prevMessages) =>
+            typeof directMessages === "function"
+              ? [...prevMessages, ...directMessages(prevMessages)]
+              : [...prevMessages, ...directMessages]
+          ),
+        setNewMessage,
+        setSendingMessage
+      );
+    } else {
+      toast.error("Cannot send a message: No valid group or direct chat identified.");
+    }
   };  
 
   const handleLeaveGroupClick = () => {
@@ -155,45 +161,43 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   };
 
   const renderHeaderContent = () => {
-    if (groupChatId && participants[groupChatId]) {
-      const chatParticipants = participants[groupChatId];
-      
-      if (chatParticipants.length === 1) {
-        const participant = chatParticipants[0];
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar
-              src={participant.profilePicture || ""}
-              alt={participant.username}
-              className="shadow-md"
-            />
-            <span className="text-lg font-semibold">{participant.username}</span>
-          </div>
-        );
-      }
-      
-      if (chatParticipants.length > 1) {
-        return (
-          <AvatarGroup size="md">
-            {chatParticipants.map((participant) => (
-              <Tooltip
-                key={participant.userId}
-                content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
-              >
-                <Avatar
-                  key={participant.userId}
-                  src={participant.profilePicture || ""}
-                  alt={participant.username}
-                  className="shadow-md"
-                />
-              </Tooltip>
-            ))}
-          </AvatarGroup>
-        );
-      }
+    if (entities.length === 1) {
+      const participant = entities[0];
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar
+            src={participant.avatar || ""}
+            alt={participant.name}
+            className="shadow-md"
+          />
+          <span className="text-lg font-semibold">{participant.name}</span>
+        </div>
+      );
     }
+  
+    if (chatParticipants.length > 1) {
+      return (
+        <AvatarGroup size="md">
+          {chatParticipants.map((participant) => (
+            <Tooltip
+              key={participant.userId}
+              content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
+            >
+              <Avatar
+                key={participant.userId}
+                src={participant.profilePicture || ""}
+                alt={participant.username}
+                className="shadow-md"
+              />
+            </Tooltip>
+          ))}
+        </AvatarGroup>
+      );
+    }
+  
     return <span className="text-lg font-semibold">Messages</span>;
   };
+  
 
   const groupMessagesByDate = () => {
     return messages.reduce((groups: Record<string, Message[]>, message) => {

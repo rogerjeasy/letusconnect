@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { useEffect } from "react";
 import { DateValue } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { useParticipantsStore } from "@/store/participantsStore"
 
 // Define the User interface to match the server-side model
 export interface User {
@@ -141,6 +142,10 @@ export const useUserStore = create<UserState>((set) => ({
 
   logout: () => {
     localStorage.clear();
+    const { clearParticipants } = useParticipantsStore.getState();
+    clearParticipants();
+    console.log("participants cleared");
+    console.log(useParticipantsStore.getState().participants);
     set({
       user: null,
       address: null,

@@ -22,15 +22,26 @@ export const useParticipantsStore = create<ParticipantsState>((set) => ({
       },
     })),
 
-  addParticipant: (chatId, participant) =>
-    set((state) => ({
-      participants: {
-        ...state.participants,
-        [chatId]: Array.isArray(participant)
-          ? [...(state.participants[chatId] || []), ...participant] 
-          : [...(state.participants[chatId] || []), participant],
-      },
-    })),
+    addParticipant: (chatId, participant) =>
+      set((state) => {
+        const existingParticipants = state.participants[chatId] || [];
+        const newParticipants = Array.isArray(participant) ? participant : [participant];
+    
+        // Filter out duplicates based on userId
+        const uniqueParticipants = newParticipants.filter(
+          (newParticipant) =>
+            !existingParticipants.some(
+              (existingParticipant) => existingParticipant.userId === newParticipant.userId
+            )
+        );
+    
+        return {
+          participants: {
+            ...state.participants,
+            [chatId]: [...existingParticipants, ...uniqueParticipants],
+          },
+        };
+      }),    
 
   removeParticipant: (chatId, userId) =>
     set((state) => ({
