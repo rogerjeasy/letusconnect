@@ -26,7 +26,6 @@ const ChatPage = () => {
   const currentUser = useUserStore((state) => state.user);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [totalUnreadCount, setTotalUnreadCount] = useState<number>(0);
   const {
@@ -218,6 +217,15 @@ const ChatPage = () => {
 
     const pusher = getPusherInstance();
     const notificationChannel = pusher?.subscribe(`user-notifications-${currentUser.uid}`);
+    const unreadCountChannel = pusher?.subscribe(`group-unread-counts-${currentUser.uid}`);
+
+    unreadCountChannel?.bind("update-unread-count", (data: { groupChatId: string; unreadCount: number }) => {
+      console.log("Unread count update received:", data);
+      setUnreadCounts((prevCounts) => ({
+        ...prevCounts,
+        [data.groupChatId]: data.unreadCount,
+      }));
+    });
 
     notificationChannel?.bind("new-unread-message", ({ senderId }: { senderId: string }) => {
       fetchUnreadCount(undefined, setUnreadCounts, senderId);
@@ -236,6 +244,7 @@ const ChatPage = () => {
 
     return () => {
       notificationChannel?.unbind_all();
+      unreadCountChannel?.unbind_all();
       pusher?.unsubscribe(`user-notifications-${currentUser.uid}`);
     };
   }, [currentUser, totalUnreadCount]);
