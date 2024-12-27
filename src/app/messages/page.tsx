@@ -220,7 +220,6 @@ const ChatPage = () => {
     const unreadCountChannel = pusher?.subscribe(`group-unread-counts-${currentUser.uid}`);
 
     unreadCountChannel?.bind("update-unread-count", (data: { groupChatId: string; unreadCount: number }) => {
-      console.log("Unread count update received:", data);
       setUnreadCounts((prevCounts) => ({
         ...prevCounts,
         [data.groupChatId]: data.unreadCount,
@@ -252,19 +251,23 @@ const ChatPage = () => {
 
   const handleEntityClick = async (entity: ChatEntity) => {
     setSelectedEntity(entity);
-  
+
     if (entity.type === "group") {
-      await markMessagesAsRead(entity.id);
+        await markMessagesAsRead(entity.id);
     } else if (entity.type === "user") {
-      await handleMessagesClick(entity.id, setTotalUnreadCount);
+        await handleMessagesClick(entity.id, setTotalUnreadCount);
     }
-  
-    setUnreadCounts((prevCounts) => ({
-      ...prevCounts,
-      [entity.id]: 0,
-    }));
-  
-  };
+
+    // Exclude setting unread counts if the entity is the selected one
+    setUnreadCounts((prevCounts) => {
+        const updatedCounts = { ...prevCounts };
+        if (entity.type === "group" && entity.id === selectedEntity?.id) {
+            delete updatedCounts[entity.id];
+        }
+        return updatedCounts;
+    });
+};
+
 
   useEffect(() => {
     if (selectedEntity?.type === "group" && selectedEntity.id) {
@@ -417,7 +420,7 @@ const ChatPage = () => {
                           <p className="font-semibold text-black">{entity.name}</p>
                           <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
                         </div>
-                        {unreadCounts[entity.id] > 0 && (
+                        {unreadCounts[entity.id] > 0 && entity.id !== selectedEntity?.id && (
                           // <Badge color="danger" className="ml-auto" size="sm">
                           //   {unreadCounts[user.uid]}
                           // </Badge>
