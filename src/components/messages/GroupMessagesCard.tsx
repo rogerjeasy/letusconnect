@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 import { ModalAddMemberToGroup, ModalRemoveMemberFromGroup } from "./ChatManagementContentModals";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
+import { getPusherInstance } from "@/helpers/pusher";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -48,8 +49,8 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const [newMessage, setNewMessage] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
-  const user = useUserStore((state) => state.user);
-  const currentUserId = user?.uid || "";
+  const currentUser = useUserStore((state) => state.user);
+  const currentUserId = currentUser?.uid || "";
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -114,6 +115,25 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       updateEntity(groupChatId, { participants: chatParticipants });
     }
   }, [groupChatId]);
+
+  useEffect(() => {
+    if (!currentUser || selectedEntity?.type !== "group" || !selectedEntity.id) return;
+  
+    const pusher = getPusherInstance();
+    const groupMessageChannel = pusher?.subscribe(`group-messages-${selectedEntity.id}`);
+  
+    // Listen for new group messages
+    groupMessageChannel?.bind("new-group-message", (newMessage: BaseMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      scrollToBottom();
+    });
+  
+    return () => {
+      groupMessageChannel?.unbind_all();
+      pusher?.unsubscribe(`group-messages-${selectedEntity.id}`);
+    };
+  }, [currentUser, selectedEntity]);
+  
     
   const handleSendMessage = async () => {
     if (selectedFiles.length > 0) {
@@ -133,7 +153,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         if (!uniqueMessages.has(newMessage.id)) {
           uniqueMessages.set(newMessage.id, newMessage);
         }
-  
         return Array.from(uniqueMessages.values());
       });
   

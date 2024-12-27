@@ -81,3 +81,71 @@ export const handleRemoveParticipantsFromGroup = async (
     }
   };
   
+  interface UnreadMessagesParams {
+    token: string;
+    groupChatId?: string;
+    projectId?: string;
+  }
+  
+  /**
+   * Function to fetch the count of unread messages for a group or project.
+   * @param params - Object containing token, groupChatId, and projectId.
+   * @returns Promise<number> - The count of unread messages.
+   */
+  export const handleGetUnreadMessagesGroup = async (
+    params: UnreadMessagesParams
+  ): Promise<number> => {
+    try {
+      const { token, groupChatId, projectId } = params;
+  
+      const queryParams = new URLSearchParams();
+      if (groupChatId) queryParams.append("groupChatId", groupChatId);
+      if (projectId) queryParams.append("projectId", projectId);
+  
+      const response = await api.get(`/api/group-chats/unread-messages/count?${queryParams.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (response.status >= 200 && response.status < 300) {
+        return response.data.unreadCount;
+      } else {
+        throw new Error(response.data.error || "Failed to fetch unread messages count");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while fetching unread messages count");
+      throw new Error(errorMessage);
+    }
+  };
+  
+
+/**
+ * Function to mark messages as read in a specific group chat.
+ * @param groupChatId - The ID of the group chat.
+ * @param token - Authorization token for API requests.
+ */
+export const handleMarkMessagesAsRead = async (
+    groupChatId: string,
+    token: string
+  ): Promise<void> => {
+    try {
+      const response = await api.patch(
+        `/api/group-chats/${groupChatId}/mark-messages-read`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        // toast.success(response.data.message || "Messages marked as read successfully");
+      } else {
+        throw new Error(response.data.error || "Failed to mark messages as read");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while marking messages as read");
+      throw errorMessage;
+    }
+  };
+  

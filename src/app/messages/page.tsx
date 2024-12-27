@@ -17,6 +17,8 @@ import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore, ChatEntity } from "@/store/chatEntitiesStore";
+import { handleGetUnreadMessagesGroup, handleMarkMessagesAsRead } from "@/components/messages/HandleGroupActions";
+import { toast } from "react-toastify";
 
 type PinnedMessagesMap = Record<string, string[]>;
 
@@ -54,11 +56,17 @@ const ChatPage = () => {
     
       setEntities(combinedEntities);
   
-      combinedEntities.forEach((entity) =>
+      // Fetch unread counts for direct messages
+      userEntities.forEach((entity) =>
         fetchUnreadCount(undefined, setUnreadCounts, entity.id)
+      );
+      // Fetch unread counts for group messages
+      groupEntities.forEach((entity) =>
+        fetchUnreadCountForEntity(entity.id)
       );
   
       fetchUnreadCount(setTotalUnreadCount);
+      // fetchUnreadCountForTotal();
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching chat entities:", errorMessage);
@@ -166,6 +174,43 @@ const ChatPage = () => {
       return [];
     }
   };
+
+  const fetchUnreadCountForEntity = async (entityId: string) => {
+    const token = localStorage.getItem("token") || "";
+    try {
+      const unreadCount = await handleGetUnreadMessagesGroup({
+        token,
+        groupChatId: entityId,
+      });
+      setUnreadCounts((prevCounts) => ({
+        ...prevCounts,
+        [entityId]: unreadCount,
+      }));
+    } catch (error) {
+      const errorMessage = handleError(error);
+      console.error("Error fetching unread count for entity:", entityId, errorMessage);
+      toast.error("Error fetching unread count for entity: " + errorMessage || "Unknown error");
+    }
+  };
+
+  const markMessagesAsRead = async (groupChatId: string) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You must be logged in to perform this action.");
+      return;
+    }
+  
+    try {
+      await handleMarkMessagesAsRead(groupChatId, token);
+      // Optionally update local state or UI
+      setUnreadCounts((prevCounts) => ({
+        ...prevCounts,
+        [groupChatId]: 0,
+      }));
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };  
        
 
   useEffect(() => {
@@ -198,14 +243,26 @@ const ChatPage = () => {
 
   const handleEntityClick = async (entity: ChatEntity) => {
     setSelectedEntity(entity);
-
+  
+    if (entity.type === "group") {
+      await markMessagesAsRead(entity.id);
+    } else if (entity.type === "user") {
+      await handleMessagesClick(entity.id, setTotalUnreadCount);
+    }
+  
     setUnreadCounts((prevCounts) => ({
       ...prevCounts,
       [entity.id]: 0,
     }));
-
-    await handleMessagesClick(entity.id, setTotalUnreadCount);
+  
   };
+
+  useEffect(() => {
+    if (selectedEntity?.type === "group" && selectedEntity.id) {
+      markMessagesAsRead(selectedEntity.id);
+    }
+  }, [selectedEntity]);  
+  
 
   const updatePinnedMessages = (groupChatId: string, messageId: string, isUnpin = false) => {
     setPinnedMessagesMap((prev) => {
