@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   ModalContent,
@@ -19,7 +19,7 @@ import { User, useUserStore } from "@/store/userStore";
 import { fetchUsersForGroup } from "./HandleParticipants";
 import { toast } from "react-toastify";
 import UsersSelection from "./UsersSelection";
-import { handleAddParticipants } from "./HandleGroupActions";
+import { handleAddParticipants, handleRemoveParticipantsFromGroup } from "./HandleGroupActions";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 
@@ -207,16 +207,28 @@ export const ModalAddMemberToGroup: React.FC<{
 }> = ({ isOpen, onClose, groupChatId, token }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<Participants[]>([]);
-  const [participantsList, setParticipantsList] = useState<Participants[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { addParticipant } = useParticipantsStore();
+  const [allUsers, setAllUsers] = useState<Participants[]>([]);
+
+  const currentParticipants = useParticipantsStore(
+    (state) => state.participants[groupChatId] || []
+  );
+  
+  // Filter out users already in the group
+  const participantsList = useMemo(() => {
+    return allUsers.filter(
+      (user) => !currentParticipants.some((participant) => participant.userId === user.userId)
+    );
+  }, [allUsers, currentParticipants]);
+
 
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const users = await fetchUsersForGroup();
-        setParticipantsList(users);
+        setAllUsers(users);
       } catch (error) {
         const errorMessage = handleError(error);
         toast.error("Failed to fetch users: " + errorMessage);
@@ -275,6 +287,84 @@ export const ModalAddMemberToGroup: React.FC<{
   );
 };
 
+interface ModalRemoveMemberFromGroupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  groupChatId: string;
+  token: string;
+}
+
+export const ModalRemoveMemberFromGroup: React.FC<ModalRemoveMemberFromGroupProps> = ({
+  isOpen,
+  onClose,
+  groupChatId,
+  token,
+}) => {
+  const participants = useMemo(
+    () => useParticipantsStore.getState().participants[groupChatId] || [],
+    [groupChatId]
+  );
+
+  const currentUserId = useUserStore((state) => state.user?.uid || "");
+
+  // Create a new list excluding the current user
+  const participantsNewList = useMemo(
+    () => participants.filter((participant) => participant.userId !== currentUserId),
+    [participants, currentUserId]
+  );
+
+  const [selectedUsers, setSelectedUsers] = useState<Participants[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { removeParticipant } = useParticipantsStore();
+
+  const handleUserSelection = (user: Participants) => {
+    setSelectedUsers((prev) =>
+      prev.find((selected) => selected.userId === user.userId)
+        ? prev.filter((selected) => selected.userId !== user.userId)
+        : [...prev, user]
+    );
+  };
+
+  const handleConfirm = async () => {
+    if (selectedUsers.length === 0) {
+      toast.error("Please select at least one participant.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const participantIds = selectedUsers.map((user) => user.userId);
+      await handleRemoveParticipantsFromGroup(groupChatId, participantIds, token);
+
+      selectedUsers.forEach((user) => removeParticipant(groupChatId, user.userId));
+      setSelectedUsers([]);
+      onClose();
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while removing participants.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <UsersSelection
+      isOpen={isOpen}
+      title="Remove Members from Group"
+      participants={participantsNewList}
+      selectedUsers={selectedUsers}
+      onSelectUser={handleUserSelection}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      isLoading={isLoading}
+      buttonLabel={`Remove Selected Participant${selectedUsers.length > 1 ? "s" : ""}`}
+      onConfirm={handleConfirm}
+      onCancel={onClose}
+    />
+  );
+};
 
 export const BrowseAllUsers: React.FC = () => {
   return (

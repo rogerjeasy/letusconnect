@@ -50,3 +50,34 @@ export const handleAddParticipants = async (
         throw errorMessage;
     }
 };
+
+/**
+ * Function to remove participants from a group.
+ * @param groupChatId - The ID of the group chat to remove participants from.
+ * @param participantIds - List of participant IDs to be removed.
+ * @param token - Authorization token for API requests.
+ */
+export const handleRemoveParticipantsFromGroup = async (
+    groupChatId: string,
+    participantIds: string[],
+    token: string
+  ): Promise<void> => {
+    try {
+      const response = await api.post(
+        `/api/group-chats/${groupChatId}/remove-participants`,
+        { participantIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        toast.success(response.data.message || "Participants removed successfully");
+      } else {
+        throw new Error(response.data.error || "Failed to remove participants");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while removing participants");
+      throw errorMessage;
+    }
+  };
+  

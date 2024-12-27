@@ -10,6 +10,7 @@ import { api, handleError } from "../../helpers/api";
 import { useUserStore } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 // Zod Schema for Form Validation
 const registrationSchema = z
@@ -78,11 +79,12 @@ const RegistrationForm = () => {
         uid: schoolExperienceData.uid,
         universities: schoolExperienceData.universities,
       });
-  
+      toast.success("Registration successful. Welcome to Let's Connect!");
       setSubmissionError(null);
       router.push("/dashboard");
     } catch (error) {
       const errorMessage = handleError(error);
+      toast.error("Failed to register. " + errorMessage);
       setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);

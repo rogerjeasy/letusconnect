@@ -20,7 +20,7 @@ import { handleLeaveGroup } from "./HandleGroupActions";
 import PDFAttachment from "./PDFAttachment";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { toast } from "react-toastify";
-import { ModalAddMemberToGroup } from "./ChatManagementContentModals";
+import { ModalAddMemberToGroup, ModalRemoveMemberFromGroup } from "./ChatManagementContentModals";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 
@@ -55,8 +55,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
   const { setParticipants, removeParticipant } = useParticipantsStore();
   const participants = useParticipantsStore((state) => state.participants);
+  const removeEntity = useChatEntitiesStore((state) => state.removeEntity);
+  const setSelectedEntity = useChatEntitiesStore((state) => state.setSelectedEntity);
 
   const chatParticipants = groupChatId
   ? participants[groupChatId] || []
@@ -169,17 +172,22 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       confirmLabel: "Leave",
       onConfirm: async () => {
         setModalData((prev) => ({ ...prev, isOpen: false }));
+  
         try {
           await handleLeaveGroup(groupChatId || "", token);
+  
           if (groupChatId) {
             removeParticipant(groupChatId, currentUserId);
+            removeEntity(groupChatId);
+            setSelectedEntity(null);
           }
         } catch (error) {
           toast.error("An error occurred while leaving the group.");
         }
       },
     });
-  };
+  };  
+
 
   const renderHeaderContent = () => {
     if (selectedEntity?.type === "user") {
@@ -284,6 +292,13 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
         token={token}
       />
 
+      <ModalRemoveMemberFromGroup
+        isOpen={isRemoveMemberModalOpen}
+        onClose={() => setIsRemoveMemberModalOpen(false)}
+        groupChatId={groupChatId || ""}
+        token={token}
+      />
+
       <Card className="h-full border shadow-md">
         <CardHeader className="flex items-center justify-between gap-2">
           {renderHeaderContent()}
@@ -292,7 +307,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
             participants={groupChatId ? participants[groupChatId] || [] : []}
             currentUserId={currentUserId}
             onAddUser={() => setIsAddMemberModalOpen(true)}
-            onRemoveUser={() => console.log("Remove user clicked")}
+            onRemoveUser={() => setIsRemoveMemberModalOpen(true)}
             onEditGroup={() => console.log("Edit group clicked")}
             onDeleteGroup={() => console.log("Delete group clicked")}
             onLeaveGroup={() => handleLeaveGroupClick()}
