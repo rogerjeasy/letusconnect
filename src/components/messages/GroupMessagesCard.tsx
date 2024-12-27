@@ -22,7 +22,7 @@ import ModalPopup from "@/components/forms/ModalPopup";
 import { toast } from "react-toastify";
 import { ModalAddMemberToGroup } from "./ChatManagementContentModals";
 import { useParticipantsStore } from "@/store/participantsStore";
-import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
+import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -32,6 +32,7 @@ interface GroupMessagesCardProps {
   initialMessages: Message[];
   participants?: Participants[];
   pinnedMessages: string[];
+  selectedEntity?: ChatEntity;
   updatePinnedMessages: (groupChatId: string, messageId: string, isUnpin?: boolean) => void;
 }
 
@@ -40,6 +41,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   token,
   initialMessages,
   pinnedMessages = [],
+  selectedEntity,
   updatePinnedMessages,
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -56,7 +58,11 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const { setParticipants, removeParticipant } = useParticipantsStore();
   const participants = useParticipantsStore((state) => state.participants);
 
-  const chatParticipants = groupChatId ? participants[groupChatId] || [] : [];
+  const chatParticipants = groupChatId
+  ? participants[groupChatId] || []
+  : selectedEntity?.type === "user" && selectedEntity.participants
+  ? selectedEntity.participants
+  : [];
 
   const { updateEntity, entities } = useChatEntitiesStore();
 
@@ -78,13 +84,20 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   };
 
   useEffect(() => {
-    if (groupChatId) {
+    if (groupChatId || initialMessages.length > 0) {
       setLoadingMessages(true);
       setMessages(initialMessages);
+      setNewMessage("");
+      setSelectedFiles([]);
       setLoadingMessages(false);
       scrollToBottom();
     }
+  
+    return () => {
+      setMessages([]); 
+    };
   }, [groupChatId, initialMessages]);
+  
 
   useEffect(() => {
     scrollToBottom();
@@ -105,33 +118,41 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       setSelectedFiles([]);
       return;
     }
+  
+    const addMessageToState = (newMessage: Message) => {
+      setMessages((prevMessages) => {
+        const uniqueMessages = new Map<string, Message>();
+  
+        // Add existing messages to the Map
+        prevMessages.forEach((msg) => uniqueMessages.set(msg.id, msg));
+  
+        // Add the new message only if it's not already in the Map
+        if (!uniqueMessages.has(newMessage.id)) {
+          uniqueMessages.set(newMessage.id, newMessage);
+        }
+  
+        return Array.from(uniqueMessages.values());
+      });
+  
+      scrollToBottom();
+    };
+  
     if (groupChatId) {
       await sendMessageToGroup(
         groupChatId,
         newMessage,
         token,
-        (groupMessages) =>
-          setMessages((prevMessages) =>
-            typeof groupMessages === "function"
-              ? [...prevMessages, ...groupMessages(prevMessages)]
-              : [...prevMessages, ...groupMessages]
-          ),
+        addMessageToState,
         setNewMessage,
         setSendingMessage
       );
-    } else if (!groupChatId && entities.length === 1) {
-      // Handle direct messages
-      const directRecipient = entities[0];
+    } else if (selectedEntity?.type === "user" && selectedEntity.participants?.length === 1) {
+      const directRecipient = selectedEntity;
       await sendDirectMessage(
         directRecipient.id,
         newMessage,
         token,
-        (directMessages) =>
-          setMessages((prevMessages) =>
-            typeof directMessages === "function"
-              ? [...prevMessages, ...directMessages(prevMessages)]
-              : [...prevMessages, ...directMessages]
-          ),
+        addMessageToState,
         setNewMessage,
         setSendingMessage
       );
@@ -161,42 +182,56 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   };
 
   const renderHeaderContent = () => {
-    if (entities.length === 1) {
-      const participant = entities[0];
-      return (
-        <div className="flex items-center gap-2">
-          <Avatar
-            src={participant.avatar || ""}
-            alt={participant.name}
-            className="shadow-md"
-          />
-          <span className="text-lg font-semibold">{participant.name}</span>
-        </div>
-      );
-    }
-  
-    if (chatParticipants.length > 1) {
-      return (
-        <AvatarGroup size="md">
-          {chatParticipants.map((participant) => (
-            <Tooltip
-              key={participant.userId}
-              content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
-            >
-              <Avatar
+    if (selectedEntity?.type === "user") {
+      if (selectedEntity.participants && selectedEntity.participants.length === 1) {
+        const participant = selectedEntity.participants[0];
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar
+              src={participant.profilePicture || ""}
+              alt={participant.username}
+              className="shadow-md"
+            />
+            <span className="text-lg font-semibold">{participant.username}</span>
+          </div>
+        );
+      }
+    } else if (groupChatId && participants[groupChatId]) {
+      const chatParticipants = participants[groupChatId];
+      if (chatParticipants.length === 1) {
+        const participant = chatParticipants[0];
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar
+              src={participant.profilePicture || ""}
+              alt={participant.username}
+              className="shadow-md"
+            />
+            <span className="text-lg font-semibold">{participant.username}</span>
+          </div>
+        );
+      } else if (chatParticipants.length > 1) {
+        return (
+          <AvatarGroup size="md">
+            {chatParticipants.map((participant) => (
+              <Tooltip
                 key={participant.userId}
-                src={participant.profilePicture || ""}
-                alt={participant.username}
-                className="shadow-md"
-              />
-            </Tooltip>
-          ))}
-        </AvatarGroup>
-      );
+                content={`${participant.username}${participant.role === "owner" ? " (Admin)" : ""}`}
+              >
+                <Avatar
+                  src={participant.profilePicture || ""}
+                  alt={participant.username}
+                  className="shadow-md"
+                />
+              </Tooltip>
+            ))}
+          </AvatarGroup>
+        );
+      }
     }
   
     return <span className="text-lg font-semibold">Messages</span>;
-  };
+  };  
   
 
   const groupMessagesByDate = () => {

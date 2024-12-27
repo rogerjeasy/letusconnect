@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import UsersSelection from "./UsersSelection";
 import { handleAddParticipants } from "./HandleGroupActions";
 import { useParticipantsStore } from "@/store/participantsStore";
+import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -33,6 +34,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
   const [participants, setParticipants] = useState<Participants[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = useUserStore((state) => state.user);
+  const { addEntity } = useChatEntitiesStore();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -81,6 +83,16 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
       };
       const response = await api.post("/api/group-chats", groupData, {
         headers: { Authorization: `Bearer ${token}` },
+      });
+      const groupChatId = response.data.groupChatId;
+      addEntity({
+        id: groupChatId,
+        name,
+        avatar: "",
+        type: "group",
+        directMessages: [],
+        groupMessages: [],
+        participants: selectedUsers,
       });
       toast.success(response.data.message || "Group created successfully.");
       setGroupName("");

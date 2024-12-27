@@ -377,19 +377,21 @@ const ChatPage = () => {
           <div className="w-3/4 h-full">
             {selectedEntity ? (
               <GroupMessagesCard
-              groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
-              token={localStorage.getItem("token") || ""}
-              initialMessages={
-                selectedEntity.type === "group"
-                  ? selectedEntity.groupMessages
-                  : selectedEntity.directMessages
-              }
-              participants={
-                selectedEntity.id ? participants[selectedEntity.id] || [] : []
-              }
-              pinnedMessages={pinnedMessagesMap[selectedEntity.id] || []}
-              updatePinnedMessages={updatePinnedMessages}
-            />                       
+                key={selectedEntity?.id}
+                groupChatId={selectedEntity.type === "group" ? selectedEntity.id : undefined}
+                token={localStorage.getItem("token") || ""}
+                initialMessages={
+                  selectedEntity.type === "group"
+                    ? selectedEntity.groupMessages
+                    : selectedEntity.directMessages
+                }
+                participants={
+                  selectedEntity.id ? participants[selectedEntity.id] || [] : []
+                }
+                pinnedMessages={pinnedMessagesMap[selectedEntity.id] || []}
+                selectedEntity={selectedEntity}
+                updatePinnedMessages={updatePinnedMessages}
+              />                       
             ) : (
               <p className="text-center">Select a chat to start messaging.</p>
             )}

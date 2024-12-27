@@ -4,6 +4,7 @@ import { BaseMessage, GroupChat } from "@/store/groupChat";
 import { Participants } from "@/store/project";
 import { handleError } from "@/helpers/api";
 import { DirectMessage } from "@/store/message";
+import { toast } from "react-toastify";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -12,7 +13,7 @@ type Message = BaseMessage | DirectMessage;
  * @param groupChatId - The ID of the group chat.
  * @param content - The message content to send.
  * @param token - User's authorization token.
- * @param setMessages - Function to update the list of messages.
+ * @param updateMessages - Callback to handle updating the message state.
  * @param setNewMessage - Function to clear the message input.
  * @param setSendingMessage - Function to indicate message-sending state.
  */
@@ -20,7 +21,7 @@ export const sendMessageToGroup = async (
   groupChatId: string,
   content: string,
   token: string,
-  setMessages: Dispatch<SetStateAction<Message[]>>,
+  updateMessages: (newMessage: BaseMessage) => void,
   setNewMessage: Dispatch<SetStateAction<string>>,
   setSendingMessage: Dispatch<SetStateAction<boolean>>
 ) => {
@@ -28,22 +29,23 @@ export const sendMessageToGroup = async (
 
   try {
     setSendingMessage(true);
-    const payload = { groupChatId, content };
 
+    const payload = { groupChatId, content };
     const response = await api.post(`/api/group-chats/messages`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     const sentMessage: BaseMessage = response.data.data;
-    setMessages((prevMessages) => [...prevMessages, sentMessage]);
+    updateMessages(sentMessage);
     setNewMessage("");
   } catch (error) {
     const errorMessage = handleError(error);
-    alert("Failed to send message. " + errorMessage);
+    toast.error("Failed to send message. " + errorMessage);
   } finally {
     setSendingMessage(false);
   }
 };
+
 
 /**
  * Fetch details of a specific group chat.
