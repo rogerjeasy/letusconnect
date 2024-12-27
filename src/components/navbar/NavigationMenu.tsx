@@ -13,7 +13,7 @@ import { testimonialsOptions } from "../dropdownoptions/testimonialOptions";
 import { groupsOptions } from "../dropdownoptions/forumOptions";
 import { SearchIcon } from "./SearchIcon";
 import { useRouter } from "next/navigation";
-import { FaComments } from "react-icons/fa";
+import { FaBell, FaComments } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
@@ -133,6 +133,39 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
                 </div>
               </Button>
             </Tooltip>
+
+            {/* Notification */}
+            <Tooltip
+              content={`You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`}
+              isDisabled={unreadCount === 0}
+            >
+              <Button
+                size="sm"
+                variant="light"
+                className="font-bold text-white"
+                onPress={() => {
+                  closeMenu();
+                  router.push("/notifications");
+                }}
+              >
+                <div className="relative">
+                  <FaBell className="text-green-500" />
+                  {unreadCount > 0 && (
+                    <Badge
+                      content={unreadCount}
+                      color="danger"
+                      size="sm"
+                      shape="circle"
+                      className="absolute -top-2 -right-2"
+                    >
+                      {unreadCount}
+                    </Badge>
+                  )}
+                  <span className="ml-2">Notification</span>
+                </div>
+              </Button>
+            </Tooltip>
+
 
             {/* Projects Dropdown */}
             <DropDownWithIcon
