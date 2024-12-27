@@ -211,17 +211,21 @@ export const ModalAddMemberToGroup: React.FC<{
   const { addParticipant } = useParticipantsStore();
   const [allUsers, setAllUsers] = useState<Participants[]>([]);
 
-  const currentParticipants = useParticipantsStore(
-    (state) => state.participants[groupChatId] || []
+  const currentParticipants = useMemo(
+    () => useParticipantsStore.getState().participants[groupChatId] || [],
+    [groupChatId]
   );
   
-  // Filter out users already in the group
+  const currentUser = useUserStore((state) => state.user);
+  
+  // Memoize participants list to filter out users already in the group and the current user
   const participantsList = useMemo(() => {
     return allUsers.filter(
-      (user) => !currentParticipants.some((participant) => participant.userId === user.userId)
+      (user) =>
+        user.userId !== currentUser?.uid && 
+        !currentParticipants.some((participant) => participant.userId === user.userId)
     );
-  }, [allUsers, currentParticipants]);
-
+  }, [allUsers, currentParticipants, currentUser?.uid]);
 
   useEffect(() => {
     const fetchUsers = async () => {
