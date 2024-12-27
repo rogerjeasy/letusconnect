@@ -10,9 +10,13 @@ import {
   DropdownMenu,
   DropdownItem,
   Button,
+  Modal,
+  ModalContent,
+  Tooltip,
 } from "@nextui-org/react";
-import { FaTimesCircle } from "react-icons/fa";
+import { FaTimesCircle, FaCog } from "react-icons/fa";
 import { ChevronDown } from "../navbar/Icons";
+import NotificationsSettings from "./NotificationsSettings";
 
 interface SearchAndFilterProps {
   onSearch: (query: string) => void;
@@ -29,6 +33,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortOption, setSortOption] = useState("date");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -48,7 +53,31 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
 
   return (
     <div className="mx-auto pt-16">
-      <Card className="p-6 shadow-lg">
+      <Card className="p-6 shadow-lg relative">
+        {/* Settings Icon with Tooltip */}
+        <Tooltip
+          content={
+            <Card className="p-4 shadow-md">
+              <h4 className="font-bold text-lg">Notification Settings</h4>
+              <p className="text-sm text-gray-600">
+                Manage notification preferences such as enabling/disabling notifications for messages, events, and system alerts.
+              </p>
+            </Card>
+          }
+          placement="top"
+          showArrow
+        >
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100 z-10"
+            style={{ boxSizing: "border-box" }}
+            >
+                <FaCog className="w-6 h-6" />
+        </button>
+
+
+        </Tooltip>
+
         <CardBody>
           <h2 className="text-2xl font-bold mb-6 text-center">
             🔍 Search and Filter Notifications
@@ -154,6 +183,20 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           </div>
         </CardBody>
       </Card>
+
+      {/* Settings Modal */}
+      <Modal
+        size="2xl"
+        isOpen={isSettingsOpen}
+        onOpenChange={(open) => setIsSettingsOpen(open)}
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <div className="p-6">
+            <NotificationsSettings />
+          </div>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
