@@ -48,7 +48,7 @@ export default function AboutHeroSection() {
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <Link href="/about">
+            <Link href="/get-started">
               <Button
                 radius="lg"
                 size="lg"
@@ -64,7 +64,7 @@ export default function AboutHeroSection() {
               </Button>
             </Link>
 
-            <Link href="/register">
+            <Link href="/explore-the-community">
               <Button
                 radius="lg"
                 size="lg"
