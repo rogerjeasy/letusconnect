@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 // Zod Schema for Form Validation
 const loginSchema = z.object({
@@ -35,19 +36,51 @@ const LoginForm = () => {
 
   const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
     setLoading(true);
+    setSubmissionError(null);
+  
     try {
       const response = await api.post("/api/users/login", data);
-
-      if (response.status === 200) {
+      
+      if (response.status === 200 && response.data) {
         const { user, token } = response.data;
-        setUser(user, token);
+        
+        if (!token || !user) {
+          throw new Error("Invalid response from server");
+        }
+  
+        // Update store with user and token
+        useUserStore.setState({
+          user,
+          token,
+          isAuthenticated: true,
+          loading: false,
+          hasChecked: false
+        });
+  
+        // Then update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+  
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-        setSubmissionError(null);
+        toast.success(response.data.message);
+  
         router.push("/dashboard");
+      } else {
+        throw new Error("Login failed");
       }
     } catch (error) {
       const errorMessage = handleError(error);
       setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");
+      
+      // Clean up on error
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      delete api.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }

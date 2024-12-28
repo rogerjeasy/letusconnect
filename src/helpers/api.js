@@ -3,7 +3,11 @@ import { getDomain } from "./getDomain";
 
 export const api = axios.create({
   baseURL: getDomain(),
-  headers: { "Content-Type": "application/json" }
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+},
+withCredentials: true
 });
 
 export const fileApi = axios.create({

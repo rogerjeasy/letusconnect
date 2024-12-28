@@ -57,7 +57,24 @@ const RegistrationForm = () => {
       });
   
       const { user, token } = response.data;
-      setUser(user, token);
+      // Update store with user and token
+      useUserStore.setState({
+        user,
+        token,
+        isAuthenticated: true,
+        loading: false,
+        hasChecked: false
+      });
+
+      // Then update localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      router.push("/dashboard");
   
       // Create school experience for the new user
       const schoolExperienceResponse = await api.post(

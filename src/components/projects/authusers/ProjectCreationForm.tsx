@@ -26,8 +26,7 @@ import { collaborationTypes, industries, skills, statuses } from "../../../store
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 
 const ProjectCreationForm = () => {
-  const user = useUserStore((state) => state.user);
-  const { isAuthenticated, restoreUser } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -51,10 +50,6 @@ const ProjectCreationForm = () => {
   const [participants, setParticipants] = useState<Participants[]>([]);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
 
   useEffect(() => {
     if (user) {

@@ -45,11 +45,12 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
     setProfileModalOpen(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLogoutModalOpen(false);
-    logout();
+    await logout(); 
     router.push("/");
   };
+  
   
 
   const handleSettingsRedirect = async () => {

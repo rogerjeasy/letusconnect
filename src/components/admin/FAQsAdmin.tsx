@@ -58,8 +58,8 @@ export default function FAQsAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newFAQ, setNewFAQ] = useState({ question: "", response: "", category: "" });
+  const { user, isAuthenticated } = useUserStore();
   const [loading, setLoading] = useState(false);
-  const { user, isAuthenticated, restoreUser, loading: userLoading } = useUserStore();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<string | null>(null);
@@ -67,11 +67,6 @@ export default function FAQsAdmin() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  // Restore user data on page load
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
   
   // Fetch FAQs when the component mounts
   useEffect(() => {
@@ -167,7 +162,7 @@ export default function FAQsAdmin() {
     currentPage * itemsPerPage
   );
 
-  if (userLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner size="lg" />

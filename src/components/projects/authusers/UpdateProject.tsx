@@ -31,7 +31,7 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
   });
 
   const user = useUserStore((state) => state.user);
-  const { isAuthenticated, restoreUser } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [modalProps, setModalProps] = useState({
     isOpen: false,
@@ -39,10 +39,6 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
     content: "",
     onConfirm: () => {},
   });
-
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
 
   const handleSubmit = async () => {
     setLoading(true);

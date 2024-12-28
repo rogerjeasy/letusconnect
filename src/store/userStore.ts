@@ -4,8 +4,9 @@ import { create } from "zustand";
 import { useEffect } from "react";
 import { DateValue } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
+import { api, handleError } from "@/helpers/api";
 
-// Define the User interface to match the server-side model
+// User interfaces remain the same
 export interface User {
   uid: string;
   username: string;
@@ -20,8 +21,6 @@ export interface User {
   currentJobTitle: string;
   areasOfExpertise: string[];
   interests: string[];
-  // connections: string[];
-  // connectionRequests: string[];
   lookingForMentor: boolean;
   willingToMentor: boolean;
   connectionsMade: number;
@@ -37,7 +36,6 @@ export interface User {
   projects: string[];
 }
 
-// Address Interface
 export interface UserAddress {
   street: string;
   city: string;
@@ -50,13 +48,6 @@ export interface UserAddress {
   id: string;
 }
 
-// Define the UserSchoolExperience interface
-export interface UserSchoolExperience {
-  uid: string;
-  universities: University[];
-}
-
-// Define the University interface
 export interface University {
   id: string;
   name: string;
@@ -70,13 +61,11 @@ export interface University {
   extracurriculars: string[];
 }
 
-// Define the UserWorkExperience interface
-export interface UserWorkExperience {
+export interface UserSchoolExperience {
   uid: string;
-  workExperiences: WorkExperience[];
+  universities: University[];
 }
 
-// Define the WorkExperience interface
 export interface WorkExperience {
   id: string;
   company: string;
@@ -89,106 +78,179 @@ export interface WorkExperience {
   achievements: string[];
 }
 
-// Define the store state
+export interface UserWorkExperience {
+  uid: string;
+  workExperiences: WorkExperience[];
+}
+
 interface UserState {
   user: User | null;
   address: UserAddress | null;
   schoolExperience: UserSchoolExperience | null;
   workExperience: UserWorkExperience | null;
   isAuthenticated: boolean;
+  hasChecked: boolean;
   loading: boolean;
+  token: string | null;
   setUser: (user: User, token: string) => void;
   setAddress: (address: UserAddress) => void;
   setSchoolExperience: (schoolExperience: UserSchoolExperience) => void;
   setWorkExperience: (workExperience: UserWorkExperience) => void;
   logout: () => void;
-  restoreUser: () => void;
+  checkSession: () => Promise<void>;
 }
 
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserState>()((set, get) => ({
   user: null,
   address: null,
   schoolExperience: null,
   workExperience: null,
   isAuthenticated: false,
   loading: true,
+  token: null,
+  hasChecked: false,
+
+
+  checkSession: async () => {
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    try {
+      set({ loading: true });
+      const response = await api.get('/api/users/session', {
+        withCredentials: true,
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${storedToken || get().token}`
+            }
+      });
+      if (response.status === 200 && response.data.user) {
+        set({
+          user: response.data.user,
+          token: response.data.token,
+          isAuthenticated: true,
+          loading: false,
+          hasChecked: true
+        });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', response.data.token);
+        }
+        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      } else {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          loading: false,
+          hasChecked: true
+        });
+      }
+    } catch (error) {
+      // toast.error("Failed to check session. Please log in again.");
+      localStorage.removeItem('token');
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        hasChecked: true
+      });
+    }
+  },
 
   setUser: (user: User, token: string) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-
+    if (token) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', token);
+      }
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
     set({
       user,
+      token,
       isAuthenticated: true,
       loading: false,
+      hasChecked: true
     });
   },
 
   setAddress: (address: UserAddress) => {
-    localStorage.setItem("address", JSON.stringify(address));
     set({ address });
   },
 
   setSchoolExperience: (schoolExperience: UserSchoolExperience) => {
-    localStorage.setItem("schoolExperience", JSON.stringify(schoolExperience));
     set({ schoolExperience });
   },
 
   setWorkExperience: (workExperience: UserWorkExperience) => {
-    localStorage.setItem("workExperience", JSON.stringify(workExperience));
     set({ workExperience });
   },
 
-  logout: () => {
-    localStorage.clear();
-    set({
-      user: null,
-      address: null,
-      schoolExperience: null,
-      workExperience: null,
-      isAuthenticated: false,
-      loading: false,
-    });
-  },
-
-  restoreUser: () => {
-    const user = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    const address = localStorage.getItem("address");
-    const schoolExperience = localStorage.getItem("schoolExperience");
-    const workExperience = localStorage.getItem("workExperience");
-
-    set({
-      user: user ? JSON.parse(user) : null,
-      address: address ? JSON.parse(address) : null,
-      schoolExperience: schoolExperience ? JSON.parse(schoolExperience) : null,
-      workExperience: workExperience ? JSON.parse(workExperience) : null,
-      isAuthenticated: !!user && !!token,
-      loading: false,
-    });
+  logout: async () => {
+    try {
+      // Optional: Call logout endpoint if you have one
+      await api.post('/api/users/logout');
+      
+      // Clear authorization header
+      delete api.defaults.headers.common['Authorization'];
+      localStorage.removeItem('token');
+      
+      // Reset store state
+      set({
+        user: null,
+        address: null,
+        schoolExperience: null,
+        workExperience: null,
+        isAuthenticated: false,
+        loading: false,
+        token: null,
+        hasChecked: false
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      localStorage.removeItem('token');
+      set({
+        user: null,
+        address: null,
+        schoolExperience: null,
+        workExperience: null,
+        isAuthenticated: false,
+        loading: false,
+        token: null,
+        hasChecked: false
+      });
+    }
   },
 }));
 
-// Custom hook for managing authentication
+// Custom hook for protected routes
 export function useAuth() {
-  const { user, isAuthenticated, restoreUser } = useUserStore();
+  const { user, isAuthenticated, loading } = useUserStore();
   const router = useRouter();
 
   useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
-
-  useEffect(() => {
-    if (!user || !isAuthenticated) {
+    if (!loading && (!user || !isAuthenticated)) {
       router.push("/login");
     }
-  }, [user, isAuthenticated, router]);
+  }, [user, isAuthenticated, loading, router]);
 
-  return { user, isAuthenticated };
+  return { user, isAuthenticated, loading };
 }
 
-// Function to generate a random avatar URL
-// export const generateRandomAvatar = (): string => {
-//   const uniqueId = Math.random().toString(36).substring(7);
-//   return `https://picsum.photos/seed/${uniqueId}/150/150?nature`;
-// };
+export function useInitializeAuth() {
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
+      try {
+        const user = JSON.parse(storedUser) as User;
+        useUserStore.getState().setUser(user, storedToken);
+      } catch (error) {
+        console.error('Failed to parse stored user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+}

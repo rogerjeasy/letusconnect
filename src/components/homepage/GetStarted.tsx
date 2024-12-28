@@ -9,13 +9,9 @@ import { useRouter } from "next/navigation";
 import ModalPopup from "@/components/forms/ModalPopup";
 
 export default function GetStartedPage() {
-  const { user, isAuthenticated, restoreUser } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
 
   const handleCompleteProfileClick = () => {
     if (isAuthenticated && user) {

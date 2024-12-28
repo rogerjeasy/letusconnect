@@ -7,18 +7,34 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function HeroSectionDashboard() {
-  const { user, isAuthenticated, restoreUser } = useUserStore();
+  const { user, isAuthenticated, loading, checkSession } = useUserStore();
   const router = useRouter();
 
   useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
+    if (!isAuthenticated) {
+      checkSession();
+    }
+  }, [checkSession, isAuthenticated]);
 
   const userName = user?.username || "User";
   const stats = {
     newConnections: 10,
     upcomingEvents: 5,
   };
+
+   // While loading, show a loading state
+   if (loading) {
+    return (
+      <section className="bg-gradient-to-r from-blue-50 via-white to-blue-50 py-16">
+        <div className="container mx-auto px-6 lg:px-20 text-center">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-gradient-to-r from-blue-50 via-white to-blue-50 py-16">

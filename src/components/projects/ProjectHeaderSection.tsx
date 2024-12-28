@@ -5,11 +5,8 @@ import Link from "next/link";
 import { useUserStore } from "@/store/userStore";
 
 const ProjectHeaderSection = () => {
-  const { user, isAuthenticated, restoreUser } = useUserStore();
+  const { isAuthenticated } = useUserStore();
 
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
 
   return (
     <div
