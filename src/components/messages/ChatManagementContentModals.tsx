@@ -22,6 +22,7 @@ import UsersSelection from "./UsersSelection";
 import { handleAddParticipants, handleRemoveParticipantsFromGroup } from "./HandleGroupActions";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
+import { tr } from "framer-motion/client";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -231,8 +232,8 @@ export const ModalAddMemberToGroup: React.FC<{
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        const users = await fetchUsersForGroup();
-        setAllUsers(users);
+        const { participants, users } = await fetchUsersForGroup(true);
+        setAllUsers(participants);
       } catch (error) {
         const errorMessage = handleError(error);
         toast.error("Failed to fetch users: " + errorMessage);
@@ -240,11 +241,12 @@ export const ModalAddMemberToGroup: React.FC<{
         setIsLoading(false);
       }
     };
-
+  
     if (isOpen) {
       fetchUsers();
     }
   }, [isOpen]);
+  
 
   const handleUserSelection = (user: Participants) => {
     setSelectedUsers((prev) =>

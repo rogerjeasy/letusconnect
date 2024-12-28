@@ -40,7 +40,7 @@ export default function UserAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const { user, isAuthenticated, restoreUser } = useUserStore();
+  const { user, isAuthenticated } = useUserStore();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
@@ -48,10 +48,6 @@ export default function UserAdmin() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  useEffect(() => {
-    restoreUser();
-  }, [restoreUser]);
 
   const fetchUsers = async () => {
     setLoading(true);

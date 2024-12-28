@@ -61,7 +61,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const participants = useParticipantsStore((state) => state.participants);
   const removeEntity = useChatEntitiesStore((state) => state.removeEntity);
   const setSelectedEntity = useChatEntitiesStore((state) => state.setSelectedEntity);
-  const [pusherSubscribed, setPusherSubscribed] = useState(false);
 
   const chatParticipants = groupChatId
   ? participants[groupChatId] || []
@@ -117,29 +116,55 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     }
   }, [groupChatId]);
 
-useEffect(() => {
-  if (!currentUser || !selectedEntity?.id || selectedEntity?.type !== "group") return;
-
-  const pusher = getPusherInstance();
-
-  // Subscribe to the specific group message channel
-  const groupMessageChannel = pusher?.subscribe(`group-messages-${selectedEntity.id}`);
-
-  groupMessageChannel?.bind("new-group-message", (newMessage: BaseMessage) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    scrollToBottom();
-
-    // Notify only if the message is not from the current user and it's in the currently selected group
-    if (newMessage.senderId !== currentUser?.uid) {
-      toast.success(`New message from ${newMessage.senderName}`);
+  useEffect(() => {
+    if (!currentUser || !selectedEntity?.id) return;
+  
+    const pusher = getPusherInstance();
+  
+    // Subscribe to the specific group message channel
+    if (selectedEntity.type === "group") {
+      const groupMessageChannel = pusher?.subscribe(`group-messages-${selectedEntity.id}`);
+  
+      groupMessageChannel?.bind("new-group-message", (newMessage: BaseMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        scrollToBottom();
+  
+        // Notify only if the message is not from the current user
+        if (newMessage.senderId !== currentUser?.uid) {
+          toast.success(`New message from ${newMessage.senderName}`);
+        }
+      });
+  
+      // Unsubscribe cleanup
+      return () => {
+        groupMessageChannel?.unbind_all();
+        pusher?.unsubscribe(`group-messages-${selectedEntity.id}`);
+      };
     }
-  });
-
-  return () => {
-    groupMessageChannel?.unbind_all();
-    pusher?.unsubscribe(`group-messages-${selectedEntity.id}`);
-  };
-}, [currentUser?.uid, selectedEntity?.id, selectedEntity?.type]);
+  
+    // Handle private (direct) messages
+    if (selectedEntity.type === "user") {
+      const channelId = [currentUser?.uid, selectedEntity.id].sort().join("-");
+      const directMessageChannel = pusher?.subscribe(`private-messages-${channelId}`);
+  
+      directMessageChannel?.bind("new-direct-message", (newMessage: DirectMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        scrollToBottom();
+  
+        // Notify only if the message is not from the current user
+        if (newMessage.senderId !== currentUser?.uid) {
+          toast.success(`New message from ${newMessage.senderName}`);
+        }
+      });
+  
+      // Unsubscribe cleanup
+      return () => {
+        directMessageChannel?.unbind_all();
+        pusher?.unsubscribe(`private-messages-${channelId}`);
+      };
+    }
+  }, [currentUser?.uid, selectedEntity?.id, selectedEntity?.type]);
+  
    
     
   const handleSendMessage = async () => {
@@ -213,7 +238,6 @@ useEffect(() => {
       },
     });
   };  
-
 
   const renderHeaderContent = () => {
     if (selectedEntity?.type === "user") {

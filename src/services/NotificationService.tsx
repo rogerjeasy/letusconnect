@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { toast } from "react-toastify";
 import { useUserStore } from "@/store/userStore";
@@ -15,20 +15,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!currentUser?.uid) return;
 
     const pusher = getPusherInstance();
-    
-    // Subscribe to user-specific notifications
-    const userNotificationChannel = pusher?.subscribe(`user-notifications-new-msg-${currentUser.uid}`);
-    
-    userNotificationChannel?.bind(
+
+    // Subscribe to user-specific notifications for group messages
+    const groupNotificationChannel = pusher?.subscribe(`user-notifications-new-msg-${currentUser.uid}`);
+    groupNotificationChannel?.bind(
       "new-unread-message",
-      (data: { 
-        groupChatId: string; 
-        senderName: string; 
-        content: string; 
-        messageId: string 
-      }) => {
-        // Don't show notification if this group is currently selected
-        if (selectedEntity?.id === data.groupChatId) {
+      (data: { groupChatId: string; senderName: string; content: string }) => {
+        // Suppress notification if the user is currently viewing the group
+        if (selectedEntity?.type === "group" && selectedEntity?.id === data.groupChatId) {
           return;
         }
 
@@ -37,9 +31,27 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     );
 
+    // Subscribe to direct message notifications
+    const directNotificationChannel = pusher?.subscribe(`user-notifications-direct-msg-${currentUser.uid}`);
+    directNotificationChannel?.bind(
+      "update-unread-count",
+      (data: { senderId: string; senderName: string; content: string }) => {
+        // Suppress notification if the user is currently viewing the direct chat
+        if (selectedEntity?.type === "user" && selectedEntity?.id === data.senderId) {
+          return;
+        }
+
+        toast.info(`New direct message from ${data.senderName}`);
+      }
+    );
+
+    // Clean up subscriptions
     return () => {
-      userNotificationChannel?.unbind_all();
+      groupNotificationChannel?.unbind_all();
       pusher?.unsubscribe(`user-notifications-new-msg-${currentUser.uid}`);
+
+      directNotificationChannel?.unbind_all();
+      pusher?.unsubscribe(`user-notifications-direct-msg-${currentUser.uid}`);
     };
   }, [currentUser?.uid, entities, selectedEntity]);
 

@@ -5,9 +5,12 @@ import { toast } from "react-toastify";
 
 /**
  * Fetch users excluding the current user.
- * @returns A list of participants (filtered users).
+ * @param returnAlsoUsers - If true, both participants and users will be returned.
+ * @returns A list of participants, and optionally users if the flag is true.
  */
-export const fetchUsersForGroup = async (): Promise<Participants[]> => {
+export const fetchUsersForGroup = async (
+    returnAlsoUsers: boolean = false
+): Promise<{ participants: Participants[]; users?: User[] }> => {
   try {
     const currentUser = useUserStore.getState().user;
     const response = await api.get("/api/users");
@@ -22,10 +25,18 @@ export const fetchUsersForGroup = async (): Promise<Participants[]> => {
         role: "Member",
       }));
 
-    return fetchedParticipants;
+    if (returnAlsoUsers) {
+      const fetchedUsers = response.data.users.filter(
+        (user: User) => user.uid !== currentUser?.uid
+      );
+
+      return { participants: fetchedParticipants, users: fetchedUsers };
+    }
+
+    return { participants: fetchedParticipants };
   } catch (error) {
     const errorMessage = handleError(error);
     toast.error(errorMessage || "An error occurred while loading users");
-    return [];
+    return { participants: [] };
   }
 };

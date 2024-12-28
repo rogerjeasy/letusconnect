@@ -6,6 +6,7 @@ export interface Message {
     createdAt: string;
     messageType: string;
     attachments: string[];
+    senderName: string;
   }
 
 export interface DirectMessage extends Message {

@@ -23,7 +23,7 @@ import { toast } from "react-toastify";
 type PinnedMessagesMap = Record<string, string[]>;
 
 const ChatPage = () => {
-  const currentUser = useUserStore((state) => state.user);
+  const { user: currentUser} = useUserStore();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
@@ -55,11 +55,9 @@ const ChatPage = () => {
     
       setEntities(combinedEntities);
   
-      // Fetch unread counts for direct messages
       userEntities.forEach((entity) =>
         fetchUnreadCount(undefined, setUnreadCounts, entity.id)
       );
-      // Fetch unread counts for group messages
       groupEntities.forEach((entity) =>
         fetchUnreadCountForEntity(entity.id)
       );
@@ -82,57 +80,67 @@ const ChatPage = () => {
       });
   
       const messages: Messages[] = response.data.messages;
-      const receiverMessagesMap: Record<string, DirectMessage[]> = {};
-  
+      const directMessagesMap: Record<string, DirectMessage[]> = {};
+
       messages.forEach((message) => {
         message.directMessages.forEach((dm) => {
-          if (!receiverMessagesMap[dm.receiverName]) {
-            receiverMessagesMap[dm.receiverName] = [];
+          // Create a unique key based on senderId and receiverId to group messages
+          const userKey = [dm.senderId, dm.receiverId].sort().join("-");
+          if (!directMessagesMap[userKey]) {
+            directMessagesMap[userKey] = [];
           }
-          receiverMessagesMap[dm.receiverName].push(dm);
+          directMessagesMap[userKey].push(dm);
         });
       });
   
       const usersResponse = await api.get("/api/users");
       const fetchedUsers: User[] = usersResponse.data.users;
-
+  
       // Filter all users except the current user
       const allUsers: User[] = fetchedUsers.filter((user) => user.uid !== currentUser?.uid);
       setUsers(allUsers);
   
       const userEntities: ChatEntity[] = fetchedUsers
         .filter((user) => user.uid !== currentUser?.uid)
-        .filter((user) => receiverMessagesMap[user.username])
-        .map((user) => ({
-          id: user.uid,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
-          avatar: user.profilePicture,
-          type: "user",
-          directMessages: receiverMessagesMap[user.username] || [],
-          groupMessages: [],
-          participants: [
-            {
-              userId: user.uid,
-              username: user.username,
-              email: user.email,
-              profilePicture: user.profilePicture,
-              role: "",
-            },
-          ],
-        }));
-      
+        .filter((user) => {
+          const userKey = [currentUser?.uid, user.uid].sort().join("-");
+          return directMessagesMap[userKey];
+        })
+        .map((user) => {
+          const userKey = [currentUser?.uid, user.uid].sort().join("-");
+          return {
+            id: user.uid,
+            name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
+            avatar: user.profilePicture,
+            type: "user",
+            directMessages: directMessagesMap[userKey] || [],
+            groupMessages: [],
+            participants: [
+              {
+                userId: user.uid,
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                role: "",
+              },
+            ],
+          };
+        });
+
+  
       // Add participants to the store
-    userEntities.forEach((entity) => {
-      addParticipant(entity.id, entity.participants || []);
-    });
+      userEntities.forEach((entity) => {
+        addParticipant(entity.id, entity.participants || []);
+      });
   
       return userEntities;
     } catch (error) {
       const errorMessage = handleError(error);
-      console.error("Error fetching user messages:", errorMessage);
+      toast.error("Error fetching user messages:", errorMessage);
       return [];
     }
-  };  
+  };
+  
 
   const fetchGroupChatMessages = async (): Promise<ChatEntity[]> => {
     const token = localStorage.getItem("token");
