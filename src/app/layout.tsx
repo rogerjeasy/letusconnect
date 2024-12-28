@@ -4,8 +4,9 @@ import Providers from "@/components/Providers";
 import TopNav from "@/components/navbar/TopNav";
 import AuthWrapper from "@/components/AuthWrapper";
 import Footer from "@/components/homepage/Footer";
-import { ToastContainer } from "react-toastify"; 
-import "react-toastify/dist/ReactToastify.css"; 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { NotificationProvider } from "@/services/NotificationService";
 
 export const metadata: Metadata = {
   title: "Let Us Connect",
@@ -21,12 +22,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-gray-100">
         <Providers>
-          <AuthWrapper>
-            <TopNav />
-            <main className="pt-16">{children}</main>
-            <Footer />
-          </AuthWrapper>
-          <ToastContainer position="top-center" autoClose={10000} /> 
+          <NotificationProvider>
+            <AuthWrapper>
+              <TopNav />
+              <main className="pt-16">{children}</main>
+              <Footer />
+            </AuthWrapper>
+          </NotificationProvider>
+          <ToastContainer position="top-center" autoClose={10000} />
         </Providers>
       </body>
     </html>

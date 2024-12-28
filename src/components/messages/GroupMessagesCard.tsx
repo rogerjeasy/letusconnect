@@ -61,6 +61,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
   const participants = useParticipantsStore((state) => state.participants);
   const removeEntity = useChatEntitiesStore((state) => state.removeEntity);
   const setSelectedEntity = useChatEntitiesStore((state) => state.setSelectedEntity);
+  const [pusherSubscribed, setPusherSubscribed] = useState(false);
 
   const chatParticipants = groupChatId
   ? participants[groupChatId] || []
@@ -116,36 +117,30 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     }
   }, [groupChatId]);
 
-  useEffect(() => {
-    if (!currentUser || !selectedEntity?.id || selectedEntity?.type !== "group") return;
-  
-    const pusher = getPusherInstance();
-    const groupMessageChannel = pusher?.subscribe(`group-messages-${selectedEntity.id}`);
-    const userNotificationChannel = pusher?.subscribe(`user-notifications-new-msg-${currentUser.uid}`);
-  
-    groupMessageChannel?.bind("new-group-message", (newMessage: BaseMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      scrollToBottom();
-  
-      if (newMessage.senderId !== currentUser?.uid && selectedEntity?.id !== selectedEntity?.id) {
-        toast.success(`New message from ${newMessage.senderName}`);
-      }
-    });
-  
-    userNotificationChannel?.bind("new-unread-message", (data: { groupChatId: string; senderName: string; content: string; messageId: string }) => {
-      const groupName = entities.find((entity) => entity.id === data.groupChatId)?.name || "a group";
-      if (selectedEntity?.id !== data.groupChatId) {
-        toast.info(`New message from ${data.senderName} in ${groupName}`);
-      }
-    });
-  
-    return () => {
-      groupMessageChannel?.unbind_all();
-      pusher?.unsubscribe(`group-messages-${selectedEntity.id}`);
-      userNotificationChannel?.unbind_all();
-      pusher?.unsubscribe(`user-notifications-new-msg-${currentUser.uid}`);
-    };
-  }, [currentUser?.uid, selectedEntity?.id, selectedEntity?.type]);
+useEffect(() => {
+  if (!currentUser || !selectedEntity?.id || selectedEntity?.type !== "group") return;
+
+  const pusher = getPusherInstance();
+
+  // Subscribe to the specific group message channel
+  const groupMessageChannel = pusher?.subscribe(`group-messages-${selectedEntity.id}`);
+
+  groupMessageChannel?.bind("new-group-message", (newMessage: BaseMessage) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    scrollToBottom();
+
+    // Notify only if the message is not from the current user and it's in the currently selected group
+    if (newMessage.senderId !== currentUser?.uid) {
+      toast.success(`New message from ${newMessage.senderName}`);
+    }
+  });
+
+  return () => {
+    groupMessageChannel?.unbind_all();
+    pusher?.unsubscribe(`group-messages-${selectedEntity.id}`);
+  };
+}, [currentUser?.uid, selectedEntity?.id, selectedEntity?.type]);
+   
     
   const handleSendMessage = async () => {
     if (selectedFiles.length > 0) {
