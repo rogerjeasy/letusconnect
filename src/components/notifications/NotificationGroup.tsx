@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import NotificationCard from "./NotificationCard";
 
@@ -15,14 +14,17 @@ interface NotificationGroupProps {
     isRead: boolean;
   }[];
   onActionClick: (id: string, action: string) => void;
+  onRefresh: () => void; // Add refresh callback
 }
 
-const NotificationGroup: React.FC<NotificationGroupProps> = ({ 
-  date, 
-  notifications, 
-  onActionClick 
+const NotificationGroup: React.FC<NotificationGroupProps> = ({
+  date,
+  notifications,
+  onActionClick,
+  onRefresh
 }) => {
   const [visibleCount, setVisibleCount] = useState(10);
+  const userToken = localStorage.getItem("token");
 
   const handleSeeMore = () => {
     setVisibleCount((prev) => prev + 10);
@@ -30,6 +32,10 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
 
   const handleSeeLess = () => {
     setVisibleCount((prev) => Math.max(10, prev - 10));
+  };
+
+  const createUniqueKey = (notification: NotificationGroupProps["notifications"][0], index: number) => {
+    return `${date}_${notification.id}_${index}`;
   };
 
   const visibleNotifications = notifications.slice(0, visibleCount);
@@ -45,14 +51,25 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
 
       {/* Card Container with fixed width and spacing */}
       <div className="space-y-4">
-        {visibleNotifications.map((notification) => (
-          <div key={notification.id} className="mx-auto">
-            <NotificationCard
-              {...notification}
-              onActionClick={onActionClick}
-            />
-          </div>
-        ))}
+        {visibleNotifications.map((notification, index) => {
+          const uniqueKey = createUniqueKey(notification, index);
+          return (
+            <div key={uniqueKey} className="mx-auto">
+              <NotificationCard
+                id={notification.id} 
+                title={notification.title}
+                content={notification.content}
+                type={notification.type}
+                time={notification.time}
+                priority={notification.priority}
+                isRead={notification.isRead}
+                token={userToken || ""}
+                onActionClick={onActionClick}
+                onReadStatusChange={onRefresh}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}

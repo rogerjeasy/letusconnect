@@ -21,20 +21,17 @@ export const handleFetchTargetedNotifications = async (
   lastNotificationId?: string
 ): Promise<Notification[]> => {
   try {
-    // Construct query parameters
     const params = new URLSearchParams();
     params.append('limit', limit.toString());
     if (lastNotificationId) {
       params.append('lastNotificationId', lastNotificationId);
     }
 
-    // Make API request
     const response = await api.get<NotificationResponse>(
       `/api/notifications/targeted?${params.toString()}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    // Check if response is successful
     if (response.status >= 200 && response.status < 300) {
       return response.data.notifications || [];
     } else {
@@ -99,3 +96,31 @@ export const handleFetchNotificationStats = async (
     }
   };
   
+/**
+ * Function to mark a notification as read.
+ * @param token - Authorization token for API requests
+ * @param notificationId - ID of the notification to mark as read
+ * @returns Promise containing the success message
+ */
+export const handleMarkNotificationAsRead = async (
+    token: string,
+    notificationId: string
+  ): Promise<string> => {
+    try {
+      const response = await api.patch<{ message: string; error?: string }>(
+        `/api/notifications/${notificationId}`,
+        {}, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        return response.data.message;
+      } else {
+        throw new Error(response.data?.error || "Failed to mark notification as read");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while marking notification as read");
+      throw errorMessage;
+    }
+  };

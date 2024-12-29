@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Badge, Card, Divider, Avatar } from "@nextui-org/react";
 import { FaEnvelope, FaCalendar, FaBell, FaExclamation, FaCog } from "react-icons/fa";
 import NotificationModalPopup from "@/components/notifications/NotificationModalPopup";
+import { handleMarkNotificationAsRead } from "./HandleNotificationAPIs";
 
 interface NotificationCardProps {
   id: string;
@@ -12,7 +13,9 @@ interface NotificationCardProps {
   time: string;
   priority: string;
   isRead: boolean;
+  token: string; 
   onActionClick: (id: string, action: string) => void;
+  onReadStatusChange?: () => void; 
 }
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
@@ -23,15 +26,36 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   time,
   priority,
   isRead,
+  token,
   onActionClick,
+  onReadStatusChange,
 }) => {
   const [read, setRead] = useState(isRead);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleCardClick = () => {
-    if (!read) {
-      setRead(true);
-      onActionClick(id, "mark-as-read");
+  const getOriginalId = (compositeId: string): string => {
+    const parts = compositeId.split('_');
+    return parts.length > 1 ? parts.slice(1).join('_') : compositeId;
+  };
+
+  const handleCardClick = async () => {
+    if (!read && !isLoading) {
+      setIsLoading(true);
+      try {
+        const originalId = getOriginalId(id);
+        console.log("Original notification id:", originalId);
+        
+        await handleMarkNotificationAsRead(token, originalId);
+        setRead(true);
+        onActionClick(originalId, "mark-as-read");
+        onReadStatusChange?.();
+      } catch (error) {
+        // Error is already handled by handleMarkNotificationAsRead
+        console.error("Failed to mark notification as read:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     setModalOpen(true);
   };
@@ -54,7 +78,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   };
 
   const notification = {
-    id,
+    id: getOriginalId(id),
     title,
     content,
     type,
@@ -124,7 +148,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         isOpen={modalOpen}
         notification={notification}
         onClose={() => setModalOpen(false)}
-        onAction={onActionClick}
+        onAction={(actionId, action) => onActionClick(getOriginalId(actionId), action)}
       />
     </>
   );

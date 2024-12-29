@@ -36,6 +36,7 @@ interface SearchAndFilterProps {
     }[];
   };
   onActionClick: (id: string, action: string) => void;
+  onRefreshNotifications: () => void;
 }
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
@@ -44,6 +45,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   onSortChange,
   groupedNotifications,
   onActionClick,
+  onRefreshNotifications,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -212,6 +214,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
                         date={date}
                         notifications={notifications}
                         onActionClick={onActionClick}
+                        onRefresh={onRefreshNotifications}
                     />
                     ))}
                 </div>

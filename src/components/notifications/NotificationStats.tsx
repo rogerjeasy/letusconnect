@@ -46,11 +46,16 @@ const NotificationStats: React.FC<NotificationStatsProps> = ({ token }) => {
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <tr key={index} className={`${row.bgColor} hover:bg-gray-100`}>
+            <tr
+              key={index}
+              className={`${row.bgColor} transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-lg`}
+            >
               <td className="p-3 border-b border-gray-200 font-medium text-gray-700">
                 {row.label}
               </td>
-              <td className="p-3 border-b border-gray-200 text-gray-800">{row.value}</td>
+              <td className="p-3 border-b border-gray-200 text-gray-800">
+                {row.value}
+              </td>
             </tr>
           ))}
         </tbody>

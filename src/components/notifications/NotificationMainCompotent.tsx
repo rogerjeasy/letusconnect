@@ -93,7 +93,8 @@ const NotificationsPage: React.FC = () => {
     targetedUsers: notification.targetedUsers
   });
 
-  const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNotifications => {
+  // NotificationsPage.tsx
+const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNotifications => {
     const grouped = _.groupBy(notifs, (notification) => {
       const date = new Date(notification.createdAt);
       const today = new Date();
@@ -104,10 +105,17 @@ const NotificationsPage: React.FC = () => {
       if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
       return "Earlier";
     });
-
-    // Transform the notifications in each group
+  
+    // Transform the notifications in each group and ensure unique keys
     return Object.entries(grouped).reduce((acc, [date, notifications]) => {
-      acc[date] = notifications.map(transformNotification);
+      // Sort notifications by createdAt
+      const sortedNotifications = _.sortBy(notifications, 'createdAt').reverse();
+      
+      // Add the date prefix to make IDs unique across groups
+      acc[date] = sortedNotifications.map(notification => ({
+        ...transformNotification(notification),
+        id: `${date}_${notification.id}` // Make ID unique by prefixing with date
+      }));
       return acc;
     }, {} as TransformedGroupedNotifications);
   };
@@ -152,9 +160,24 @@ const NotificationsPage: React.FC = () => {
     setFilteredNotifications(sorted);
   };
 
-  const handleActionClick = (id: string, action: string) => {
-    console.log("Action:", action, "for ID:", id);
-    // Implement your action handling logic here
+  const handleActionClick = async (id: string, action: string) => {
+    try {
+      // Extract the original ID by removing the index suffix
+      const originalId = id.split('_')[1];
+      console.log("Action:", action, "for ID:", originalId);
+      
+      switch (action) {
+        case "mark-as-read":
+          // Use the original ID for API calls
+          break;
+        default:
+          console.log("Unhandled action:", action);
+      }
+      
+      await fetchNotifications(true);
+    } catch (error) {
+      console.error("Error handling action:", error);
+    }
   };
 
   const groupedNotifications = groupNotificationsByDate(filteredNotifications);
@@ -167,7 +190,8 @@ const NotificationsPage: React.FC = () => {
         onSortChange={handleSortChange}
         groupedNotifications={groupedNotifications}
         onActionClick={handleActionClick}
-      />
+        onRefreshNotifications={fetchNotifications}
+        />
     </div>
   );
 };
