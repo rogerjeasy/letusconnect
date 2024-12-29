@@ -44,22 +44,31 @@ export default function UserEducation() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [, setFieldValues] = useState<Record<number, Partial<University>>>({});
 
+  const proxyApi = {
+    get: async (endpoint: string) => {
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to fetch: ${response.statusText}`);
+      }
+      return response.json();
+    }
+  };
+
   const fetchUniversities = async (country: string) => {
-    const endpoint = country
-      ? `http://universities.hipolabs.com/search?country=${country}`
-      : "http://universities.hipolabs.com/search";
+    const endpoint = country 
+    ? `/api/proxy/universities?country=${encodeURIComponent(country)}`
+    : '/api/proxy/universities';
 
     try {
       setIsLoading(true);
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error("Failed to fetch universities");
-
-      const data: University[] = await response.json();
-      const universityNames = data.map((university, ) => ({
-        key: `${university.name}`,
-        label: university.name,
-      }));
-      setUniversities(universityNames);
+      const data: University[] = await proxyApi.get(endpoint);
+    
+    const universityNames = data.map((university) => ({
+      key: `${university.name}`,
+      label: university.name,
+    }));
+    setUniversities(universityNames);
     } catch (error) {
       console.error("Error fetching universities:", error);
       alert("Failed to fetch universities. Please try again.");
