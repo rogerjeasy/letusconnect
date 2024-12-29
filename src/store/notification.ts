@@ -81,3 +81,19 @@ export const formatNotificationDate = (dateString: string): string => {
 };
 
   
+export interface NotificationStats {
+    totalCount: number;
+    unreadCount: number;
+    readCount: number;
+    archivedCount: number;
+    priorityStats: {
+      [key: string]: number;
+    };
+    typeStats: {
+      [key: string]: number;
+    };
+  }
+  
+  export interface UnreadCountResponse {
+    unreadCount: number;
+  }

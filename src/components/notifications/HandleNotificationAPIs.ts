@@ -1,6 +1,6 @@
 import { api, handleError } from "@/helpers/api";
 import { toast } from "react-toastify";
-import { Notification } from "@/store/notification";
+import { Notification, NotificationStats, UnreadCountResponse,  } from "@/store/notification";
 
 export interface NotificationResponse {
   message: string;
@@ -36,7 +36,6 @@ export const handleFetchTargetedNotifications = async (
 
     // Check if response is successful
     if (response.status >= 200 && response.status < 300) {
-      toast.success(response.data.message);
       return response.data.notifications || [];
     } else {
       throw new Error(response.data?.error || "Failed to fetch notifications");
@@ -49,15 +48,54 @@ export const handleFetchTargetedNotifications = async (
 };
 
 /**
- * Example usage:
- * 
- * // Fetch first page of notifications
- * const notifications = await handleFetchTargetedNotifications(token);
- * 
- * // Fetch next page using last notification ID
- * const nextPage = await handleFetchTargetedNotifications(
- *   token, 
- *   20, 
- *   notifications[notifications.length - 1]?.id
- * );
+ * Function to fetch notification statistics.
+ * @param token - Authorization token for API requests
+ * @returns Promise containing notification statistics
  */
+export const handleFetchNotificationStats = async (
+    token: string
+  ): Promise<NotificationStats> => {
+    try {
+      const response = await api.get<NotificationStats>(
+        '/api/notifications/stats',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        return response.data;
+      } else {
+        throw new Error("Failed to fetch notification statistics");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while fetching notification statistics");
+      throw errorMessage;
+    }
+  };
+  
+  /**
+   * Function to fetch unread notification count.
+   * @param token - Authorization token for API requests
+   * @returns Promise containing the number of unread notifications
+   */
+  export const handleFetchUnreadCount = async (
+    token: string
+  ): Promise<number> => {
+    try {
+      const response = await api.get<UnreadCountResponse>(
+        '/api/notifications/unread-count',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        return response.data.unreadCount;
+      } else {
+        throw new Error("Failed to fetch unread notification count");
+      }
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(errorMessage || "An error occurred while fetching unread count");
+      throw errorMessage;
+    }
+  };
+  

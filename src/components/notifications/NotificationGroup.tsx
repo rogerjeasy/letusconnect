@@ -38,9 +38,9 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
     <div className="max-w-7xl mx-auto">
       {/* Date Header with consistent spacing */}
       <div className="text-center mb-4">
-        <h4 className="text-lg font-bold text-gray-700">
+        <h1 className="text-lg font-bold text-gray-700">
           {date}
-        </h4>
+        </h1>
       </div>
 
       {/* Card Container with fixed width and spacing */}

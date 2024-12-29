@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Input, Tooltip } from "@nextui-org/react";
+import { Badge, Button, Input, Spinner, Tooltip } from "@nextui-org/react";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { adminOptions } from "../dropdownoptions/adminOptions";
 import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
@@ -18,6 +18,9 @@ import { useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
 import fetchUnreadCount from "../messages/fetchUnreadCount";
+import { useNotificationCount } from "../notifications/ManagingNotifications";
+import { BellIcon } from "lucide-react";
+import { NotificationIcon } from "../icons/NotificationIcon";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -59,6 +62,46 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
     // setUnreadCount(0);
     closeMenu();
     router.push("/messages");
+  };
+
+  const NotificationBadge = ({ token, onPress }: { token: string; onPress?: () => void }) => {
+    const { unreadCount, isLoading } = useNotificationCount(token);
+  
+    return (
+      <Tooltip
+        content={unreadCount ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "No new notifications"}
+        placement="bottom"
+      >
+        <Button
+          size="sm"
+          variant="light"
+          className="font-bold text-white"
+          onPress={onPress}
+        >
+          <div className="relative flex items-center">
+            {isLoading ? (
+              <Spinner size="sm" color="success" />
+            ) : (
+              <>
+                {unreadCount > 0 && (
+                  <Badge
+                    color="danger"
+                    content={unreadCount > 99 ? "99+" : unreadCount}
+                    isInvisible={false}
+                    shape="circle"
+                    size="sm"
+                  >
+                    <NotificationIcon className="fill-current" size={20} />
+                  </Badge>
+                )}
+                {unreadCount === 0 && <NotificationIcon className="fill-current" size={20} />}
+              </>
+            )}
+            <span className="ml-2">Notification</span>
+          </div>
+        </Button>
+      </Tooltip>
+    );
   };
 
   return (
@@ -116,55 +159,34 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
                 className="font-bold text-white"
                 onPress={handleMessagesClick}
               >
-                <div className="relative">
-                  <FaComments className="text-green-500" />
+                <div className="relative flex items-center">
+                  
                   {unreadCount > 0 && (
                     <Badge
-                      content={unreadCount}
-                      color="danger"
-                      size="sm"
-                      shape="circle"
-                      className="absolute -top-2 -right-2"
-                    >
-                      {unreadCount}
-                    </Badge>
+                    color="danger"
+                    content={unreadCount > 99 ? "99+" : unreadCount}
+                    isInvisible={false}
+                    shape="circle"
+                    size="sm"
+                  >
+                    <FaComments className="text-green-500"  size={20}/>
+                  </Badge>
+                  
                   )}
+                  {unreadCount === 0 && <FaComments className="text-green-500" size={20} />}
                   <span className="ml-2">My Chats & Messages</span>
                 </div>
               </Button>
             </Tooltip>
 
             {/* Notification */}
-            <Tooltip
-              content={`You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`}
-              isDisabled={unreadCount === 0}
-            >
-              <Button
-                size="sm"
-                variant="light"
-                className="font-bold text-white"
-                onPress={() => {
-                  closeMenu();
-                  router.push("/notifications");
-                }}
-              >
-                <div className="relative">
-                  <FaBell className="text-green-500" />
-                  {unreadCount > 0 && (
-                    <Badge
-                      content={unreadCount}
-                      color="danger"
-                      size="sm"
-                      shape="circle"
-                      className="absolute -top-2 -right-2"
-                    >
-                      {unreadCount}
-                    </Badge>
-                  )}
-                  <span className="ml-2">Notification</span>
-                </div>
-              </Button>
-            </Tooltip>
+            <NotificationBadge 
+              token={localStorage.getItem("token") || ""} 
+              onPress={() => {
+                closeMenu();
+                router.push("/notifications");
+              }}
+            />
 
 
             {/* Projects Dropdown */}
