@@ -28,6 +28,7 @@ type ProfileDropDownProps = {
   };
 };
 
+
 const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) => {
   const router = useRouter();
   const profileItems: DropdownContentItem[] = menuOptions.Profile;
@@ -45,10 +46,18 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
     setProfileModalOpen(true);
   };
 
-  const handleLogout = async () => {
-    setLogoutModalOpen(false);
-    await logout(); 
-    router.push("/");
+  const handleLogoutClick = () => {
+    setLogoutModalOpen(true);
+  };
+  
+  const handleLogoutConfirm = async () => {
+    try {
+      setLogoutModalOpen(false);
+      await logout();
+      router.replace("/"); 
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
   
   
@@ -96,7 +105,7 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
                 item.key === "profile"
                   ? handleViewProfile
                   : item.key === "logout"
-                  ? handleLogout
+                  ? handleLogoutClick
                   : item.key === "settings"
                   ? handleSettingsRedirect
                   : undefined
@@ -126,6 +135,7 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
       <Logout
         isOpen={isLogoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm} 
       />
     </>
   );

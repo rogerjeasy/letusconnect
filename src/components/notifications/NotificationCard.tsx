@@ -44,7 +44,6 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       setIsLoading(true);
       try {
         const originalId = getOriginalId(id);
-        console.log("Original notification id:", originalId);
         
         await handleMarkNotificationAsRead(token, originalId);
         setRead(true);

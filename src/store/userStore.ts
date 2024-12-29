@@ -113,6 +113,17 @@ export const useUserStore = create<UserState>()((set, get) => ({
 
   checkSession: async () => {
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    console.log("current token", storedToken);
+    if (!storedToken) {
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        loading: false,
+        hasChecked: true
+      });
+      return;
+    }
     try {
       set({ loading: true });
       const response = await api.get('/api/users/session', {
@@ -189,8 +200,13 @@ export const useUserStore = create<UserState>()((set, get) => ({
 
   logout: async () => {
     try {
-      // Optional: Call logout endpoint if you have one
-      await api.post('/api/users/logout');
+      set({ loading: false, hasChecked: true });
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      await api.patch('/api/users/logout', {}, {
+        headers: {
+          'Authorization': `Bearer ${storedToken || get().token}`
+        }
+      });
       
       // Clear authorization header
       delete api.defaults.headers.common['Authorization'];

@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Modal,
   ModalContent,
@@ -10,29 +9,24 @@ import {
 } from "@nextui-org/react";
 import { useUserStore } from "../../store/userStore";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 type LogoutProps = {
   isOpen: boolean;
   onClose: () => void;
+  onConfirm: () => Promise<void>;
 };
 
-export default function Logout({ isOpen, onClose }: LogoutProps) {
-  const { logout } = useUserStore();
-  const router = useRouter();
-  const { user, isAuthenticated } = useUserStore();
-
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, user, router]);
+export default function Logout({ isOpen, onClose, onConfirm }: LogoutProps) {
+  const { user } = useUserStore();
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    logout(); 
-    router.push("/");
+  const handleLogoutConfirm = async () => {
+    try {
+      await onConfirm();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
@@ -63,7 +57,10 @@ export default function Logout({ isOpen, onClose }: LogoutProps) {
             >
               Cancel
             </Button>
-            <Button color="danger" onPress={handleLogout}>
+            <Button 
+              color="danger" 
+              onPress={handleLogoutConfirm}
+            >
               Log Out
             </Button>
           </ModalFooter>

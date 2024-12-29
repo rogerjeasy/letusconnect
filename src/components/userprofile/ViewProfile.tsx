@@ -19,16 +19,16 @@ type ViewUserProfileProps = {
   };
   
   export default function ViewUserProfile({ isOpen, onClose }: ViewUserProfileProps) {
-  const { user, isAuthenticated } = useUserStore();
+  const { user } = useUserStore();
   const router = useRouter();
   const avatarPicture = user?.profilePicture;
 
   // Protect the page
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    if (!user) {
       router.push("/login");
     }
-  }, [isAuthenticated, user, router]);
+  }, [user, router]);
 
   if (!user) return null;
 
