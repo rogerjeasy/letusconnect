@@ -104,7 +104,7 @@ const SessionCheck = ({ onRetry }: { onRetry: () => void }) => {
               <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
                 Let Us Connect
               </h2>
-              <p className="text-gray-600 mt-2 font-medium">HSLU's Master's Program Networking Platform</p>
+              <p className="text-gray-600 mt-2 font-medium">HSLU&apos;s Master&apos;s Program Networking Platform</p>
               <p className="text-sm text-gray-600 mt-2 max-w-md leading-relaxed">
                 Your gateway to professional networking, mentorship, and career growth in Applied Information and Data Science
               </p>
@@ -168,7 +168,7 @@ const SessionCheck = ({ onRetry }: { onRetry: () => void }) => {
                       Taking longer than expected
                     </h3>
                     <p className="text-gray-700 mb-4 leading-relaxed">
-                      We're experiencing delays in establishing your secure connection. This might be due to network connectivity or high server load.
+                        We&apos;re experiencing delays in establishing your secure connection. This might be due to network connectivity or high server load.
                     </p>
                     <div className="flex flex-col gap-3">
                       <Button
