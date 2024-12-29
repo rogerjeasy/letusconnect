@@ -18,6 +18,7 @@ import { FaTimesCircle, FaCog } from "react-icons/fa";
 import { ChevronDown } from "../navbar/Icons";
 import NotificationsSettings from "./NotificationsSettings";
 import NotificationGroup from "./NotificationGroup";
+import NotificationStats from "./NotificationStats";
 
 interface SearchAndFilterProps {
   onSearch: (query: string) => void;
@@ -49,6 +50,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortOption, setSortOption] = useState("date");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const token = localStorage.getItem("token");
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -70,6 +72,12 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
     <div className="flex flex-col gap-8">
       <div className="mx-auto pt-16 w-full">
         <Card className="p-6 shadow-lg relative">
+          {/* Notification Stats */}
+          {token && (
+            <div className="absolute top-4 left-4">
+              <NotificationStats token={token} />
+            </div>
+          )}
           {/* Settings Icon with Tooltip */}
           <Tooltip
             content={

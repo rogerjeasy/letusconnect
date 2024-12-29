@@ -69,7 +69,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
   
     return (
       <Tooltip
-        content={unreadCount ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "No new notifications"}
+        content={unreadCount ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "No new notifications 😊"}
         placement="bottom"
       >
         <Button
@@ -150,8 +150,12 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
 
             {/* Messages button */}
             <Tooltip
-              content={`You have ${unreadCount} unread message${unreadCount > 1 ? "s" : ""}`}
-              isDisabled={unreadCount === 0}
+              content={
+                unreadCount
+                  ? `You have ${unreadCount} new message${unreadCount > 1 ? "s" : ""}`
+                  : "No new messages 😊"
+              }
+              // isDisabled={unreadCount === 0}
             >
               <Button
                 size="sm"
