@@ -74,19 +74,20 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
     <div className="flex flex-col gap-8">
       <div className="mx-auto pt-16 w-full">
         <Card className="p-6 shadow-lg relative">
-          {/* Notification Stats */}
+          {/* Stats with responsive positioning */}
           {token && (
-            <div className="absolute top-4 left-4">
+            <div className="md:absolute md:top-4 md:left-4 md:z-20 w-full md:w-auto md:max-w-xs mb-6 md:mb-0">
               <NotificationStats token={token} />
             </div>
           )}
-          {/* Settings Icon with Tooltip */}
+
+          {/* Settings Icon */}
           <Tooltip
             content={
               <Card className="p-4 shadow-md">
                 <h4 className="font-bold text-lg">Notification Settings</h4>
                 <p className="text-sm text-gray-600">
-                  Manage notification preferences such as enabling/disabling notifications for messages, events, and system alerts.
+                  Manage notification preferences
                 </p>
               </Card>
             }
@@ -96,128 +97,143 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
             <button
               onClick={() => setIsSettingsOpen(true)}
               className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100 z-10"
-              style={{ boxSizing: "border-box" }}
             >
               <FaCog className="w-6 h-6" />
             </button>
           </Tooltip>
 
           <CardBody>
-            <h2 className="text-2xl font-bold mb-6 text-center">
-              🔍 Search and Filter Notifications
-            </h2>
+            {/* Title with responsive margin */}
+            <div className="md:mt-0">
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                🔍 Search and Filter Notifications
+              </h2>
 
-            <div className="flex justify-center mb-6">
-              <Input
-                placeholder="Search notifications..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  onSearch(e.target.value);
-                }}
-                size="lg"
-                className="w-full md:w-2/3 lg:w-1/2"
-              />
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 mb-6">
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button
-                    variant="bordered"
-                    className="w-40 h-10"
-                    endContent={<ChevronDown fill="currentColor" size={16} />}
-                  >
-                    Filter by Type
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  onAction={(selected) =>
-                    handleFilterChange(selected as string, filterStatus)
-                  }
-                >
-                  <DropdownItem key="all">All</DropdownItem>
-                  <DropdownItem key="message">Message</DropdownItem>
-                  <DropdownItem key="event">Event</DropdownItem>
-                  <DropdownItem key="reminder">Reminder</DropdownItem>
-                  <DropdownItem key="system">System</DropdownItem>
-                  <DropdownItem key="custom">Custom</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button
-                    variant="bordered"
-                    className="w-40 h-10"
-                    endContent={<ChevronDown fill="currentColor" size={16} />}
-                  >
-                    Filter by Status
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  onAction={(selected) =>
-                    handleFilterChange(filterType, selected as string)
-                  }
-                >
-                  <DropdownItem key="all">All</DropdownItem>
-                  <DropdownItem key="unread">Unread</DropdownItem>
-                  <DropdownItem key="read">Read</DropdownItem>
-                  <DropdownItem key="hidden">Hidden</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button
-                    variant="bordered"
-                    className="w-40 h-10"
-                    endContent={<ChevronDown fill="currentColor" size={16} />}
-                  >
-                    Sort By
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  onAction={(selected) => {
-                    setSortOption(selected as string);
-                    onSortChange(selected as string);
+              {/* Search bar */}
+              <div className="flex justify-center mb-6">
+                <Input
+                  placeholder="Search notifications..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    onSearch(e.target.value);
                   }}
-                >
-                  <DropdownItem key="date">Date</DropdownItem>
-                  <DropdownItem key="priority">Priority</DropdownItem>
-                  <DropdownItem key="type">Type</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
+                  size="lg"
+                  className="w-full md:w-2/3 lg:w-1/2"
+                />
+              </div>
 
-            <div className="flex justify-center gap-4 mb-8">
-                <Button color="primary" size="md" className="h-10 px-4">
-                    Apply Filters
+              {/* Filters with responsive wrapping */}
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
+                <div className="w-full sm:w-auto">
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <Button
+                        variant="bordered"
+                        className="w-full sm:w-40 h-10"
+                        endContent={<ChevronDown fill="currentColor" size={16} />}
+                      >
+                        Filter by Type
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      onAction={(selected) =>
+                        handleFilterChange(selected as string, filterStatus)
+                      }
+                    >
+                      <DropdownItem key="all">All</DropdownItem>
+                      <DropdownItem key="message">Message</DropdownItem>
+                      <DropdownItem key="event">Event</DropdownItem>
+                      <DropdownItem key="reminder">Reminder</DropdownItem>
+                      <DropdownItem key="system">System</DropdownItem>
+                      <DropdownItem key="custom">Custom</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+
+                <div className="w-full sm:w-auto">
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <Button
+                        variant="bordered"
+                        className="w-full sm:w-40 h-10"
+                        endContent={<ChevronDown fill="currentColor" size={16} />}
+                      >
+                        Filter by Status
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      onAction={(selected) =>
+                        handleFilterChange(filterType, selected as string)
+                      }
+                    >
+                      <DropdownItem key="all">All</DropdownItem>
+                      <DropdownItem key="unread">Unread</DropdownItem>
+                      <DropdownItem key="read">Read</DropdownItem>
+                      <DropdownItem key="hidden">Hidden</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+
+                <div className="w-full sm:w-auto">
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <Button
+                        variant="bordered"
+                        className="w-full sm:w-40 h-10"
+                        endContent={<ChevronDown fill="currentColor" size={16} />}
+                      >
+                        Sort By
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      onAction={(selected) => {
+                        setSortOption(selected as string);
+                        onSortChange(selected as string);
+                      }}
+                    >
+                      <DropdownItem key="date">Date</DropdownItem>
+                      <DropdownItem key="priority">Priority</DropdownItem>
+                      <DropdownItem key="type">Type</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                <Button 
+                  color="primary" 
+                  size="md" 
+                  className="w-full sm:w-auto h-10 px-4"
+                >
+                  Apply Filters
                 </Button>
                 <Button
-                    color="danger"
-                    variant="bordered"
-                    size="md"
-                    className="h-10 px-4"
-                    onClick={handleClearFilters}
-                    startContent={<FaTimesCircle />}
+                  color="danger"
+                  variant="bordered"
+                  size="md"
+                  className="w-full sm:w-auto h-10 px-4"
+                  onClick={handleClearFilters}
+                  startContent={<FaTimesCircle />}
                 >
-                    Clear Filters
+                  Clear Filters
                 </Button>
-                </div>
+              </div>
 
-                {/* Notification Groups */}
-                <div className="w-full mt-8">
-                    {Object.entries(groupedNotifications).map(([date, notifications]) => (
-                    <NotificationGroup
-                        key={date}
-                        date={date}
-                        notifications={notifications}
-                        onActionClick={onActionClick}
-                        onRefresh={onRefreshNotifications}
-                    />
-                    ))}
-                </div>
+              {/* Notification Groups */}
+              <div className="w-full mt-8">
+                {Object.entries(groupedNotifications).map(([date, notifications]) => (
+                  <NotificationGroup
+                    key={date}
+                    date={date}
+                    notifications={notifications}
+                    onActionClick={onActionClick}
+                    onRefresh={onRefreshNotifications}
+                  />
+                ))}
+              </div>
+            </div>
           </CardBody>
         </Card>
 
@@ -235,8 +251,6 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           </ModalContent>
         </Modal>
       </div>
-
-
     </div>
   );
 };

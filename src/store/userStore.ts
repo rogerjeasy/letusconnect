@@ -113,7 +113,6 @@ export const useUserStore = create<UserState>()((set, get) => ({
 
   checkSession: async () => {
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    console.log("current token", storedToken);
     if (!storedToken) {
       set({
         user: null,
