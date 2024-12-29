@@ -47,8 +47,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         
         await handleMarkNotificationAsRead(token, originalId);
         setRead(true);
-        onActionClick(originalId, "mark-as-read");
-        onReadStatusChange?.();
+        // onActionClick(originalId, "mark-as-read");
+        // onReadStatusChange?.();
       } catch (error) {
         // Error is already handled by handleMarkNotificationAsRead
         console.error("Failed to mark notification as read:", error);
