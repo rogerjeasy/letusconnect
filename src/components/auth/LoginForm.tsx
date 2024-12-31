@@ -56,7 +56,7 @@ const LoginForm = () => {
           token,
           isAuthenticated: true,
           loading: false,
-          hasChecked: false
+          hasChecked: true
         });
   
         // Then update localStorage

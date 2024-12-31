@@ -106,7 +106,7 @@ export const useUserStore = create<UserState>()((set, get) => ({
   schoolExperience: null,
   workExperience: null,
   isAuthenticated: false,
-  loading: true,
+  loading: false,
   token: null,
   hasChecked: false,
 

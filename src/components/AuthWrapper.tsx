@@ -7,21 +7,28 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
   const checkSession = useUserStore((state) => state.checkSession);
   const loading = useUserStore((state) => state.loading);
   const hasChecked = useUserStore((state) => state.hasChecked);
-  
+  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+ 
   useEffect(() => {
-    // Check if there's a token in localStorage before initiating session check
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (!hasChecked && storedToken) {
-      checkSession();
-    } else if (!hasChecked) {
-      // If no token exists, mark as checked without loading state
-      useUserStore.setState({ 
-        loading: false, 
-        hasChecked: true,
-        isAuthenticated: false 
-      });
+    if (hasChecked) {
+      return; // Skip if we've already checked
     }
-  }, [checkSession, hasChecked]);
+
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    
+    if (!storedToken) {
+      // If no token, immediately mark as checked without any API call
+      useUserStore.setState({
+        hasChecked: true,
+        isAuthenticated: false,
+        loading: false
+      });
+      return;
+    }
+
+    // Only run checkSession if we have a token
+    checkSession();
+  }, [hasChecked, checkSession]);
 
   if (loading) {
     return <SessionCheck onRetry={checkSession} />;
