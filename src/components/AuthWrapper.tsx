@@ -7,11 +7,12 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
   const checkSession = useUserStore((state) => state.checkSession);
   const loading = useUserStore((state) => state.loading);
   const hasChecked = useUserStore((state) => state.hasChecked);
-  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  const user = useUserStore((state) => state.user);
  
   useEffect(() => {
-    if (hasChecked) {
-      return; // Skip if we've already checked
+    // Skip if we've already checked or if we have a user
+    if (hasChecked || user) {
+      return;
     }
 
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -26,9 +27,9 @@ const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // Only run checkSession if we have a token
+    // Only run checkSession if we have a token and no user
     checkSession();
-  }, [hasChecked, checkSession]);
+  }, [hasChecked, checkSession, user]);
 
   if (loading) {
     return <SessionCheck onRetry={checkSession} />;

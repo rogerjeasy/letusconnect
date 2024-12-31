@@ -29,8 +29,12 @@ const NotificationsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [lastNotificationId, setLastNotificationId] = useState<string | undefined>();
+  const [token, setToken] = useState<string>("");
   
-  const token = localStorage.getItem("token") || "";
+  useEffect(() => {
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+    setToken(storedToken || "");
+  }, []);
 
   const fetchNotifications = async (isInitial: boolean = false) => {
     try {
@@ -63,7 +67,9 @@ const NotificationsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchNotifications(true);
+    if (token) {
+      fetchNotifications(true);
+    }
   }, [token]);
 
   const transformNotification = (notification: Notification): TransformedNotification => ({
@@ -181,6 +187,10 @@ const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNot
   };
 
   const groupedNotifications = groupNotificationsByDate(filteredNotifications);
+
+  if (!token) {
+    return <div className="p-6">Loading...</div>;
+  }
 
   return (
     <div className="p-6">
