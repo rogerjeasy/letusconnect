@@ -55,11 +55,6 @@ export const connectStudentOptions = {
       icon: <FaSearch className="text-teal-500" />,
       link: "/users-directory",
     },
-    // {
-    //   label: "My Chats & Messages",
-    //   icon: <FaComments className="text-blue-500" />,
-    //   link: "/messages",
-    // },
     {
       label: "Upcoming Networking Events",
       icon: <FaCalendarAlt className="text-purple-500" />,

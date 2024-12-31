@@ -11,6 +11,7 @@ import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { handleGetUserEducation } from "../apihandling/HandleUserEducation";
 
 // Zod Schema for Form Validation
 const loginSchema = z.object({
@@ -25,6 +26,7 @@ const LoginForm = () => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
 
   const {
     register,
@@ -65,6 +67,11 @@ const LoginForm = () => {
   
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
+        const educationData = await handleGetUserEducation(token);
+        if (educationData) {
+          setSchoolExperience(educationData);
+        }
+        
         toast.success(response.data.message);
   
         router.push("/dashboard");

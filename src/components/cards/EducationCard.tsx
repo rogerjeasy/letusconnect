@@ -16,6 +16,7 @@ import SpinnerUI from "../forms/SpinnerUI";
 import universityDegrees from "../../store/universityDegrees";
 import { University } from "../../store/userStore";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
+import { Plus, Trash2, School } from 'lucide-react';
 
 interface EducationCardProps {
   education: University;

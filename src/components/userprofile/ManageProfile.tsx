@@ -6,6 +6,7 @@ import UserProfileCard from "../forms/UserProfileCard";
 import UserEducation from "./UserEducation";
 import UserWorkExperienceComponent from "./UserWorkExperienceComponent";
 import { useUserStore } from "../../store/userStore";
+import UserEducationComponent from "./EducationCard";
 
 export default function ManageUser() {
   const { user } = useUserStore();
@@ -29,7 +30,7 @@ export default function ManageUser() {
           </div>
           {/* User Education Card */}
           <div className="w-full max-w-[800px] mx-auto">
-            <UserEducation />
+            <UserEducationComponent />
           </div>
           {/* User Work Experience Card */}
           <div className="w-full max-w-[800px] mx-auto">

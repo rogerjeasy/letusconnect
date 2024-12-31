@@ -8,6 +8,7 @@ import { api, handleError } from "../../helpers/api";
 import EducationCard from "../cards/EducationCard";
 import { z } from "zod";
 import PlusCircleIcon from "../icons/PlusCircleIcon";
+import { Plus, Trash2, School } from 'lucide-react';
 
 // Zod Schema for Validation
 const educationSchema = z
@@ -28,6 +29,19 @@ const educationSchema = z
 
   type EducationFormValues = z.infer<typeof educationSchema>;
 
+  const emptyUniversity: University = {
+    id: "",
+    name: "",
+    program: "",
+    country: "",
+    degree: "",
+    startYear: 0,
+    endYear: 0,
+    experience: "",
+    awards: [],
+    extracurriculars: [],
+  };
+
 
 export default function UserEducation() {
 
@@ -43,6 +57,7 @@ export default function UserEducation() {
   const [isEditingIndex, setIsEditingIndex] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [, setFieldValues] = useState<Record<number, Partial<University>>>({});
+  const [formUniversities, setFormUniversities] = useState<University[]>([]);
 
   const proxyApi = {
     get: async (endpoint: string) => {
@@ -96,9 +111,9 @@ export default function UserEducation() {
   }, [schoolExperience?.universities]); 
 
   const validateCurrentEducation = () => {
-    if (!schoolExperience?.universities?.length) return true;
+    if (formUniversities.length === 0) return true;
 
-    const currentEducation = schoolExperience.universities[schoolExperience.universities.length - 1];
+    const currentEducation = formUniversities[formUniversities.length - 1];
     const validation = educationSchema.safeParse(currentEducation);
 
     if (!validation.success) {
@@ -120,58 +135,10 @@ export default function UserEducation() {
   };
 
   const handleAddEducation = async () => {
-    if (!validateCurrentEducation()) return;
-  
-    if (!schoolExperience || !schoolExperience.uid) {
-      console.error("School experience UID is missing or undefined.");
-      return;
+    if (validateCurrentEducation()) {
+      setFormUniversities((prev) => [...prev, { ...emptyUniversity }]);
     }
-  
-    const newEducation: University = {
-      id: "",
-      name: "",
-      program: "",
-      country: "",
-      degree: "",
-      startYear: 0,
-      endYear: 0,
-      experience: "",
-      awards: [],
-      extracurriculars: [],
-    };
-  
-    try {
-      // Send a POST request to create the new education record in the backend
-      const response = await api.post(
-        `/api/school-experiences/${schoolExperience.uid}/universities`,
-        newEducation,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-  
-      const universitiesArray = response.data.universities;
-      const newUniversity = universitiesArray[universitiesArray.length - 1];
-
-      // Ensure that schoolExperience.universities is initialized as an array
-      const updatedUniversities = [
-        ...(schoolExperience.universities || []),
-        newUniversity,
-      ];
-
-      // Update the state with the new universities list
-      setSchoolExperience({
-        ...schoolExperience,
-        universities: updatedUniversities,
-      });
-  
-      setIsEditingIndex(updatedUniversities.length - 1);
-    } catch (error) {
-      const errorMessage = handleError(error);
-      console.error("Error adding new education:", errorMessage);
-      alert(errorMessage);
-    }
-  };  
+  };
 
   const handleAddAward = (eduIndex: number) => {
     if (!schoolExperience) {
@@ -315,14 +282,15 @@ export default function UserEducation() {
         {/* Header */}
         <CardHeader className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <p className="text-md font-bold">Education Section</p>
+            <School className="h-5 w-5" />
+            <h3 className="text-lg font-semibold">University Details</h3>
           </div>
         </CardHeader>
         <Divider />
 
         {/* Education Sub-Cards */}
         <CardBody>
-          {schoolExperience?.universities?.map((education, eduIndex) => (
+          {formUniversities.map((education, eduIndex) => (
             <EducationCard
               key={eduIndex}
               education={education}
