@@ -35,7 +35,7 @@ const MentorshipPreferences = ({
                 Looking for a Mentor
               </p>
               <p className="text-sm text-gray-500">
-                Indicates that you're interested in finding a mentor
+                Indicates that you are interested in finding a mentor
               </p>
             </div>
           </div>
@@ -54,7 +54,7 @@ const MentorshipPreferences = ({
                 Willing to Mentor
               </p>
               <p className="text-sm text-gray-500">
-                Indicates that you're open to mentoring others
+                Indicates that you are open to mentoring others
               </p>
             </div>
           </div>
