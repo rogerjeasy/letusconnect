@@ -1,11 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Select, SelectItem, Avatar } from "@nextui-org/react";
+import { Select, SelectItem, Avatar, Button, Card, CardHeader, CardBody, Chip } from "@nextui-org/react";
 import { useCountryStore } from "../../store/userCountryStore";
 import { useUserLanguageStore } from "../../store/userLanguageStore";
 import { fetchCountryData } from "../../utils/countryapi"
-import { CountryAPIResponse } from "../../store/types"
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 import Scroll from "./Scroll";
 
 interface FetchState {
@@ -25,6 +40,10 @@ export default function UserSelection({
   const { countries, setCountries } = useCountryStore();
   const { languages, phoneCodes, setLanguages, setPhoneCodes } = useUserLanguageStore();
   const [fetchState, setFetchState] = useState<FetchState>({ loading: false, error: null });
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(
+    Array.isArray(defaultValue) ? defaultValue : []
+  );
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -134,6 +153,15 @@ export default function UserSelection({
     );
   }
 
+  const handleLanguageToggle = (language: string) => {
+    const updatedSelection = selectedLanguages.includes(language)
+      ? selectedLanguages.filter(lang => lang !== language)
+      : [...selectedLanguages, language];
+    
+    setSelectedLanguages(updatedSelection);
+    onChange?.(updatedSelection);
+  };
+
   const renderSelection = () => {
     switch (selectionMode) {
       case "country":
@@ -158,34 +186,80 @@ export default function UserSelection({
           </Select>
         );
 
-      case "language":
-        return (
-          <Scroll className="max-w-full h-[200px] overflow-auto">
-            <Select
-              className="w-full"
-              label="Select Languages"
-              selectionMode="multiple"
-              defaultSelectedKeys={
-                Array.isArray(defaultValue)
-                  ? new Set(
-                      defaultValue
-                        .map((name) =>
-                          languages.find((lang) => lang.name === name)?.code
-                        )
-                        .filter((key): key is string => !!key)
-                    )
-                  : undefined
-              }
-              onSelectionChange={(keys) => handleSelect(keys as Set<string>, "language")}
-            >
-              {languages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  {lang.name}
-                </SelectItem>
-              ))}
-            </Select>
-          </Scroll>
-        );
+        case "language":
+          return (
+            <div className="space-y-4">
+              <div>
+                <span className="text-sm text-muted-foreground">
+                  Selected Languages: {selectedLanguages.length}
+                </span>
+              </div>
+  
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="solid"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between"
+                  >
+                    Select Languages
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search languages..." />
+                    <CommandList>
+                      <CommandEmpty>No language found.</CommandEmpty>
+                      <CommandGroup>
+                        {languages.map((lang) => (
+                          <CommandItem
+                            key={lang.code}
+                            value={lang.name}
+                            onSelect={() => {
+                              handleLanguageToggle(lang.name);
+                            }}
+                          >
+                            {lang.name}
+                            <Check
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                selectedLanguages.includes(lang.name) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+  
+              {selectedLanguages.length > 0 && (
+                <Card className="mt-4">
+                  <CardHeader className="pb-3">
+                    <h4 className="font-medium">Selected Languages</h4>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLanguages.map((lang) => (
+                        <Chip
+                          key={lang}
+                          variant="flat"
+                          color="primary"
+                          className="cursor-pointer"
+                          onClose={() => handleLanguageToggle(lang)}
+                        >
+                          {lang}
+                        </Chip>
+                      ))}
+                    </div>
+                  </CardBody>
+                </Card>
+              )}
+            </div>
+          );
 
       case "phone":
         return (

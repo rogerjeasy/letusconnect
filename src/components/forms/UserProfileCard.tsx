@@ -25,6 +25,9 @@ import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 import { User } from "../../store/userStore";
 import ExpertiseSelector from "./ExpertiseSelector";
 import { ExpertiseSkill } from "@/store/areaOfExpertise";
+import UserSelection from "../forms/SelectCountry";
+import SkillSelector from "./SkillsSelector";
+import { Skill } from "@/store/skills";
 
 interface ModalProps {
   isOpen: boolean;
@@ -385,31 +388,51 @@ export default function UserProfileCard() {
             </div>
           </div>
 
+          <div className="mt-4">
+            <h3 className="text-large font-bold mb-2">Skills</h3>
+            {isEditing ? (
+              <SkillSelector
+                selectedSkills={(profile.skills || []) as Skill[]}
+                onChange={(skills) => handleUpdateField("skills", skills)}
+                maxSelections={10}
+              />
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.skills?.map((skill) => (
+                  <Chip key={skill} variant="flat" color="primary">
+                    {skill}
+                  </Chip>
+                )) || "No skills selected"}
+              </div>
+            )}
+          </div>
+
           {/* Languages */}
-          <div className="flex flex-wrap gap-4 mt-4">
-            <div className="flex-1 min-w-[200px]">
-              {isEditing ? (
-                <Scroll>
-                  <UserSelction
-                    selectionMode="language"
-                    defaultValue={profile.languages || []}
-                    onChange={(selectedLanguages) =>
-                      handleUpdateField("languages", selectedLanguages as string[])
-                    }
-                  />
-                </Scroll>
-              ) : (
-                <InputForm
-                  type="text"
-                  label="Languages"
-                  value={
-                    profile.languages && profile.languages.length > 0
-                      ? profile.languages.join(", ")
-                      : "No languages selected"
+          <div className="mt-4">
+            <h3 className="text-large font-bold mb-2">Languages</h3>
+            {isEditing ? (
+              <div className="flex-1">
+                <UserSelection
+                  selectionMode="language"
+                  defaultValue={profile.languages || []}
+                  onChange={(selectedLanguages) =>
+                    handleUpdateField("languages", selectedLanguages as string[])
                   }
                 />
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.languages && profile.languages.length > 0 ? (
+                  profile.languages.map((language) => (
+                    <Chip key={language} variant="flat" color="primary">
+                      {language}
+                    </Chip>
+                  ))
+                ) : (
+                  "No languages selected"
+                )}
+              </div>
+            )}
           </div>
 
           {/* Expertise */}
@@ -419,7 +442,7 @@ export default function UserProfileCard() {
               <ExpertiseSelector
                 selectedExpertise={(profile.areasOfExpertise || []) as ExpertiseSkill[]}
                 onChange={(expertise) => handleUpdateField("areasOfExpertise", expertise)}
-                maxSelections={5}
+                maxSelections={10}
               />
             ) : (
               <div className="flex flex-wrap gap-2">

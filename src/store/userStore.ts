@@ -6,6 +6,7 @@ import { DateValue } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import { ExpertiseSkill } from "./areaOfExpertise";
+import { Skill } from "./skills";
 
 // User interfaces remain the same
 export interface User {
@@ -32,7 +33,7 @@ export interface User {
   dateOfBirth: DateValue | null;
   phoneCode: string;
   languages: string[];
-  skills: string[];
+  skills: Skill[];
   certifications: string[];
   projects: string[];
 }

@@ -19,39 +19,39 @@ import {
 } from "@/components/ui/popover";
 import { Card, CardBody, CardHeader, Chip } from "@nextui-org/react";
 import { 
-  EXPERTISE_CATEGORIES,
-  type ExpertiseCategory,
-  type ExpertiseSkill,
+  SKILL_CATEGORIES,
+  type SkillCategory,
+  type Skill,
   getAllCategories
-} from "@/store/areaOfExpertise";
+} from "@/store/skills";
 
-interface ExpertiseSelectorProps {
-  selectedExpertise: ExpertiseSkill[];
-  onChange: (expertise: ExpertiseSkill[]) => void;
+interface SkillSelectorProps {
+  selectedSkills: Skill[];
+  onChange: (skills: Skill[]) => void;
   maxSelections?: number;
 }
 
-export default function ExpertiseSelector({
-  selectedExpertise,
+export default function SkillSelector({
+  selectedSkills,
   onChange,
-  maxSelections = 5
-}: ExpertiseSelectorProps) {
+  maxSelections = 10
+}: SkillSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [activeCategory, setActiveCategory] = React.useState<ExpertiseCategory>("DATA_SCIENCE");
+  const [activeCategory, setActiveCategory] = React.useState<SkillCategory>("TECHNICAL_SKILLS");
 
-  const handleSkillToggle = (skill: ExpertiseSkill) => {
-    if (selectedExpertise.includes(skill)) {
-      onChange(selectedExpertise.filter(item => item !== skill));
-    } else if (selectedExpertise.length < maxSelections) {
-      onChange([...selectedExpertise, skill]);
+  const handleSkillToggle = (skill: Skill) => {
+    if (selectedSkills.includes(skill)) {
+      onChange(selectedSkills.filter(item => item !== skill));
+    } else if (selectedSkills.length < maxSelections) {
+      onChange([...selectedSkills, skill]);
     }
   };
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="flex justify-between items-center">
         <span className="text-sm text-muted-foreground">
-          Selected: {selectedExpertise.length}/{maxSelections}
+          Selected Skills: {selectedSkills.length}/{maxSelections}
         </span>
       </div>
 
@@ -64,13 +64,13 @@ export default function ExpertiseSelector({
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {EXPERTISE_CATEGORIES[activeCategory].name}
+            {SKILL_CATEGORIES[activeCategory].name}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Search categories..." />
+            <CommandInput placeholder="Search skill categories..." />
             <CommandList>
               <CommandEmpty>No category found.</CommandEmpty>
               <CommandGroup>
@@ -98,23 +98,23 @@ export default function ExpertiseSelector({
         </PopoverContent>
       </Popover>
 
-      {/* Skills Display */}
+      {/* Available Skills Display */}
       <Card className="mt-4">
         <CardHeader className="pb-3">
-          <h4 className="font-medium">Available Skills</h4>
+          <h4 className="font-medium">Available Skills in {SKILL_CATEGORIES[activeCategory].name}</h4>
         </CardHeader>
         <CardBody>
           <div className="flex flex-wrap gap-2">
-            {[...EXPERTISE_CATEGORIES[activeCategory].skills].map((skill) => (
+            {[...SKILL_CATEGORIES[activeCategory].skills].map((skill) => (
               <Chip
                 key={skill}
                 variant="flat"
-                color={selectedExpertise.includes(skill) ? "primary" : "default"}
-                className="cursor-pointer"
+                color={selectedSkills.includes(skill) ? "primary" : "default"}
+                className="cursor-pointer transition-colors"
                 onClick={() => handleSkillToggle(skill)}
               >
                 {skill}
-                {selectedExpertise.includes(skill) && (
+                {selectedSkills.includes(skill) && (
                   <Check className="ml-2 h-3 w-3" />
                 )}
               </Chip>
@@ -123,15 +123,15 @@ export default function ExpertiseSelector({
         </CardBody>
       </Card>
 
-      {/* Selected Skills */}
-      {selectedExpertise.length > 0 && (
+      {/* Selected Skills Display */}
+      {selectedSkills.length > 0 && (
         <Card className="mt-4">
           <CardHeader className="pb-3">
-            <h4 className="font-medium">Selected Skills</h4>
+            <h4 className="font-medium">Your Selected Skills</h4>
           </CardHeader>
           <CardBody>
             <div className="flex flex-wrap gap-2">
-              {selectedExpertise.map((skill) => (
+              {selectedSkills.map((skill) => (
                 <Chip
                   key={skill}
                   variant="flat"
