@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { DateValue } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
+import { ExpertiseSkill } from "./areaOfExpertise";
 
 // User interfaces remain the same
 export interface User {
@@ -19,7 +20,7 @@ export interface User {
   role: string[];
   graduationYear: number;
   currentJobTitle: string;
-  areasOfExpertise: string[];
+  areasOfExpertise: ExpertiseSkill[];
   interests: string[];
   lookingForMentor: boolean;
   willingToMentor: boolean;

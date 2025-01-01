@@ -174,6 +174,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
                 }}
               >
                 {component.description}
+
               </ListItem>
             ))}
           </ul>

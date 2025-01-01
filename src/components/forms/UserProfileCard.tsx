@@ -10,6 +10,7 @@ import {
   Divider,
   Button,
   Avatar,
+  Chip,
 } from "@nextui-org/react";
 import InputForm from "../forms/InputForm";
 import InputToUpdate from "../forms/InputToUpdate";
@@ -22,6 +23,8 @@ import { api, fileApi, handleError } from "../../helpers/api";
 import Scroll from "./Scroll";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 import { User } from "../../store/userStore";
+import ExpertiseSelector from "./ExpertiseSelector";
+import { ExpertiseSkill } from "@/store/areaOfExpertise";
 
 interface ModalProps {
   isOpen: boolean;
@@ -55,7 +58,7 @@ export default function UserProfileCard() {
     }
   }, [isAuthenticated, user, router]);
 
-  const handleUpdateField = (field: keyof User, value: string | string[]) => {
+  const handleUpdateField = (field: keyof User, value: string | string[] | ExpertiseSkill[]) => {
     setProfile((prev) => ({
       ...prev,
       [field]: value,
@@ -407,6 +410,26 @@ export default function UserProfileCard() {
                 />
               )}
             </div>
+          </div>
+
+          {/* Expertise */}
+          <div className="mt-4">
+            <h3 className="text-large font-bold mb-2">Areas of Expertise</h3>
+            {isEditing ? (
+              <ExpertiseSelector
+                selectedExpertise={(profile.areasOfExpertise || []) as ExpertiseSkill[]}
+                onChange={(expertise) => handleUpdateField("areasOfExpertise", expertise)}
+                maxSelections={5}
+              />
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.areasOfExpertise?.map((skill) => (
+                  <Chip key={skill} variant="flat" color="primary">
+                    {skill}
+                  </Chip>
+                )) || "No expertise selected"}
+              </div>
+            )}
           </div>
         </CardBody>
 
