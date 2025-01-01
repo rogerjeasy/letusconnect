@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
-import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
+import React, { useEffect, useState } from "react";
+import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip, Textarea } from "@nextui-org/react";
 import { FaUserPlus, FaEnvelope, FaUserTie, FaGraduationCap } from "react-icons/fa";
-import { User } from "@/store/userStore";
+import { User, useUserStore } from "@/store/userStore";
+import ModalPopup from "../forms/ModalPopup";
+import { useRouter } from "next/navigation";
+import { handleGetConnections, handleSendConnectionRequest } from "../apihandling/HandleUserConnections";
 
 interface UserCardProps {
   user: User;
@@ -13,6 +16,52 @@ interface UserCardProps {
 
 const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) => {
   const avatarPicture = user?.profilePicture;
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const currentUser = useUserStore((state) => state.user);
+  const [hasExistingRequest, setHasExistingRequest] = useState(false);
+
+  const handleConnect = async () => {
+    if (!currentUser) {
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    setIsConnectModalOpen(true);
+  };
+
+  const handleSendRequest = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    setLoading(true);
+    const success = await handleSendConnectionRequest(user.uid, message, token);
+    setLoading(false);
+  
+    if (success) {
+      setIsConnectModalOpen(false);
+      setMessage("");
+    }
+  };
+
+  // useEffect(() => {
+  //   checkExistingRequest();
+  // }, []);
+  
+  const checkExistingRequest = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    try {
+      const connections = await handleGetConnections(token);
+      setHasExistingRequest(connections?.pendingRequests[user.uid] != null);
+    } catch (error) {
+      console.error("Error checking connection status:", error);
+    }
+  };
+
   return (
     <Card className="w-85 h-full flex flex-col justify-between shadow-lg relative overflow-visible">
       <CardHeader className="flex items-center gap-4">
@@ -57,15 +106,18 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
       </CardBody>
 
       <CardFooter className="flex gap-2">
-        <Tooltip content="Connect">
-          <Button
-            color="primary"
-            size="sm"
-            onClick={() => onConnect && onConnect(user.uid)}
-          >
-            <FaUserPlus className="mr-2" /> Connect
-          </Button>
-        </Tooltip>
+      <Tooltip content={hasExistingRequest ? "Request Pending" : "Connect"}>
+        <Button
+          color="primary"
+          size="sm"
+          onClick={handleConnect}
+          isLoading={loading}
+          isDisabled={hasExistingRequest}
+        >
+          <FaUserPlus className="mr-2" />
+          {hasExistingRequest ? "Request Sent" : "Connect"}
+        </Button>
+      </Tooltip>
         <Tooltip content="View Profile">
           <Button
             color="secondary"
@@ -76,7 +128,50 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
           </Button>
         </Tooltip>
       </CardFooter>
+      <ModalPopup
+        isOpen={isLoginPromptOpen}
+        title="Login Required"
+        content="You need to log in to connect with other users."
+        confirmLabel="Continue to Login"
+        cancelLabel="Cancel"
+        confirmColor="primary"
+        cancelColor="danger"
+        onConfirm={() => {
+          setIsLoginPromptOpen(false);
+          router.push("/login");
+        }}
+        onCancel={() => setIsLoginPromptOpen(false)}
+        showCancelButton={true}
+      />
+
+      <ModalPopup
+        isOpen={isConnectModalOpen}
+        title="Add a Personalized Message"
+        content={
+          <div className="space-y-4">
+            <p>Send a connection request to {user.firstName} {user.lastName}</p>
+            <Textarea
+              placeholder="Write a message (optional)"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        }
+        confirmLabel="Send Request"
+        cancelLabel="Cancel"
+        confirmColor="primary"
+        cancelColor="danger"
+        onConfirm={handleSendRequest}
+        onCancel={() => {
+          setIsConnectModalOpen(false);
+          setMessage("");
+        }}
+        showCancelButton={true}
+        isLoading={loading}
+      />
     </Card>
+    
   );
 };
 

@@ -437,14 +437,31 @@ export default function UserProfileCard() {
             )}
           </div>
 
+          {/* Interests */}
           <div className="mt-4">
             <h3 className="text-large font-bold mb-2">Interests</h3>
-            <InterestsSelector
-              selectedInterests={profile.interests || []}
-              onChange={(interests) => handleUpdateField("interests", interests)}
-              maxSelections={10}
-              isEditing={isEditing}
-            />
+            {isEditing ? (
+              <div className="flex-1">
+                <InterestsSelector
+                  selectedInterests={profile.interests || []}
+                  onChange={(interests) => handleUpdateField("interests", interests)}
+                  maxSelections={10}
+                  isEditing={isEditing}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.interests && profile.interests.length > 0 ? (
+                  profile.interests.map((interest) => (
+                    <Chip key={interest} variant="flat" color="primary">
+                      {interest}
+                    </Chip>
+                  ))
+                ) : (
+                  "No languages selected"
+                )}
+              </div>
+            )}
           </div>
 
           {/* Expertise */}
