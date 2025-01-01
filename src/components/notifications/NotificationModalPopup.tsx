@@ -20,23 +20,26 @@ interface NotificationModalPopupProps {
   isOpen: boolean;
   notification: {
     id: string;
-    title: string;
+    title: string; 
     content: string;
     type: string;
     time: string;
     priority: string;
+    fromUid: string;
   };
   onClose: () => void;
   onAction: (id: string, action: string) => void;
-}
+  onViewProfile: (uid: string) => void;
+ }
 
 export default function NotificationModalPopup({
   isOpen,
   notification,
   onClose,
   onAction,
-}: NotificationModalPopupProps) {
-  const { id, title, content, type, time, priority } = notification;
+  onViewProfile,
+ }: NotificationModalPopupProps) {
+  const { id, title, content, type, time, priority, fromUid } = notification;
 
   const getIconForType = (type: string) => {
     switch (type) {
@@ -62,6 +65,20 @@ export default function NotificationModalPopup({
           <Button color="primary" onPress={() => onAction(id, "reply")}>
             Reply
           </Button>
+        );
+      case "connection_request":
+        return (
+          <div className="flex gap-2">
+            <Button color="success" onPress={() => onAction(id, "accept")}>
+              Accept
+            </Button>
+            <Button color="danger" onPress={() => onAction(id, "reject")}>
+              Reject  
+            </Button>
+            <Button color="primary" onPress={() => onViewProfile(fromUid)}>
+              View Profile
+            </Button>
+          </div>
         );
       case "event":
         return (

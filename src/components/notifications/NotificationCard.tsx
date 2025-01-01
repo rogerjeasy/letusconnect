@@ -4,6 +4,7 @@ import { Badge, Card, Divider, Avatar } from "@nextui-org/react";
 import { FaEnvelope, FaCalendar, FaBell, FaExclamation, FaCog } from "react-icons/fa";
 import NotificationModalPopup from "@/components/notifications/NotificationModalPopup";
 import { handleMarkNotificationAsRead } from "./HandleNotificationAPIs";
+import { useRouter } from "next/navigation";
 
 interface NotificationCardProps {
   id: string;
@@ -13,12 +14,13 @@ interface NotificationCardProps {
   time: string;
   priority: string;
   isRead: boolean;
-  token: string; 
+  token: string;
+  fromUid?: string;
   onActionClick: (id: string, action: string) => void;
-  onReadStatusChange?: () => void; 
-}
+  onReadStatusChange?: () => void;
+ }
 
-const NotificationCard: React.FC<NotificationCardProps> = ({
+ const NotificationCard: React.FC<NotificationCardProps> = ({
   id,
   title,
   content,
@@ -27,12 +29,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   priority,
   isRead,
   token,
+  fromUid,
   onActionClick,
   onReadStatusChange,
-}) => {
+ }) => {
   const [read, setRead] = useState(isRead);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const getOriginalId = (compositeId: string): string => {
     const parts = compositeId.split('_');
@@ -59,6 +63,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     setModalOpen(true);
   };
 
+  const handleViewProfile = (uid: string) => {
+    router.push(`/profile/${uid}`);
+  };
+
   const getIconForType = (type: string) => {
     switch (type) {
       case "message":
@@ -83,6 +91,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     type,
     time,
     priority,
+    fromUid: fromUid || "",
   };
 
   return (
@@ -148,6 +157,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         notification={notification}
         onClose={() => setModalOpen(false)}
         onAction={(actionId, action) => onActionClick(getOriginalId(actionId), action)}
+        onViewProfile={handleViewProfile}
       />
     </>
   );

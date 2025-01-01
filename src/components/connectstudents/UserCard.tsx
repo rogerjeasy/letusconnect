@@ -122,7 +122,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
           <Button
             color="secondary"
             size="sm"
-            onClick={() => onViewProfile && onViewProfile(user.uid)}
+            onClick={() => router.push(`/profile/${user.uid}`)}
           >
             <FaEnvelope className="mr-2" /> View Profile
           </Button>
