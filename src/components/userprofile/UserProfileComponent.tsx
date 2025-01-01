@@ -26,25 +26,29 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             </Avatar>
             <div className="space-y-4 w-full">
                 <div className="flex flex-col items-center gap-2">
-                <CardTitle className="text-2xl">{user.firstName} {user.lastName}</CardTitle>
-                <div className="flex flex-wrap justify-center gap-2">
-                    {user.role.map((role) => (
-                    <Badge key={role} variant="secondary">{role}</Badge>
-                    ))}
+                    <CardTitle className="text-2xl">
+                        {user.firstName && user.lastName 
+                            ? `${user.firstName} ${user.lastName}`
+                            : user.username}
+                    </CardTitle>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {user.role?.map((role) => (
+                            <Badge key={role} variant="secondary">{role}</Badge>
+                        ))}
+                    </div>
                 </div>
-                </div>
-                <CardDescription className="text-lg">{user.currentJobTitle}</CardDescription>
+                <CardDescription className="text-lg">{user.currentJobTitle || 'No job title'}</CardDescription>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center justify-center gap-1">
                         <Mail className="h-4 w-4" />
-                        {user.email}
+                        {user.email || 'Email not available'}
                     </div>
                     <div className="flex items-center justify-center gap-1">
                         <Phone className="h-4 w-4" />
-                        {user.phoneNumber}
+                        {user.phoneNumber || 'Phone not available'}
                     </div>
                 </div>
-            </div>
+                </div>
         </CardHeader>
 
         <CardContent className="space-y-2">
@@ -76,7 +80,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             <CardContent>
               <p className="text-muted-foreground">{user.bio}</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {user.interests.map((interest) => (
+                {user.interests?.map((interest) => (
                   <Badge key={interest} variant="outline">{interest}</Badge>
                 ))}
               </div>
@@ -88,7 +92,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               <CardTitle>Areas of Expertise</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-              {user.areasOfExpertise.map((expertise: ExpertiseSkill) => (
+              {user.areasOfExpertise?.map((expertise: ExpertiseSkill) => (
                 <Badge key={expertise} variant="secondary">
                   {expertise}
                 </Badge>
@@ -118,7 +122,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Technical Skills</h4>
                   <div className="flex flex-wrap gap-2">
-                    {user.skills.map((skill: Skill) => (
+                    {user.skills?.map((skill: Skill) => (
                       <Badge key={skill} variant="secondary">
                         {skill}
                       </Badge>
@@ -128,7 +132,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Languages</h4>
                   <div className="flex flex-wrap gap-2">
-                    {user.languages.map((language) => (
+                    {user.languages?.map((language) => (
                       <Badge key={language} variant="outline">{language}</Badge>
                     ))}
                   </div>
@@ -175,7 +179,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Certifications</h4>
                   <div className="flex flex-wrap gap-2">
-                    {user.certifications.map((cert) => (
+                    {user.certifications?.map((cert) => (
                       <Badge key={cert} variant="secondary">{cert}</Badge>
                     ))}
                   </div>
@@ -183,7 +187,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Projects</h4>
                   <div className="flex flex-wrap gap-2">
-                    {user.projects.map((project) => (
+                    {user.projects?.map((project) => (
                       <Badge key={project} variant="outline">{project}</Badge>
                     ))}
                   </div>

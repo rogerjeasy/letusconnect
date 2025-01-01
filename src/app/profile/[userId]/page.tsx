@@ -5,6 +5,7 @@ import UserProfile from "@/components/userprofile/UserProfileComponent";
 import { api, handleError } from "@/helpers/api";
 import { useEffect, useState } from "react";
 import { User } from "@/store/userStore";
+import UserProfileWhileLoading from "@/components/userprofile/UserProfileWhileLoading";
 
 const ProfilePage = () => {
     const { userId } = useParams();
@@ -24,7 +25,7 @@ const ProfilePage = () => {
       if (userId) fetchUserProfile();
     }, [userId]);
   
-    if (!userDetails) return <div>Loading...</div>;
+    if (!userDetails) return <UserProfileWhileLoading />;
   
     return <UserProfile user={userDetails} />;
   };
