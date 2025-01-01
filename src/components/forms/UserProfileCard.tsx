@@ -29,6 +29,7 @@ import UserSelection from "../forms/SelectCountry";
 import SkillSelector from "./SkillsSelector";
 import { Skill } from "@/store/skills";
 import MentorshipPreferences from "../mentoring/MentorshipPreferences";
+import InterestsSelector from "./InterestsComponent";
 
 interface ModalProps {
   isOpen: boolean;
@@ -434,6 +435,16 @@ export default function UserProfileCard() {
                 )}
               </div>
             )}
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-large font-bold mb-2">Interests</h3>
+            <InterestsSelector
+              selectedInterests={profile.interests || []}
+              onChange={(interests) => handleUpdateField("interests", interests)}
+              maxSelections={10}
+              isEditing={isEditing}
+            />
           </div>
 
           {/* Expertise */}
