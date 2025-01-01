@@ -28,6 +28,7 @@ import { ExpertiseSkill } from "@/store/areaOfExpertise";
 import UserSelection from "../forms/SelectCountry";
 import SkillSelector from "./SkillsSelector";
 import { Skill } from "@/store/skills";
+import MentorshipPreferences from "../mentoring/MentorshipPreferences";
 
 interface ModalProps {
   isOpen: boolean;
@@ -61,7 +62,7 @@ export default function UserProfileCard() {
     }
   }, [isAuthenticated, user, router]);
 
-  const handleUpdateField = (field: keyof User, value: string | string[] | ExpertiseSkill[]) => {
+  const handleUpdateField = (field: keyof User, value: string | boolean | string[] | ExpertiseSkill[]) => {
     setProfile((prev) => ({
       ...prev,
       [field]: value,
@@ -453,6 +454,15 @@ export default function UserProfileCard() {
                 )) || "No expertise selected"}
               </div>
             )}
+          </div>
+
+          <div className="mt-4">
+            <MentorshipPreferences
+              lookingForMentor={profile.lookingForMentor || false}
+              willingToMentor={profile.willingToMentor || false}
+              onUpdate={(field, value) => handleUpdateField(field, value)}
+              isEditing={isEditing}
+            />
           </div>
         </CardBody>
 
