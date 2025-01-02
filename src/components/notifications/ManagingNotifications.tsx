@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { handleFetchNotificationStats, handleFetchUnreadCount } from "./HandleNotificationAPIs";
 import { NotificationStats } from "@/store/notification";
+import { getNotificationStats, getUnreadNotificationCount } from "@/services/notification.service";
 
 
 // Custom hook for managing notification counts
-export const useNotificationCount = (token: string) => {
+export const useNotificationCount = () => {
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +15,7 @@ export const useNotificationCount = (token: string) => {
     const fetchUnreadCount = useCallback(async () => {
       try {
         setIsLoading(true);
-        const count = await handleFetchUnreadCount(token);
+        const count = await getUnreadNotificationCount();
         setUnreadCount(count);
         setError(null);
       } catch (err) {
@@ -22,9 +23,9 @@ export const useNotificationCount = (token: string) => {
       } finally {
         setIsLoading(false);
       }
-    }, [token]);
+    }, []);
   
-    React.useEffect(() => {
+    useEffect(() => {
       fetchUnreadCount();
     }, [fetchUnreadCount]);
   
@@ -37,15 +38,15 @@ export const useNotificationCount = (token: string) => {
   };
   
   // Custom hook for managing notification statistics
-export const useNotificationStats = (token: string) => {
+export const useNotificationStats = () => {
     const [stats, setStats] = React.useState<NotificationStats | null>(null);
     const [isLoading, setIsLoading] = React.useState<boolean>(true);
     const [error, setError] = React.useState<string | null>(null);
   
-    const fetchStats = React.useCallback(async () => {
+    const fetchStats = useCallback(async () => {
       try {
         setIsLoading(true);
-        const fetchedStats = await handleFetchNotificationStats(token);
+        const fetchedStats = await getNotificationStats();
         setStats(fetchedStats);
         setError(null);
       } catch (err) {
@@ -53,9 +54,9 @@ export const useNotificationStats = (token: string) => {
       } finally {
         setIsLoading(false);
       }
-    }, [token]);
+    }, []);
   
-    React.useEffect(() => {
+    useEffect(() => {
       fetchStats();
     }, [fetchStats]);
   

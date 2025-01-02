@@ -11,6 +11,7 @@ import TestimonialsCarousel from "./TestimonialsCarousel";
 import UpcomingEvents from "./UpcomingEvents";
 
 const HomePageComponent = () => {
+    
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <HeroSection />

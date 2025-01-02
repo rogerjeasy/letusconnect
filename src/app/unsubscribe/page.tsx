@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { Button, Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
+import { unsubscribeFromNewsletter } from "@/services/newsletter.service";
 
 const UnsubscribePageContent: React.FC = () => {
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ const UnsubscribePageContent: React.FC = () => {
     setIsModalOpen(false);
 
     try {
-      await api.post("/api/newsletters/unsubscribe", { email });
+      await unsubscribeFromNewsletter(email);
       setStatus("success");
       setMessage("✅ You have successfully unsubscribed from the newsletter.");
       setIsModalOpen(true);
@@ -40,7 +41,7 @@ const UnsubscribePageContent: React.FC = () => {
   };
 
   const handleCloseSuccess = () => {
-    router.push("/"); // Redirect to the homepage
+    router.push("/");
   };
 
   const handleRetryOrContact = () => {

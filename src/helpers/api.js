@@ -1,19 +1,26 @@
 import axios from "axios";
 import { getDomain } from "./getDomain";
+import { API_CONFIG } from "@/config/api.config";
 
+// Create API instances
 export const api = axios.create({
-  baseURL: getDomain(),
+  baseURL: `${getDomain()}${API_CONFIG.VERSION}`,
   headers: {
     "Content-Type": "application/json",
     "Accept": "application/json"
-},
-withCredentials: true
+  },
+  withCredentials: true
 });
 
 export const fileApi = axios.create({
-  baseURL: getDomain(),
-  headers: { "Content-Type": "multipart/form-data" },
+  baseURL: `${getDomain()}${API_CONFIG.VERSION}`,
+  headers: { 
+    "Content-Type": "multipart/form-data" 
+  },
+  withCredentials: true
 });
+
+
 
 export const handleError = (error) => {
   const response = error.response;
@@ -52,3 +59,25 @@ export const handleError = (error) => {
     return "An unknown error occurred.";
   }
 };
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Clear token on 401 error
+      setAuthToken(null);
+    }
+    return Promise.reject(error);
+  }
+);
+
+fileApi.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Clear token on 401 error
+      setAuthToken(null);
+    }
+    return Promise.reject(error);
+  }
+);

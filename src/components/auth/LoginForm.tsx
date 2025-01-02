@@ -12,6 +12,8 @@ import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { handleGetUserEducation } from "../apihandling/HandleUserEducation";
+import { login } from "@/services/auth.service";
+import { setAuthToken } from "@/helpers/tokenManagement";
 
 // Zod Schema for Form Validation
 const loginSchema = z.object({
@@ -41,43 +43,26 @@ const LoginForm = () => {
     setSubmissionError(null);
   
     try {
-      const response = await api.post("/api/users/login", data);
-      
-      if (response.status === 200 && response.data) {
-        const { user, token } = response.data;
-        
-        if (!token || !user) {
-          throw new Error("Invalid response from server");
-        }
-  
-        // Update store with user and token
-        useUserStore.setState({
-          user,
-          token,
-          isAuthenticated: true,
-          loading: false,
-          hasChecked: true
-        });
+      const { user, token } = await login(data);
   
         // Then update localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem("token", token);
-          localStorage.setItem("user", JSON.stringify(user));
-        }
-  
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setAuthToken(token);
+        useUserStore.setState({
+        user,
+        token,
+        isAuthenticated: true,
+        loading: false,
+        hasChecked: true
+      });
 
-        const educationData = await handleGetUserEducation(token);
-        if (educationData) {
-          setSchoolExperience(educationData);
-        }
+        // const educationData = await handleGetUserEducation(token);
+        // if (educationData) {
+        //   setSchoolExperience(educationData);
+        // }
         
-        toast.success(response.data.message);
+        toast.success("Login successful!");
   
         router.push("/dashboard");
-      } else {
-        throw new Error("Login failed");
-      }
     } catch (error) {
       const errorMessage = handleError(error);
       setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");

@@ -6,7 +6,9 @@ import { FaUserPlus, FaEnvelope, FaUserTie, FaGraduationCap } from "react-icons/
 import { User, useUserStore } from "@/store/userStore";
 import ModalPopup from "../forms/ModalPopup";
 import { useRouter } from "next/navigation";
-import { handleGetConnections, handleSendConnectionRequest } from "../apihandling/HandleUserConnections";
+import { getConnectionRequests, getUserConnections, sendConnectionRequest } from "@/services/connection.service";
+import { toast } from "react-toastify";
+import { handleError } from "@/helpers/api";
 
 interface UserCardProps {
   user: User;
@@ -33,30 +35,52 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
   };
 
   const handleSendRequest = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!currentUser) return;
     
     setLoading(true);
-    const success = await handleSendConnectionRequest(user.uid, message, token);
-    setLoading(false);
-  
-    if (success) {
+    try {
+      await sendConnectionRequest(user.uid, message);
       setIsConnectModalOpen(false);
       setMessage("");
+      setHasExistingRequest(true);
+
+    } catch (error) {
+      toast.error("Failed to send connection request."+ handleError(error));
+    } finally {
+      setLoading(false);
     }
   };
 
-  // useEffect(() => {
-  //   checkExistingRequest();
-  // }, []);
+  useEffect(() => {
+    if (user.uid) { 
+      checkExistingRequest();
+    }
+  }, [currentUser, user.uid]);
   
   const checkExistingRequest = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    
+    console.log("Starting checkExistingRequest");
+    if (!currentUser) return;
+  
     try {
-      const connections = await handleGetConnections(token);
-      setHasExistingRequest(connections?.pendingRequests[user.uid] != null);
+      const connectionsResponse = await getUserConnections();
+      console.log("Connections response:", connectionsResponse);
+  
+      // Check if connected
+      const isConnected = connectionsResponse?.connections && 
+        typeof connectionsResponse.connections === 'object' &&
+        user?.uid && 
+        connectionsResponse.connections[user.uid] != null;
+      
+      // Check pending requests (requests received)
+      const hasPendingRequest = connectionsResponse?.pendingRequests && 
+        connectionsResponse.pendingRequests[user.uid] != null;
+      
+      // Check sent requests
+      const hasSentRequest = connectionsResponse?.sentRequests && 
+      connectionsResponse.sentRequests[user.uid] != null;
+  
+      setHasExistingRequest(isConnected || hasPendingRequest || hasSentRequest);
+  
     } catch (error) {
       console.error("Error checking connection status:", error);
     }

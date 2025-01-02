@@ -5,6 +5,9 @@ import { useUserStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { handleProfileCompletion } from "../apihandling/HandleDashboardAPIs";
+import { api } from "@/helpers/api";
+import { API_CONFIG } from "@/config/api.config";
+import { getProfileCompletion } from "@/services/users.services";
 
 interface ProfileCompletion {
   completionPercentage: number;
@@ -18,7 +21,6 @@ export default function HeroSectionDashboard() {
   const { user, isAuthenticated, loading, checkSession } = useUserStore();
   const router = useRouter();
   const [profileStatus, setProfileStatus] = useState<ProfileCompletion | null>(null);
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -28,13 +30,13 @@ export default function HeroSectionDashboard() {
 
   useEffect(() => {
     const fetchProfileStatus = async () => {
-      if (token) {
-        const status = await handleProfileCompletion(token);
+      if (isAuthenticated) {
+        const status = await getProfileCompletion(); 
         setProfileStatus(status);
       }
     };
     fetchProfileStatus();
-  }, [token]);
+  }, [isAuthenticated]);
 
   const userName = user?.username || "User";
   const stats = {

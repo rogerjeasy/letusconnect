@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import { ExpertiseSkill } from "./areaOfExpertise";
 import { Skill } from "./skills";
+import { API_CONFIG } from "@/config/api.config";
 
 // User interfaces remain the same
 export interface User {
@@ -127,7 +128,7 @@ export const useUserStore = create<UserState>()((set, get) => ({
     }
     try {
       set({ loading: true });
-      const response = await api.get('/api/users/session', {
+      const response = await api.get(API_CONFIG.ENDPOINTS.AUTH.SESSION, {
         withCredentials: true,
             headers: {
                 'Accept': 'application/json',
@@ -203,7 +204,7 @@ export const useUserStore = create<UserState>()((set, get) => ({
     try {
       set({ loading: false, hasChecked: true });
       const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      await api.patch('/api/users/logout', {}, {
+      await api.patch(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {}, {
         headers: {
           'Authorization': `Bearer ${storedToken || get().token}`
         }

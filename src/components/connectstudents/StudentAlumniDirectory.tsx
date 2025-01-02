@@ -20,6 +20,7 @@ import { api } from "@/helpers/api";
 import UserCard from "./UserCard";
 import { User, useUserStore } from "@/store/userStore";
 import UserCardWhileLoading from "./UserCardWhileLoading";
+import { getAllUsers } from "@/services/users.services";
 
 export default function StudentAlumniDirectory() {
   const [users, setUsers] = useState<User[]>([]);
@@ -40,16 +41,16 @@ export default function StudentAlumniDirectory() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/api/users");
-      let fetchedUsers = response.data.users;
+      const fetchedUsers = await getAllUsers();
 
-      // Exclude the currentUser if not null
       if (currentUser) {
-        fetchedUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
+        const filteredUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
+        setUsers(filteredUsers);
+        setFilteredUsers(filteredUsers);
+      } else {
+        setUsers(fetchedUsers);
+        setFilteredUsers(fetchedUsers);
       }
-
-      setUsers(fetchedUsers);
-      setFilteredUsers(fetchedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {

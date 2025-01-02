@@ -11,6 +11,9 @@ import { useUserStore } from "../../store/userStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import { registerUser } from '@/services/auth.service';
+import { RegisterData } from "@/models/RegisterData";
+import { setAuthToken } from "@/helpers/tokenManagement";
 
 // Zod Schema for Form Validation
 const registrationSchema = z
@@ -48,16 +51,15 @@ const RegistrationForm = () => {
   const onSubmit: SubmitHandler<RegistrationFormValues> = async (data) => {
     setLoading(true);
     try {
-      // Make the API request to the register endpoint
-      const response = await api.post("/api/users/register", {
+      const registerData: RegisterData = {
         email: data.email,
-        username: data.username,
         password: data.password,
+        username: data.username,
         program: data.program,
-      });
+      };
+
+      const { user, token } = await registerUser(registerData);
   
-      const { user, token } = response.data;
-      // Update store with user and token
       useUserStore.setState({
         user,
         token,
@@ -67,35 +69,30 @@ const RegistrationForm = () => {
       });
 
       // Then update localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setAuthToken(token);
 
       router.push("/dashboard");
   
       // Create school experience for the new user
-      const schoolExperienceResponse = await api.post(
-        "/api/school-experiences/",
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    //   const schoolExperienceResponse = await api.post(
+    //     "/api/school-experiences/",
+    //     {},
+    //     {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     }
+    //   );
 
-      // Create a new address
-      const addressResponse = await api.post("/api/addresses", {}, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    setAddress(addressResponse.data.address);
+    //   // Create a new address
+    //   const addressResponse = await api.post("/api/addresses", {}, {
+    //     headers: { Authorization: `Bearer ${token}` },
+    // });
+    // setAddress(addressResponse.data.address);
   
-      const schoolExperienceData = schoolExperienceResponse.data.data;
-      setSchoolExperience({
-        uid: schoolExperienceData.uid,
-        universities: schoolExperienceData.universities,
-      });
+    //   const schoolExperienceData = schoolExperienceResponse.data.data;
+    //   setSchoolExperience({
+    //     uid: schoolExperienceData.uid,
+    //     universities: schoolExperienceData.universities,
+    //   });
       toast.success("Registration successful. Welcome to Let's Connect!");
       setSubmissionError(null);
       router.push("/dashboard");

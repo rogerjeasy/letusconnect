@@ -11,6 +11,7 @@ import RecommendationDashboard from "./RecommendationDashboard";
 import ActivityFeedDashboard from "./ActivityFeedDashboard";
 import PersonalizedResourcesDashboard from "./PersonalizedResourcesDashboard";
 import HighlightedGroupsDashboard from "./HighlightedGroupsDashboard";
+import { useStore } from "zustand";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useUserStore();
@@ -33,6 +34,15 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="pt-24 md:pt-28 px-4 md:px-8">

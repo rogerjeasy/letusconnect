@@ -1,9 +1,9 @@
 "use client";
 
-import UserConnections from "@/components/connectstudents/UserConnections";
+import UserConnectionComponents from "@/components/connectstudents/UserConnections";
 
 const UserConnectionsPage: React.FC = () => {
-  return <UserConnections />;
+  return <UserConnectionComponents />;
 };
 
 export default UserConnectionsPage;

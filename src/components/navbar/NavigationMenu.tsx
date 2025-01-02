@@ -65,7 +65,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
   };
 
   const NotificationBadge = ({ token, onPress }: { token: string; onPress?: () => void }) => {
-    const { unreadCount, isLoading } = useNotificationCount(token);
+    const { unreadCount, isLoading } = useNotificationCount();
   
     return (
       <Tooltip

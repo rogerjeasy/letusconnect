@@ -27,12 +27,11 @@ import { NotificationIcon } from "../icons/NotificationIcon"
 import { Badge, Button, Input, Spinner, Tooltip } from "@nextui-org/react"
 import { useNotificationCount } from "../notifications/ManagingNotifications"
 import { useEffect, useState } from "react"
-import fetchUnreadCount from "../messages/fetchUnreadCount"
 import { getPusherInstance } from "@/helpers/pusher"
 import { useRouter } from "next/navigation"
 import { SearchIcon } from "./SearchIcon"
-import { b } from "framer-motion/client"
 import { FaComments } from "react-icons/fa"
+import { getUnreadMessageCount } from "@/services/message.service"
 
 interface MenuComponent {
   title: string;
@@ -121,7 +120,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
   useEffect(() => {
     if (!user?.uid) return;
 
-    fetchUnreadCount(setUnreadCount);
+    getUnreadMessageCount(setUnreadCount);
 
     const pusher = getPusherInstance();
     const notificationChannel = pusher?.subscribe(`user-notifications-${user.uid}`);
@@ -131,11 +130,11 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
     });
 
     notificationChannel?.bind("update-unread-count", () => {
-      fetchUnreadCount(setUnreadCount);
+      getUnreadMessageCount(setUnreadCount);
     });
 
     notificationChannel?.bind("message-read", () => {
-      fetchUnreadCount(setUnreadCount);
+      getUnreadMessageCount(setUnreadCount);
     });
 
     return () => {
@@ -184,7 +183,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
   };
 
   const NotificationBadge = ({ token}: { token: string }) => {
-    const { unreadCount, isLoading } = useNotificationCount(token);
+    const { unreadCount, isLoading } = useNotificationCount();
   
     return (
       <Tooltip

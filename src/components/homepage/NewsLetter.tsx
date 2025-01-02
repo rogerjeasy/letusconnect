@@ -11,6 +11,7 @@ import {
   Input,
   Button,
 } from "@nextui-org/react";
+import { getNewsletterSubscriberCount, subscribeToNewsletter } from "@/services/newsletter.service";
 
 const NewsLetter: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -27,8 +28,8 @@ const NewsLetter: React.FC = () => {
 
   const fetchTotalSubscribers = async () => {
     try {
-      const response = await api.get("/api/newsletters/subscribers/count");
-      setTotalSubscribers(response.data.totalSubscribers);
+      const count = await getNewsletterSubscriberCount();
+      setTotalSubscribers(count);
     } catch (error) {
       console.error("Failed to fetch total subscribers:", error);
     }
@@ -40,9 +41,7 @@ const NewsLetter: React.FC = () => {
     setMessage("");
 
     try {
-      await api.post("/api/newsletters/subscribe", {
-        email,
-      });
+      await subscribeToNewsletter(email);
 
       setStatus("success");
       setMessage("🎉 Thank you for subscribing to our newsletter!");

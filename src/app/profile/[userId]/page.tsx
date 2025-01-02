@@ -6,6 +6,7 @@ import { api, handleError } from "@/helpers/api";
 import { useEffect, useState } from "react";
 import { User } from "@/store/userStore";
 import UserProfileWhileLoading from "@/components/userprofile/UserProfileWhileLoading";
+import { getUserByUid } from "@/services/users.services";
 
 const ProfilePage = () => {
     const { userId } = useParams();
@@ -14,8 +15,8 @@ const ProfilePage = () => {
     useEffect(() => {
       const fetchUserProfile = async () => {
         try {
-          const response = await api.get(`/api/users/${userId}`);
-          setUserDetails(response.data.user);
+          const user = await getUserByUid(userId as string);
+          setUserDetails(user);
         } catch (error) {
           const errorMessage = handleError(error);
           console.error('Error fetching profile:', errorMessage);
