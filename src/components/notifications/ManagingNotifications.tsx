@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { handleFetchNotificationStats, handleFetchUnreadCount } from "./HandleNotificationAPIs";
 import { NotificationStats } from "@/store/notification";
 import { getNotificationStats, getUnreadNotificationCount } from "@/services/notification.service";
 

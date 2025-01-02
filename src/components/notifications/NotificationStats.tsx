@@ -9,7 +9,7 @@ interface NotificationStatsProps {
 }
 
 const NotificationStats: React.FC<NotificationStatsProps> = ({ token }) => {
-  const { stats, isLoading, error } = useNotificationStats(token);
+  const { stats, isLoading, error } = useNotificationStats();
 
   if (isLoading) {
     return (
