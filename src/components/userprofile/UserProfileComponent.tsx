@@ -8,6 +8,8 @@ import { User, useUserStore, WorkExperience } from "@/store/userStore";
 import { Skill } from "@/store/skills";
 import { ExpertiseSkill } from "@/store/areaOfExpertise";
 import { format } from "date-fns";
+import { useRouter } from 'next/navigation';
+import { Tooltip } from '@nextui-org/react';
 
 interface UserProfileProps {
   user: User;
@@ -15,6 +17,7 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   const userWorkExperience = useUserStore((state) => state.workExperience);
+  const router = useRouter();
   return (
     // p-6 max-w-5xl mx-auto pt-28
     <div className="container mx-auto p-4 space-y-6">
@@ -61,10 +64,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <Check className="h-4 w-4" />
                 {user.isVerified ? 'Verified' : 'Unverified'}
                 </Badge>
-                <Badge variant="outline" className="flex gap-1">
-                <Users className="h-4 w-4" />
-                {user.connectionsMade} Connections
-                </Badge>
+                <Tooltip content="Click to see connections" placement="top">
+                    <Badge
+                    variant="outline"
+                    className="flex gap-1 cursor-pointer"
+                    onClick={() => router.push(`/connections/${user.uid}`)}
+                    >
+                    <Users className="h-4 w-4" />
+                    {user.connectionsMade} Connections
+                    </Badge>
+                </Tooltip>
+
                 {user.lookingForMentor && (
                 <Badge variant="secondary">Looking for Mentor</Badge>
                 )}
