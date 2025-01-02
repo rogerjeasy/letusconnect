@@ -340,7 +340,7 @@ const ManageUserConnections: React.FC<ManageUserConnectionsProps> = ({ token }) 
                     <div className="text-center py-8 text-gray-500">
                       <SendHorizontal className="h-12 w-12 mx-auto mb-4" />
                       <p>No sent requests</p>
-                      <p className="text-sm">You haven't sent any connection requests yet</p>
+                      <p className="text-sm">You have not sent any connection requests yet</p>
                     </div>
                   )}
                 </ScrollArea>

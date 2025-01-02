@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getDomain } from "./getDomain";
 import { API_CONFIG } from "@/config/api.config";
+import { setAuthToken } from "./setAuthToken";
 
 // Create API instances
 export const api = axios.create({
