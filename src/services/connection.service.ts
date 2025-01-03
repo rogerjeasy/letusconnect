@@ -11,7 +11,24 @@ interface ConnectionsResponse {
 }
 
 interface ConnectionRequestResponse {
-  connectionStatus: string;
+  connections: {
+    [uid: string]: {
+      acceptedAt: string;
+      sentAt: string;
+      status: string;
+      targetName: string;
+      targetUid: string;
+    };
+  };
+  pendingRequests: {
+    [uid: string]: {
+      fromName: string;
+      fromUid: string;
+      message: string;
+      sentAt: string;
+      status: string;
+    }
+  };
 }
 
 interface ConnectionActionResponse {
@@ -69,7 +86,7 @@ export const getUserConnections = async (): Promise<ConnectionsResponse> => {
 export const getConnectionRequests = async (uid: string): Promise<ConnectionRequestResponse> => {
   try {
     const response = await api.get<ConnectionRequestResponse>(
-      API_CONFIG.ENDPOINTS.CONNECTIONS.REQUESTS.BASE + `/${uid}`
+      API_CONFIG.ENDPOINTS.CONNECTIONS.GET_BY_UID(uid)
     );
     return response.data;
   } catch (error) {

@@ -33,10 +33,12 @@ interface SearchAndFilterProps {
       time: string;
       priority: string;
       isRead: boolean;
+      userId?: string;
     }[];
   };
   onActionClick: (id: string, action: string) => void;
   onRefreshNotifications: () => void;
+  isRefreshing: boolean;
 }
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
@@ -46,6 +48,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   groupedNotifications,
   onActionClick,
   onRefreshNotifications,
+  isRefreshing,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -202,37 +205,48 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-                <Button 
-                  color="primary" 
-                  size="md" 
-                  className="w-full sm:w-auto h-10 px-4"
-                >
-                  Apply Filters
-                </Button>
-                <Button
-                  color="danger"
-                  variant="bordered"
-                  size="md"
-                  className="w-full sm:w-auto h-10 px-4"
-                  onClick={handleClearFilters}
-                  startContent={<FaTimesCircle />}
-                >
-                  Clear Filters
-                </Button>
-              </div>
+            <Button 
+              color="primary" 
+              size="md" 
+              className="w-full sm:w-auto h-10 px-4"
+              isLoading={isRefreshing}
+            >
+              {isRefreshing ? 'Applying...' : 'Apply Filters'}
+            </Button>
+            <Button
+              color="danger"
+              variant="bordered"
+              size="md"
+              className="w-full sm:w-auto h-10 px-4"
+              onClick={handleClearFilters}
+              startContent={<FaTimesCircle />}
+              isDisabled={isRefreshing}
+            >
+              Clear Filters
+            </Button>
+          </div>
 
               {/* Notification Groups */}
               <div className="w-full mt-8">
-                {Object.entries(groupedNotifications).map(([date, notifications]) => (
-                  <NotificationGroup
-                    key={date}
-                    date={date}
-                    notifications={notifications}
-                    onActionClick={onActionClick}
-                    onRefresh={onRefreshNotifications}
-                  />
-                ))}
+            {Object.entries(groupedNotifications).map(([date, notifications]) => (
+              <NotificationGroup
+                key={date}
+                date={date}
+                notifications={notifications}
+                onActionClick={onActionClick}
+                onRefresh={onRefreshNotifications}
+              />
+            ))}
+            {isRefreshing && (
+              <div className="flex justify-center py-4">
+                <div className="animate-pulse flex space-x-4">
+                  <div className="h-3 w-3 bg-gray-200 rounded-full"></div>
+                  <div className="h-3 w-3 bg-gray-300 rounded-full"></div>
+                  <div className="h-3 w-3 bg-gray-400 rounded-full"></div>
+                </div>
               </div>
+            )}
+          </div>
             </div>
           </CardBody>
         </Card>

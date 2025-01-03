@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Badge, Card, Divider, Avatar } from "@nextui-org/react";
 import { FaEnvelope, FaCalendar, FaBell, FaExclamation, FaCog } from "react-icons/fa";
 import NotificationModalPopup from "@/components/notifications/NotificationModalPopup";
-import { handleMarkNotificationAsRead } from "./HandleNotificationAPIs";
 import { useRouter } from "next/navigation";
+import { markNotificationAsRead } from "@/services/notification.service";
 
 interface NotificationCardProps {
   id: string;
@@ -14,7 +14,6 @@ interface NotificationCardProps {
   time: string;
   priority: string;
   isRead: boolean;
-  token: string;
   fromUid?: string;
   onActionClick: (id: string, action: string) => void;
   onReadStatusChange?: () => void;
@@ -28,7 +27,6 @@ interface NotificationCardProps {
   time,
   priority,
   isRead,
-  token,
   fromUid,
   onActionClick,
   onReadStatusChange,
@@ -49,12 +47,9 @@ interface NotificationCardProps {
       try {
         const originalId = getOriginalId(id);
         
-        await handleMarkNotificationAsRead(token, originalId);
+        await markNotificationAsRead(originalId);
         setRead(true);
-        // onActionClick(originalId, "mark-as-read");
-        // onReadStatusChange?.();
       } catch (error) {
-        // Error is already handled by handleMarkNotificationAsRead
         console.error("Failed to mark notification as read:", error);
       } finally {
         setIsLoading(false);
@@ -157,7 +152,7 @@ interface NotificationCardProps {
         notification={notification}
         onClose={() => setModalOpen(false)}
         onAction={(actionId, action) => onActionClick(getOriginalId(actionId), action)}
-        onViewProfile={handleViewProfile}
+        onViewProfile={(fromUid) => handleViewProfile(fromUid)}
       />
     </>
   );

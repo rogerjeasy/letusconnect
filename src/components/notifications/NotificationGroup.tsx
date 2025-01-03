@@ -12,9 +12,11 @@ interface NotificationGroupProps {
     time: string;
     priority: string;
     isRead: boolean;
+    fromUid?: string;
+    userId?: string;
   }[];
   onActionClick: (id: string, action: string) => void;
-  onRefresh: () => void; // Add refresh callback
+  onRefresh: () => void; 
 }
 
 const NotificationGroup: React.FC<NotificationGroupProps> = ({
@@ -24,7 +26,6 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
   onRefresh
 }) => {
   const [visibleCount, setVisibleCount] = useState(10);
-  const userToken = localStorage.getItem("token");
 
   const handleSeeMore = () => {
     setVisibleCount((prev) => prev + 10);
@@ -63,7 +64,7 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
                 time={notification.time}
                 priority={notification.priority}
                 isRead={notification.isRead}
-                token={userToken || ""}
+                fromUid={notification.userId}
                 onActionClick={onActionClick}
                 onReadStatusChange={onRefresh}
               />

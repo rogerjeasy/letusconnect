@@ -1,4 +1,6 @@
 "use client";
+import { acceptConnectionRequest, getConnectionRequests, rejectConnectionRequest } from "@/services/connection.service";
+import { useUserStore } from "@/store/userStore";
 import {
   Modal,
   ModalContent,
@@ -8,6 +10,7 @@ import {
   Button,
   Avatar,
 } from "@nextui-org/react";
+import { useEffect, useState } from "react";
 import {
   FaEnvelope,
   FaCalendar,
@@ -40,6 +43,45 @@ export default function NotificationModalPopup({
   onViewProfile,
  }: NotificationModalPopupProps) {
   const { id, title, content, type, time, priority, fromUid } = notification;
+  const currentUser = useUserStore((state) => state.user);
+  const [isAlreadyConnected, setIsAlreadyConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({
+    accept: false,
+    reject: false
+  });
+
+  useEffect(() => {
+    const checkConnectionStatus = async () => {
+      if (fromUid && isOpen && currentUser?.uid) {
+        try {
+          const connectionStatus = await getConnectionRequests(fromUid);
+          
+          const isConnected = Object.keys(connectionStatus.connections).includes(currentUser.uid);
+          setIsAlreadyConnected(isConnected);
+        } catch (error) {
+          console.error("Failed to check connection status:", error);
+        }
+      }
+    };
+    checkConnectionStatus();
+  }, [fromUid, isOpen, currentUser?.uid]);
+
+  const handleConnectionAction = async (action: 'accept' | 'reject') => {
+    setIsLoading(prev => ({ ...prev, [action]: true }));
+    try {
+      if (action === 'accept') {
+        await acceptConnectionRequest(fromUid);
+      } else {
+        await rejectConnectionRequest(fromUid);
+      }
+      onAction(id, action);
+      onClose();
+    } catch (error) {
+      console.error(`Failed to ${action} connection request:`, error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, [action]: false }));
+    }
+  };
 
   const getIconForType = (type: string) => {
     switch (type) {
@@ -67,15 +109,38 @@ export default function NotificationModalPopup({
           </Button>
         );
       case "connection_request":
+        if (isAlreadyConnected) {
+          return (
+            <div className="flex gap-2">
+              <Button 
+                color="primary" 
+                onPress={() => onViewProfile(fromUid)}
+              >
+                View Profile
+              </Button>
+            </div>
+          );
+        }
         return (
           <div className="flex gap-2">
-            <Button color="success" onPress={() => onAction(id, "accept")}>
+            <Button 
+              color="success" 
+              isLoading={isLoading.accept}
+              onPress={() => handleConnectionAction('accept')}
+            >
               Accept
             </Button>
-            <Button color="danger" onPress={() => onAction(id, "reject")}>
-              Reject  
+            <Button 
+              color="danger" 
+              isLoading={isLoading.reject}
+              onPress={() => handleConnectionAction('reject')}
+            >
+              Reject
             </Button>
-            <Button color="primary" onPress={() => onViewProfile(fromUid)}>
+            <Button 
+              color="primary" 
+              onPress={() => onViewProfile(fromUid)}
+            >
               View Profile
             </Button>
           </div>

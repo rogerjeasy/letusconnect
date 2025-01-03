@@ -71,7 +71,7 @@ export const getUnreadNotificationCount = async (): Promise<number> => {
 export const markNotificationAsRead = async (notificationId: string): Promise<string> => {
   try {
     const response = await api.patch<{ message: string; error?: string }>(
-      `${API_CONFIG.ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId)}/read`
+      `${API_CONFIG.ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId)}`
     );
     return response.data.message;
   } catch (error) {

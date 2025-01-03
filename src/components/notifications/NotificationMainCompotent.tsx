@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import SearchAndFilter from "@/components/notifications/SearchAndFilter";
-import { handleFetchTargetedNotifications } from "@/components/notifications/HandleNotificationAPIs";
 import { 
   Notification, 
 } from "@/store/notification";
@@ -16,11 +15,6 @@ export interface TransformedNotification extends Omit<Notification, 'createdAt' 
   time: string;
 }
 
-// Define types for grouped notifications
-type GroupedNotifications = {
-  [date: string]: Notification[];
-};
-
 export type TransformedGroupedNotifications = {
   [date: string]: TransformedNotification[];
 };
@@ -28,21 +22,22 @@ export type TransformedGroupedNotifications = {
 const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);  
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [lastNotificationId, setLastNotificationId] = useState<string | undefined>();
-  const [token, setToken] = useState<string>("");
-  
-  useEffect(() => {
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
-    setToken(storedToken || "");
-  }, []);
 
   const fetchNotifications = async (isInitial: boolean = false) => {
     try {
-      setLoading(true);
-      const fetchedNotifications = await getTargetedNotifications()
+      if (isInitial) {
+        setInitialLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
+
+      const fetchedNotifications = await getTargetedNotifications();
 
       if (fetchedNotifications.length < 20) {
         setHasMore(false);
@@ -61,15 +56,38 @@ const NotificationsPage: React.FC = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    if (token) {
-      fetchNotifications(true);
-    }
-  }, [token]);
+    fetchNotifications(true);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-6">
+        <div className="text-red-500">
+          {error}
+          <button 
+            onClick={() => fetchNotifications(true)}
+            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center">
+        <SearchAndFilterSkeleton />
+      </div>
+    );
+  }
 
   const transformNotification = (notification: Notification): TransformedNotification => ({
     id: notification.id,
@@ -187,13 +205,6 @@ const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNot
 
   const groupedNotifications = groupNotificationsByDate(filteredNotifications);
   
-  if (!token) {
-    return (
-      <div className="flex items-center justify-center">
-        <SearchAndFilterSkeleton />
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">
@@ -204,7 +215,13 @@ const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNot
         groupedNotifications={groupedNotifications}
         onActionClick={handleActionClick}
         onRefreshNotifications={fetchNotifications}
-        />
+        isRefreshing={isRefreshing} 
+      />
+      {isRefreshing && (
+        <div className="fixed bottom-4 right-4 bg-white p-2 rounded-full shadow-lg">
+          <Spinner size="sm" />
+        </div>
+      )}
     </div>
   );
 };

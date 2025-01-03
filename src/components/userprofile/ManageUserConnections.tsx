@@ -197,7 +197,7 @@ const ManageUserConnections: React.FC<ManageUserConnectionsProps> = ({ token }) 
               </Avatar>
               <div>
                 <h4 className="text-lg font-semibold">{user.username}</h4>
-                <p className="text-sm text-gray-500">Sent at {request.sentAt.toString()}</p>
+                <p className="text-sm text-gray-500">Sent at {new Date(request.sentAt).toLocaleString()}</p>
                 {request.message && (
                   <p className="text-sm mt-1 italic">&ldquo;{request.message}&rdquo;</p>
                 )}
