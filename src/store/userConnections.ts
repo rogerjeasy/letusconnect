@@ -4,8 +4,8 @@ import { Time } from "@internationalized/date";
 export interface Connection {
     targetUid: string;
     targetName: string;
-    sentAt: Time;
-    acceptedAt: Time;
+    sentAt: string;
+    acceptedAt: string;
     status: string;  // "active", "blocked", etc.
 }
 
@@ -13,14 +13,14 @@ export interface ConnectionRequest {
     fromUid: string;
     fromName: string;
     toUid: string;
-    sentAt: Time;
+    sentAt: string;
     message: string;
     status: string;  // "pending", "accepted", "rejected"
 }
 
 export interface SentRequest {
     toUid: string;
-    sentAt: Time;
+    sentAt: string;
     message: string;
     status: string;  // "pending", "accepted", "rejected"
     accepted: Time;

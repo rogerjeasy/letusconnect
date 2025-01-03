@@ -18,3 +18,19 @@ export interface Messages {
   channelID: string;
   directMessages: DirectMessage[];
 }
+
+export interface MarkReadRequest {
+  messageIds: string[];
+}
+
+export interface TypingStatusRequest {
+  receiverId: string;
+  isTyping: boolean;
+}
+
+export interface SendMessageRequest {
+  receiverId: string;
+  content: string;
+  messageType?: string;
+  attachments?: string[];
+}

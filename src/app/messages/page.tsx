@@ -19,6 +19,9 @@ import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore, ChatEntity } from "@/store/chatEntitiesStore";
 import { handleGetUnreadMessagesGroup, handleMarkMessagesAsRead } from "@/components/messages/HandleGroupActions";
 import { toast } from "react-toastify";
+import { getAllUsers } from "@/services/users.services";
+import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
+import { getGroupUnreadCount, getMyGroupChats, processGroupChats } from "@/services/groupchat.service";
 
 type PinnedMessagesMap = Record<string, string[]>;
 
@@ -73,30 +76,12 @@ const ChatPage = () => {
   };    
 
   const fetchUserMessages = async (): Promise<ChatEntity[]> => {
-    const token = localStorage.getItem("token");
     try {
-      const response = await api.get("/api/messages/direct", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const messages = await getDirectMessages();
+      const directMessagesMap = organizeDirectMessages(messages);
   
-      const messages: Messages[] = response.data.messages;
-      const directMessagesMap: Record<string, DirectMessage[]> = {};
+      const fetchedUsers = await getAllUsers();
 
-      messages.forEach((message) => {
-        message.directMessages.forEach((dm) => {
-          // Create a unique key based on senderId and receiverId to group messages
-          const userKey = [dm.senderId, dm.receiverId].sort().join("-");
-          if (!directMessagesMap[userKey]) {
-            directMessagesMap[userKey] = [];
-          }
-          directMessagesMap[userKey].push(dm);
-        });
-      });
-  
-      const usersResponse = await api.get("/api/users");
-      const fetchedUsers: User[] = usersResponse.data.users;
-  
-      // Filter all users except the current user
       const allUsers: User[] = fetchedUsers.filter((user) => user.uid !== currentUser?.uid);
       setUsers(allUsers);
   
@@ -143,38 +128,9 @@ const ChatPage = () => {
   
 
   const fetchGroupChatMessages = async (): Promise<ChatEntity[]> => {
-    const token = localStorage.getItem("token");
     try {
-      const response = await api.get("/api/group-chats/my/group-chats", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      const groupData: GroupChat[] = response.data.data;
-
-      // Map each group's pinned messages
-      const newPinnedMessagesMap: PinnedMessagesMap = {};
-      groupData.forEach((group) => {
-        newPinnedMessagesMap[group.id] = group.pinnedMessages || [];
-      });
-      setPinnedMessagesMap(newPinnedMessagesMap);
-  
-      const groupEntities: ChatEntity[] = groupData.map((group) => {
-        const groupMessages: BaseMessage[] = group.messages || []; 
-        const participants: Participants[] = group.participants || [];
-        addParticipant(group.id, participants);
-  
-        return {
-          id: group.id,
-          name: group.name,
-          avatar: "", 
-          type: "group",
-          groupMessages: groupMessages,
-          directMessages: [],
-          participants: participants,
-        };
-      });
-  
-      return groupEntities;
+      const groupChats = await getMyGroupChats();
+      return processGroupChats(groupChats, setPinnedMessagesMap, addParticipant);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching group messages:", errorMessage);
@@ -183,16 +139,8 @@ const ChatPage = () => {
   };
 
   const fetchUnreadCountForEntity = async (entityId: string) => {
-    const token = localStorage.getItem("token") || "";
     try {
-      const unreadCount = await handleGetUnreadMessagesGroup({
-        token,
-        groupChatId: entityId,
-      });
-      setUnreadCounts((prevCounts) => ({
-        ...prevCounts,
-        [entityId]: unreadCount,
-      }));
+      await getGroupUnreadCount(entityId, undefined, setUnreadCounts);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching unread count for entity:", entityId, errorMessage);
