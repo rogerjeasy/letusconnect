@@ -1,7 +1,6 @@
 import axios from "axios";
 import { getDomain } from "./getDomain";
 import { API_CONFIG } from "@/config/api.config";
-import { setAuthToken } from "./tokenManagement";
 
 // Create API instances
 export const api = axios.create({
@@ -66,7 +65,7 @@ api.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       // Clear token on 401 error
-      setAuthToken(null);
+      // setAuthToken(null);
     }
     return Promise.reject(error);
   }
@@ -77,7 +76,7 @@ fileApi.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       // Clear token on 401 error
-      setAuthToken(null);
+      // setAuthToken(null);
     }
     return Promise.reject(error);
   }

@@ -7,6 +7,9 @@ import {
   Notification, 
 } from "@/store/notification";
 import _ from "lodash";
+import { Spinner } from "@nextui-org/react";
+import SearchAndFilterSkeleton from "./SearchSkeletonNotification";
+import { getTargetedNotifications } from "@/services/notification.service";
 
 // Define the transformed notification type that includes 'time' instead of 'createdAt'
 export interface TransformedNotification extends Omit<Notification, 'createdAt' | 'updatedAt' | 'readAt' | 'sentAt'> {
@@ -39,11 +42,7 @@ const NotificationsPage: React.FC = () => {
   const fetchNotifications = async (isInitial: boolean = false) => {
     try {
       setLoading(true);
-      const fetchedNotifications = await handleFetchTargetedNotifications(
-        token,
-        20,
-        isInitial ? undefined : lastNotificationId
-      );
+      const fetchedNotifications = await getTargetedNotifications()
 
       if (fetchedNotifications.length < 20) {
         setHasMore(false);
@@ -187,9 +186,13 @@ const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNot
   };
 
   const groupedNotifications = groupNotificationsByDate(filteredNotifications);
-
+  
   if (!token) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center">
+        <SearchAndFilterSkeleton />
+      </div>
+    );
   }
 
   return (
