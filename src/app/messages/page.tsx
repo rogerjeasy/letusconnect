@@ -19,6 +19,7 @@ import { getAllUsers } from "@/services/users.services";
 import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
 import { getGroupUnreadCount, getMyGroupChats, markGroupMessagesAsRead, processGroupChats } from "@/services/groupchat.service";
 import { getUnreadMessageCount } from "@/services/message.service";
+import SortedChatList from "@/components/messages/SortedChatList";
 
 type PinnedMessagesMap = Record<string, string[]>;
 
@@ -253,7 +254,6 @@ const ChatPage = () => {
   // if (!currentUser) {
   //   return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
   // }
-
   return (
     <div className="relative flex justify-center items-center p-6 min-h-screen overflow-hidden">
       {/* Background Image Slider */}
@@ -368,37 +368,12 @@ const ChatPage = () => {
                     )}
                   </>
                 ) : (
-                  <ul className="space-y-4">
-                    {entities.map((entity) => (
-                      <li
-                        key={entity.id}
-                        className={`flex items-center gap-4 p-2 cursor-pointer rounded-lg ${
-                          selectedEntity?.id === entity.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
-                        }`}
-                        onClick={() => handleEntityClick(entity)}
-                      >
-                        <Avatar src={entity.avatar} alt={entity.name} />
-                        <div>
-                          <p className="font-semibold text-black">{entity.name}</p>
-                          <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
-                        </div>
-                        {unreadCounts[entity.id] > 0 && entity.id !== selectedEntity?.id && (
-                          // <Badge color="danger" className="ml-auto" size="sm">
-                          //   {unreadCounts[user.uid]}
-                          // </Badge>
-                          <Badge
-                          content={unreadCounts[entity.id]}
-                          color="danger"
-                          size="md"
-                          shape="circle"
-                          className="absolute -top-2 -right-2"
-                        >
-                          {""}
-                        </Badge>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  <SortedChatList 
+                    entities={entities}
+                    selectedEntity={selectedEntity}
+                    unreadCounts={unreadCounts}
+                    handleEntityClick={handleEntityClick}
+                  />
                 )}
               </div>
             </Card>

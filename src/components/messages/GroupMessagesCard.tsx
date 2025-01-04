@@ -24,7 +24,7 @@ import { ModalAddMemberToGroup, ModalRemoveMemberFromGroup } from "./ChatManagem
 import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { getPusherInstance } from "@/helpers/pusher";
-import { Send, SendHorizontal } from "lucide-react";
+import { Send } from "lucide-react";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -193,13 +193,21 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     };
   
     if (groupChatId) {
+      const groupMessages = messages.filter((msg): msg is BaseMessage => 
+        'readStatus' in msg && 'isDeleted' in msg && 'isPinned' in msg
+      );
+    
       await sendMessageToGroup(
         groupChatId,
         newMessage,
-        token,
-        addMessageToState,
+        (newMessage: BaseMessage) => {
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+          scrollToBottom();
+        },
         setNewMessage,
-        setSendingMessage
+        setSendingMessage,
+        updateEntity,
+        groupMessages
       );
     } else if (selectedEntity?.type === "user" && selectedEntity.participants?.length === 1) {
       const directRecipient = selectedEntity;

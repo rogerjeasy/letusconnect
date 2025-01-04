@@ -16,15 +16,6 @@ interface UnreadCountResponse {
   unreadCount: number;
 }
 
-interface SendGroupMessageRequest {
-  groupId: string;
-  content: string;
-  messageType?: string;
-  attachments?: string[];
-  replyToId?: string;
-  priority?: string;
-}
-
 interface PinMessageRequest {
   groupId: string;
   messageId: string;
@@ -65,7 +56,6 @@ export const getMyGroupChats = async (): Promise<GroupChat[]> => {
  * Send a new message to a group chat.
  * @param groupChatId - The ID of the group chat.
  * @param content - The message content to send.
- * @param token - User's authorization token.
  * @param updateMessages - Callback to handle updating the message state.
  * @param setNewMessage - Function to clear the message input.
  * @param setSendingMessage - Function to indicate message-sending state.
@@ -73,10 +63,11 @@ export const getMyGroupChats = async (): Promise<GroupChat[]> => {
 export const sendMessageToGroup = async (
     groupChatId: string,
     content: string,
-    token: string,
     updateMessages: (newMessage: BaseMessage) => void,
     setNewMessage: Dispatch<SetStateAction<string>>,
-    setSendingMessage: Dispatch<SetStateAction<boolean>>
+    setSendingMessage: Dispatch<SetStateAction<boolean>>,
+    updateEntity: (entityId: string, updatedEntity: Partial<ChatEntity>) => void,
+    currentMessages: BaseMessage[]
   ) => {
     if (!content.trim()) return;
   
@@ -87,7 +78,15 @@ export const sendMessageToGroup = async (
       const response = await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.MESSAGES, payload);
   
       const sentMessage: BaseMessage = response.data.data;
+      
+      // Update local messages state
       updateMessages(sentMessage);
+      
+      // Update entity in Zustand store with new message
+      updateEntity(groupChatId, {
+        groupMessages: [...currentMessages, sentMessage]
+      });
+      
       setNewMessage("");
     } catch (error) {
       const errorMessage = handleError(error);
@@ -95,7 +94,7 @@ export const sendMessageToGroup = async (
     } finally {
       setSendingMessage(false);
     }
-};
+  };
 
 
 

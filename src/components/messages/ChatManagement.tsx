@@ -24,6 +24,8 @@ import { useParticipantsStore } from "@/store/participantsStore";
 import { Participants } from "@/store/project";
 import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { fetchUsersForGroup } from "@/components/messages/HandleParticipants";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Users, UserPlus, Settings, Archive, MessageCircle } from 'lucide-react';
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />
