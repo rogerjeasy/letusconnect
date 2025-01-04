@@ -16,24 +16,7 @@ import { useStore } from "zustand";
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useUserStore();
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex items-center justify-center h-screen">
-  //       <Spinner size="lg" />
-  //     </div>
-  //   );
-  // }
 
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="pt-24 md:pt-28 px-4 md:px-8">
-        <AccessDenied
-          condition={true}
-          message="Access Denied: You need to be logged in to view this page."
-        />
-      </div>
-    );
-  }
 
   if (loading) {
     return (

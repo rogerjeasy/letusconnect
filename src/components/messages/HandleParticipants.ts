@@ -2,6 +2,7 @@ import { api, handleError } from "@/helpers/api";
 import { User, useUserStore } from "@/store/userStore";
 import { Participants } from "@/store/project";
 import { toast } from "react-toastify";
+import { getAllUsers } from "@/services/users.services";
 
 /**
  * Fetch users excluding the current user.
@@ -13,9 +14,9 @@ export const fetchUsersForGroup = async (
 ): Promise<{ participants: Participants[]; users?: User[] }> => {
   try {
     const currentUser = useUserStore.getState().user;
-    const response = await api.get("/api/users");
+    const response = await getAllUsers();
 
-    const fetchedParticipants = response.data.users
+    const fetchedParticipants = response
       .filter((user: User) => user.uid !== currentUser?.uid)
       .map((user: User) => ({
         userId: user.uid,
@@ -26,7 +27,7 @@ export const fetchUsersForGroup = async (
       }));
 
     if (returnAlsoUsers) {
-      const fetchedUsers = response.data.users.filter(
+      const fetchedUsers = response.filter(
         (user: User) => user.uid !== currentUser?.uid
       );
 

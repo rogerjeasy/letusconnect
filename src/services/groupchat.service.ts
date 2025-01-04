@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from "react";
 import { BaseMessage, GroupChat, GroupSettings } from "@/store/groupChat";
 import { Participants } from "@/store/project";
 import { ChatEntity } from "@/store/chatEntitiesStore";
+import { toast } from "react-toastify";
 
 interface GroupChatResponse {
   data: GroupChat[];
@@ -61,19 +62,42 @@ export const getMyGroupChats = async (): Promise<GroupChat[]> => {
 };
 
 /**
- * Send a message to a group chat
- * @param messageData Message data including group ID and content
- * @returns Promise with the sent message
+ * Send a new message to a group chat.
+ * @param groupChatId - The ID of the group chat.
+ * @param content - The message content to send.
+ * @param token - User's authorization token.
+ * @param updateMessages - Callback to handle updating the message state.
+ * @param setNewMessage - Function to clear the message input.
+ * @param setSendingMessage - Function to indicate message-sending state.
  */
-export const sendGroupMessage = async (messageData: SendGroupMessageRequest): Promise<BaseMessage> => {
-  try {
-    const response = await api.post<BaseMessage>(API_CONFIG.ENDPOINTS.GROUP_CHATS.MESSAGES, messageData);
-    return response.data;
-  } catch (error) {
-    const errorMessage = handleError(error);
-    throw new Error(errorMessage || "Failed to send group message");
-  }
+export const sendMessageToGroup = async (
+    groupChatId: string,
+    content: string,
+    token: string,
+    updateMessages: (newMessage: BaseMessage) => void,
+    setNewMessage: Dispatch<SetStateAction<string>>,
+    setSendingMessage: Dispatch<SetStateAction<boolean>>
+  ) => {
+    if (!content.trim()) return;
+  
+    try {
+      setSendingMessage(true);
+  
+      const payload = { groupChatId, content };
+      const response = await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.MESSAGES, payload);
+  
+      const sentMessage: BaseMessage = response.data.data;
+      updateMessages(sentMessage);
+      setNewMessage("");
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error("Failed to send message. " + errorMessage);
+    } finally {
+      setSendingMessage(false);
+    }
 };
+
+
 
 /**
  * Mark messages as read in a group chat
@@ -81,7 +105,7 @@ export const sendGroupMessage = async (messageData: SendGroupMessageRequest): Pr
  */
 export const markGroupMessagesAsRead = async (groupChatId: string): Promise<void> => {
   try {
-    await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.MARK_READ(groupChatId));
+    await api.patch(API_CONFIG.ENDPOINTS.GROUP_CHATS.MARK_READ(groupChatId));
   } catch (error) {
     const errorMessage = handleError(error);
     throw new Error(errorMessage || "Failed to mark group messages as read");

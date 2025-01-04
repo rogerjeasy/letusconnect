@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { api, handleError } from "@/helpers/api";
+import { handleError } from "@/helpers/api";
 import { User, useUserStore } from "@/store/userStore";
 import { Avatar, Spinner, Card, Badge, Button, CardHeader, Tooltip, CardBody } from "@nextui-org/react";
-import AccessDenied from "@/components/accessdenied/AccessDenied";
 import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
 import { Participants } from "@/store/project";
@@ -18,7 +17,7 @@ import { handleMarkMessagesAsRead } from "@/components/messages/HandleGroupActio
 import { toast } from "react-toastify";
 import { getAllUsers } from "@/services/users.services";
 import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
-import { getGroupUnreadCount, getMyGroupChats, processGroupChats } from "@/services/groupchat.service";
+import { getGroupUnreadCount, getMyGroupChats, markGroupMessagesAsRead, processGroupChats } from "@/services/groupchat.service";
 import { getUnreadMessageCount } from "@/services/message.service";
 
 type PinnedMessagesMap = Record<string, string[]>;
@@ -216,7 +215,7 @@ const ChatPage = () => {
     setSelectedEntity(entity);
 
     if (entity.type === "group") {
-        await markMessagesAsRead(entity.id);
+        await markGroupMessagesAsRead(entity.id);
     } else if (entity.type === "user") {
         await handleMessagesClick(entity.id, setTotalUnreadCount);
     }
@@ -234,7 +233,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (selectedEntity?.type === "group" && selectedEntity.id) {
-      markMessagesAsRead(selectedEntity.id);
+      markGroupMessagesAsRead(selectedEntity.id);
     }
   }, [selectedEntity]);  
   

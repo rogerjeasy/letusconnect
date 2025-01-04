@@ -5,7 +5,7 @@ import { Card, CardHeader, CardBody, Divider, Input, Button,
   Tooltip, DropdownTrigger, DropdownMenu, DropdownItem, Dropdown } from "@nextui-org/react";
 import { Avatar, AvatarGroup } from "@nextui-org/react";
 import { BaseMessage } from "@/store/groupChat";
-import { sendMessageToGroup } from "@/utils/groupChatUtils";
+import { sendMessageToGroup } from "@/services/groupchat.service";
 import { Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
 import { sendDirectMessage } from "@/services/message.service";

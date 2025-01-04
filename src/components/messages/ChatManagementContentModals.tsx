@@ -23,6 +23,7 @@ import { handleAddParticipants, handleRemoveParticipantsFromGroup } from "./Hand
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { tr } from "framer-motion/client";
+import { getAllUsers } from "@/services/users.services";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -41,9 +42,9 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        const response = await api.get("/api/users");
+        const response = await getAllUsers();
         
-        const fetchedParticipants = response.data.users
+        const fetchedParticipants = response
         .filter((user: User) => user.uid !== currentUser?.uid)
         .map((user: User) => ({
           userId: user.uid,
@@ -67,6 +68,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
   }, [isOpen, currentUser]);
 
   const handleUserSelection = (user: Participants) => {
+    
     setSelectedUsers((prev) =>
       prev.find((selected) => selected.userId === user.userId)
         ? prev.filter((selected) => selected.userId !== user.userId)
