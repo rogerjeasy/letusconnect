@@ -26,6 +26,7 @@ import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { getPusherInstance } from "@/helpers/pusher";
 import { Send } from "lucide-react";
+import { uniqBy } from 'lodash';
 
 type Message = BaseMessage | DirectMessage;
 

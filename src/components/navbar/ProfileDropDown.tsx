@@ -34,13 +34,12 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
   const profileItems: DropdownContentItem[] = menuOptions.Profile;
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
-  const token = localStorage.getItem("token");
   const { logout } = useUserStore();
 
   // Address state management
   const {
     fetchAddress,
-  } = useFetchAddress(token!);
+  } = useFetchAddress();
 
   const handleViewProfile = () => {
     setProfileModalOpen(true);

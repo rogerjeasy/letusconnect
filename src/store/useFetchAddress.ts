@@ -1,10 +1,23 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { api, handleError } from "../helpers/api";
+import { toast } from "react-toastify";
+import { getUserAddresses } from "@/services/address.service";
 
-export const useFetchAddress = (token: string) => {
-  const [address, setAddress] = useState({
+interface Address {
+  id: string;
+  country: string;
+  state: string;
+  city: string;
+  postalCode: string;
+  street: string;
+  houseNumber: string;
+  apartment: string;
+  region: string;
+}
+
+export const useFetchAddress = () => {
+  const [address, setAddress] = useState<Address>({
     country: "",
     state: "",
     city: "",
@@ -19,23 +32,21 @@ export const useFetchAddress = (token: string) => {
 
   const fetchAddress = useCallback(async () => {
     try {
-      const response = await api.get("/api/addresses", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Address found, populate the fields
-      setAddress(response.data.addresses[0]);
-      setAddressResponseStatus(200);
-    } catch (error) {
-      const errorMessage = handleError(error);
-      if (errorMessage.status === 404) {
+      const addresses = await getUserAddresses();
+      
+      if (addresses && addresses.length > 0) {
+        setAddress(addresses[0]);
+        setAddressResponseStatus(200);
+      } else {
         setAddressResponseStatus(404);
         console.log("Address not yet created");
-      } else {
-        console.error("Failed to fetch address:", errorMessage);
       }
+    } catch (error) {
+      setAddressResponseStatus(500);
+      console.error("Failed to fetch address:", error);
+      toast.error("Failed to fetch address. Please try again later.");
     }
-  }, [token]);
+  }, []);
 
   return {
     address,

@@ -36,6 +36,14 @@ export const API_CONFIG = {
         BY_UID: (uid: string) => `/users/${uid}`,
       },
 
+      ADDRESSES: {
+        BASE: '/addresses',
+        CREATE: '/addresses',
+        UPDATE: (id: string) => `/addresses/${id}`,
+        GET_ALL: '/addresses',
+        DELETE: (id: string) => `/addresses/${id}`,
+      },
+
       FAQ: {
         BASE: '/faqs',
         BY_ID: (id: string) => `/faqs/${id}`,

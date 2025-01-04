@@ -12,18 +12,14 @@ import ModalPopup from "./ModalPopup";
 import { useFetchAddress } from "../../store/useFetchAddress";
 import { EditDocumentIcon } from "../icons/EditDocumentIcon";
 import UserSelection from "../forms/SelectCountry";
+import { updateUserAddress } from "@/services/address.service";
 
 export default function UserAddressCard() {
   const { user, isAuthenticated } = useUserStore();
   const router = useRouter();
-  const token = localStorage.getItem("token");
 
   const [isEditing, setIsEditing] = useState(false);
-  const {
-    address,
-    setAddress,
-    fetchAddress,
-  } = useFetchAddress(token!);
+  const { address, setAddress, fetchAddress } = useFetchAddress();
 
   // Add local form state to handle continuous typing
   const [formData, setFormData] = useState(address);
@@ -67,11 +63,8 @@ export default function UserAddressCard() {
   const handleSave = async () => {
     setIsUpdating(true);
     try {
-        // Use formData instead of address when saving
-        const response = await api.put(`/api/addresses/${address.id}`, formData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        setAddress(response.data.address);        
+        const response = await updateUserAddress(address.id, formData, setAddress);
+        setAddress(response);        
         setModalProps({
             isOpen: true,
             title: "Success",

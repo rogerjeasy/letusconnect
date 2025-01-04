@@ -21,7 +21,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import Scroll from "./Scroll";
 
 interface FetchState {
   loading: boolean;

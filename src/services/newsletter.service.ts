@@ -69,6 +69,7 @@ export const getAllNewsletterSubscribers = async (): Promise<NewsletterSubscribe
     const response = await api.get<SubscribersResponse>(
       API_CONFIG.ENDPOINTS.NEWSLETTERS.SUBSCRIBERS
     );
+    console.log("response", response);
     return response.data.subscribers;
   } catch (error) {
     throw new Error(handleError(error) || "Failed to fetch newsletter subscribers");

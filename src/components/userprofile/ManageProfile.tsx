@@ -7,11 +7,15 @@ import UserEducation from "./UserEducation";
 import UserWorkExperienceComponent from "./UserWorkExperienceComponent";
 import { useUserStore } from "../../store/userStore";
 import UserEducationComponent from "./EducationCard";
+import UserProfileSettingWhileLoading from "./UserProfileSettingWhileLoading";
 
 export default function ManageUser() {
   const { user } = useUserStore();
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) 
+    return (
+      <UserProfileSettingWhileLoading />
+    );
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
