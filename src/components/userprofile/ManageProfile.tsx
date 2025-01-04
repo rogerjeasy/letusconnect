@@ -3,7 +3,6 @@
 import { Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
 import UserAddressCard from "../forms/UserAddressCard";
 import UserProfileCard from "../forms/UserProfileCard";
-import UserEducation from "./UserEducation";
 import UserWorkExperienceComponent from "./UserWorkExperienceComponent";
 import { useUserStore } from "../../store/userStore";
 import UserEducationComponent from "./EducationCard";
