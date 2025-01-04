@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardBody, Divider, Input, Button, 
-  Tooltip, DropdownTrigger, DropdownMenu, DropdownItem, Dropdown } from "@nextui-org/react";
+  Tooltip, DropdownTrigger, DropdownMenu, DropdownItem, Dropdown, 
+  Textarea} from "@nextui-org/react";
 import { Avatar, AvatarGroup } from "@nextui-org/react";
 import { BaseMessage } from "@/store/groupChat";
 import { sendMessageToGroup } from "@/services/groupchat.service";
@@ -518,66 +519,124 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
           )}
         </CardBody>
         <Divider />
-        <div className="p-4 flex items-center gap-2">
-          <Dropdown>
-            <DropdownTrigger>
+        <div className="p-4">
+        {selectedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {selectedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center p-2 bg-gray-200 rounded shadow-sm"
+              >
+                <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                <button
+                  onClick={() => handleRemoveFile(file)}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          {/* Mobile view: Input first */}
+          <div className="w-full order-1 sm:order-2 sm:mx-2">
+            <Textarea
+              placeholder="Type a message..."
+              fullWidth
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              isDisabled={sendingMessage || loadingMessages}
+            />
+          </div>
+
+          {/* Action buttons container - split for desktop */}
+          <div className="flex items-center gap-2 w-full sm:w-auto order-2 sm:order-none sm:flex-none">
+            {/* Left side buttons */}
+            <div className="flex items-center gap-2">
+              <Dropdown>
+                <DropdownTrigger>
+                  <button
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                    aria-label="Add options"
+                  >
+                    <FaPlus className="text-blue-500 text-lg" />
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Add Options">
+                  <DropdownItem
+                    key="document"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaFile className="text-gray-500" />
+                      <span>Document</span>
+                    </div>
+                  </DropdownItem>
+                  <DropdownItem
+                    key="photos"
+                    startContent={<FaImage className="text-blue-500" />}
+                    onClick={() => console.log("Photos clicked")}
+                  >
+                    Photos
+                  </DropdownItem>
+                  <DropdownItem
+                    key="camera"
+                    startContent={<FaCamera className="text-green-500" />}
+                    onClick={() => console.log("Camera clicked")}
+                  >
+                    Camera
+                  </DropdownItem>
+                  <DropdownItem
+                    key="location"
+                    startContent={<FaMapMarkerAlt className="text-red-500" />}
+                    onClick={() => console.log("Location clicked")}
+                  >
+                    Location
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+
               <button
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
-                aria-label="Add options"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
+                aria-label="Add Emoji"
+                onClick={() => setShowEmojiPicker((prev) => !prev)}
               >
-                <FaPlus className="text-blue-500 text-lg" />
+                <FaSmile className="text-yellow-500 text-lg" />
               </button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Add Options">
-              <DropdownItem
-                key="document"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <div className="flex items-center gap-2">
-                  <FaFile className="text-gray-500" />
-                  <span>Document</span>
-                </div>
-              </DropdownItem>
+            </div>
 
-              <DropdownItem
-                key="photos"
-                startContent={<FaImage className="text-blue-500" />}
-                onClick={() => console.log("Photos clicked")}
+            {/* Send button - moved to a separate div for desktop layout */}
+            <div className="sm:hidden">
+              <Button
+                color="primary"
+                onClick={handleSendMessage}
+                isDisabled={sendingMessage || loadingMessages || (!newMessage.trim() && selectedFiles.length === 0)}
               >
-                Photos
-              </DropdownItem>
-              <DropdownItem
-                key="camera"
-                startContent={<FaCamera className="text-green-500" />}
-                onClick={() => console.log("Camera clicked")}
-              >
-                Camera
-              </DropdownItem>
-              <DropdownItem
-                key="location"
-                startContent={<FaMapMarkerAlt className="text-red-500" />}
-                onClick={() => console.log("Location clicked")}
-              >
-                Location
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+                {sendingMessage ? "Sending..." : <Send className="h-5 w-5" />}
+              </Button>
+            </div>
+          </div>
 
-          {/* Emoji Picker */}
-          <button
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 transition"
-            aria-label="Add Emoji"
-            onClick={() => setShowEmojiPicker((prev) => !prev)}
-          >
-            <FaSmile className="text-yellow-500 text-lg" />
-          </button>
+          {/* Send button for desktop view */}
+          <div className="hidden sm:block order-3">
+            <Button
+              color="primary"
+              onClick={handleSendMessage}
+              isDisabled={sendingMessage || loadingMessages || (!newMessage.trim() && selectedFiles.length === 0)}
+            >
+              {sendingMessage ? "Sending..." : <Send className="h-5 w-5" />}
+            </Button>
+          </div>
+
           {showEmojiPicker && (
             <div className="absolute bottom-14 left-0 z-10 bg-white shadow-lg rounded-md">
               <EmojiPicker onEmojiClick={handleEmojiClick} />
             </div>
           )}
 
-          <input 
+          <input
             type="file"
             ref={fileInputRef}
             className="hidden"
@@ -589,41 +648,8 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
               }
             }}
           />
-
-          {selectedFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {selectedFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center p-2 bg-gray-200 rounded shadow-sm"
-                >
-                  <span className="text-sm truncate max-w-[150px]">{file.name}</span>
-                  <button
-                    onClick={() => handleRemoveFile(file)}
-                    className="ml-2 text-red-500 hover:text-red-700"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <Input
-            placeholder="Type a message..."
-            fullWidth
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            isDisabled={sendingMessage || loadingMessages}
-          />
-          <Button
-            color="primary"
-            onClick={handleSendMessage}
-            isDisabled={sendingMessage || loadingMessages || (!newMessage.trim() && selectedFiles.length === 0)}
-          >
-            {sendingMessage ? "Sending..." : <Send className="h-5 w-5" />}
-          </Button>
         </div>
+      </div>
 
       </Card>
     </>
