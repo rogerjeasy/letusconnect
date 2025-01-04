@@ -1,15 +1,27 @@
 "use client";
-
-import React from "react";
+import React, { useEffect } from "react";
 import { Spinner } from "@nextui-org/react";
-import { useNotificationStats } from "./ManagingNotifications";
+import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 
 interface NotificationStatsProps {
   token: string;
 }
 
 const NotificationStats: React.FC<NotificationStatsProps> = ({ token }) => {
-  const { stats, isLoading, error } = useNotificationStats();
+  const { 
+    stats, 
+    unreadCount, 
+    isLoading, 
+    error, 
+    updateStats, 
+    fetchUnreadCount 
+  } = useNotificationStatsStore();
+
+  useEffect(() => {
+    // Initial fetch of stats and unread count
+    updateStats();
+    fetchUnreadCount();
+  }, [updateStats, fetchUnreadCount]);
 
   if (isLoading) {
     return (
@@ -29,8 +41,9 @@ const NotificationStats: React.FC<NotificationStatsProps> = ({ token }) => {
 
   const rows = [
     { label: "Total", value: stats.totalCount, bgColor: "bg-blue-50" },
-    { label: "Unread", value: stats.unreadCount, bgColor: "bg-green-50" },
-    { label: "Read", value: stats.readCount, bgColor: "bg-yellow-50" },
+    // Use unreadCount from the store instead of stats.unreadCount for real-time updates
+    { label: "Unread", value: unreadCount, bgColor: "bg-green-50" },
+    { label: "Read", value: stats.totalCount - unreadCount, bgColor: "bg-yellow-50" },
     { label: "Archived", value: stats.archivedCount, bgColor: "bg-red-50" },
   ];
 

@@ -5,6 +5,7 @@ import { FaEnvelope, FaCalendar, FaBell, FaExclamation, FaCog } from "react-icon
 import NotificationModalPopup from "@/components/notifications/NotificationModalPopup";
 import { useRouter } from "next/navigation";
 import { markNotificationAsRead } from "@/services/notification.service";
+import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 
 interface NotificationCardProps {
   id: string;
@@ -35,6 +36,9 @@ interface NotificationCardProps {
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const decrementUnreadCount = useNotificationStatsStore(
+    (state) => state.decrementUnreadCount
+  );
 
   const getOriginalId = (compositeId: string): string => {
     const parts = compositeId.split('_');
@@ -49,6 +53,7 @@ interface NotificationCardProps {
         
         await markNotificationAsRead(originalId);
         setRead(true);
+        decrementUnreadCount();
       } catch (error) {
         console.error("Failed to mark notification as read:", error);
       } finally {

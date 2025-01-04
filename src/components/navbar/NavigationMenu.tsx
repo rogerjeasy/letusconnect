@@ -13,14 +13,13 @@ import { testimonialsOptions } from "../dropdownoptions/testimonialOptions";
 import { groupsOptions } from "../dropdownoptions/forumOptions";
 import { SearchIcon } from "./SearchIcon";
 import { useRouter } from "next/navigation";
-import { FaBell, FaComments } from "react-icons/fa";
+import { FaComments } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
 import fetchUnreadCount from "../messages/fetchUnreadCount";
-import { useNotificationCount } from "../notifications/ManagingNotifications";
-import { BellIcon } from "lucide-react";
 import { NotificationIcon } from "../icons/NotificationIcon";
+import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -30,33 +29,34 @@ interface NavigationMenuProps {
 
 const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProps) => {
   const router = useRouter();
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const { 
+    unreadCount, 
+    isLoading, 
+    fetchUnreadCount,
+    decrementUnreadCount 
+  } = useNotificationStatsStore();
 
   useEffect(() => {
     if (!user?.uid) return;
 
-    fetchUnreadCount(setUnreadCount);
+    fetchUnreadCount();
 
     const pusher = getPusherInstance();
     const notificationChannel = pusher?.subscribe(`user-notifications-${user.uid}`);
-
-    notificationChannel?.bind("new-unread-message", () => {
-      setUnreadCount((prev) => prev + 1);
+    
+    notificationChannel?.bind("new-notification", () => {
+      fetchUnreadCount(); 
     });
 
-    notificationChannel?.bind("update-unread-count", () => {
-      fetchUnreadCount(setUnreadCount);
-    });
-
-    notificationChannel?.bind("message-read", () => {
-      fetchUnreadCount(setUnreadCount);
+    notificationChannel?.bind("notification-read", () => {
+      decrementUnreadCount(); 
     });
 
     return () => {
       notificationChannel?.unbind_all();
       pusher?.unsubscribe(`user-notifications-${user.uid}`);
     };
-  }, [user?.uid]);
+  }, [user?.uid, fetchUnreadCount, decrementUnreadCount]);
 
   const handleMessagesClick = () => {
     // setUnreadCount(0);
@@ -65,7 +65,6 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
   };
 
   const NotificationBadge = ({ token, onPress }: { token: string; onPress?: () => void }) => {
-    const { unreadCount, isLoading } = useNotificationCount();
   
     return (
       <Tooltip
