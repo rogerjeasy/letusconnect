@@ -54,15 +54,23 @@ const SortedChatList: React.FC<SortedChatListProps> = ({
           <Avatar src={entity.avatar} alt={entity.name} />
           <div>
             <p className="font-semibold text-black">{entity.name}</p>
-            <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p>
+            {/* <p className="text-sm text-black">{entity.type === "user" ? "User" : "Group"}</p> */}
             {/* Display latest message preview */}
-            {/* {(entity.directMessages.length > 0 || entity.groupMessages.length > 0) && (
-              <p className="text-xs text-gray-500 truncate max-w-[150px]">
-                {entity.type === "user"
-                  ? entity.directMessages[entity.directMessages.length - 1]?.content
-                  : entity.groupMessages[entity.groupMessages.length - 1]?.content}
-              </p>
-            )} */}
+            {(entity.directMessages.length > 0 || entity.groupMessages.length > 0) && (
+            <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                {(() => {
+                const content = entity.type === "user"
+                    ? entity.directMessages[entity.directMessages.length - 1]?.content
+                    : entity.groupMessages[entity.groupMessages.length - 1]?.content;
+                
+                if (!content) return "";
+                
+                const words = content.split(" ");
+                if (words.length <= 5) return content;
+                return `${words.slice(0, 5).join(" ")}...`;
+                })()}
+            </p>
+            )}
           </div>
           {unreadCounts[entity.id] > 0 && entity.id !== selectedEntity?.id && (
             <Badge
