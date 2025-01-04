@@ -24,6 +24,7 @@ import { ModalAddMemberToGroup, ModalRemoveMemberFromGroup } from "./ChatManagem
 import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { getPusherInstance } from "@/helpers/pusher";
+import { Send, SendHorizontal } from "lucide-react";
 
 type Message = BaseMessage | DirectMessage;
 
@@ -612,7 +613,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
             onClick={handleSendMessage}
             isDisabled={sendingMessage || loadingMessages || (!newMessage.trim() && selectedFiles.length === 0)}
           >
-            {sendingMessage ? "Sending..." : "Send"}
+            {sendingMessage ? "Sending..." : <Send className="h-5 w-5" />}
           </Button>
         </div>
 
