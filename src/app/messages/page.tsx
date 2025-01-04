@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { api, handleError } from "@/helpers/api";
 import { User, useUserStore } from "@/store/userStore";
 import { Avatar, Spinner, Card, Badge, Button, CardHeader, Tooltip, CardBody } from "@nextui-org/react";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
-import fetchUnreadCount from "@/components/messages/fetchUnreadCount";
 import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
-import { BaseMessage, GroupChat } from "@/store/groupChat";
-import { DirectMessage, Messages } from "@/store/message";
 import { Participants } from "@/store/project";
 import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
 import UsersToChatWith from "@/components/messages/UsersToChatWith";
@@ -17,11 +14,12 @@ import { FaCog, FaTimes } from "react-icons/fa";
 import ChatManagement from "@/components/messages/ChatManagement";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore, ChatEntity } from "@/store/chatEntitiesStore";
-import { handleGetUnreadMessagesGroup, handleMarkMessagesAsRead } from "@/components/messages/HandleGroupActions";
+import { handleMarkMessagesAsRead } from "@/components/messages/HandleGroupActions";
 import { toast } from "react-toastify";
 import { getAllUsers } from "@/services/users.services";
 import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
 import { getGroupUnreadCount, getMyGroupChats, processGroupChats } from "@/services/groupchat.service";
+import { getUnreadMessageCount } from "@/services/message.service";
 
 type PinnedMessagesMap = Record<string, string[]>;
 
@@ -42,6 +40,15 @@ const ChatPage = () => {
   const [pinnedMessagesMap, setPinnedMessagesMap] = useState<PinnedMessagesMap>({});
   const { participants, addParticipant } = useParticipantsStore();
 
+  const updateUnreadCount = useCallback(async (entityId: string) => {
+    try {
+      await getGroupUnreadCount(entityId, undefined, setUnreadCounts);
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(`Error fetching unread count: ${errorMessage}`);
+    }
+  }, []);
+
   useEffect(() => {
     fetchChatEntities();
   }, []);
@@ -59,13 +66,13 @@ const ChatPage = () => {
       setEntities(combinedEntities);
   
       userEntities.forEach((entity) =>
-        fetchUnreadCount(undefined, setUnreadCounts, entity.id)
+        getUnreadMessageCount(undefined, setUnreadCounts, entity.id)
       );
       groupEntities.forEach((entity) =>
         fetchUnreadCountForEntity(entity.id)
       );
   
-      fetchUnreadCount(setTotalUnreadCount);
+      getUnreadMessageCount(setTotalUnreadCount);
       // fetchUnreadCountForTotal();
     } catch (error) {
       const errorMessage = handleError(error);
@@ -183,18 +190,18 @@ const ChatPage = () => {
     });
 
     notificationChannel?.bind("new-unread-message", ({ senderId }: { senderId: string }) => {
-      fetchUnreadCount(undefined, setUnreadCounts, senderId);
-      fetchUnreadCount(setTotalUnreadCount);
+      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadMessageCount(setTotalUnreadCount);
     });
 
     notificationChannel?.bind("update-unread-count", ({ senderId }: { senderId: string}) => {
-      fetchUnreadCount(undefined, setUnreadCounts, senderId);
-      fetchUnreadCount(setTotalUnreadCount);
+      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadMessageCount(setTotalUnreadCount);
     });
 
     notificationChannel?.bind("message-read", ({ senderId }: { senderId: string }) => {
-      fetchUnreadCount(undefined, setUnreadCounts, senderId);
-      fetchUnreadCount(setTotalUnreadCount);
+      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadMessageCount(setTotalUnreadCount);
     });
 
     return () => {
@@ -244,9 +251,9 @@ const ChatPage = () => {
     });
   };   
 
-  if (!currentUser) {
-    return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
-  }
+  // if (!currentUser) {
+  //   return <AccessDenied condition={true} message="Access Denied: You need to Login to your account or create one." />;
+  // }
 
   return (
     <div className="relative flex justify-center items-center p-6 min-h-screen overflow-hidden">

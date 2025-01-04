@@ -3,7 +3,10 @@
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
 import { Dispatch, SetStateAction } from "react";
-import { DirectMessage, MarkReadRequest, Message, Messages, SendMessageRequest, TypingStatusRequest } from "@/store/message";
+import { DirectMessage, MarkReadRequest, Messages, SendMessageRequest, TypingStatusRequest } from "@/store/message";
+import { toast } from "react-toastify";
+import { useUserStore } from "@/store/userStore";
+import { BaseMessage } from "@/store/groupChat";
 
 interface UnreadCountResponse {
   unreadCount: number;
@@ -25,7 +28,6 @@ export const getUnreadMessageCount = async (
     const url = userId 
       ? `${API_CONFIG.ENDPOINTS.MESSAGES.UNREAD}?senderId=${userId}`
       : API_CONFIG.ENDPOINTS.MESSAGES.UNREAD;
-
     const response = await api.get<UnreadCountResponse>(url);
     const unreadCount = response.data.unreadCount;
 
@@ -60,20 +62,6 @@ export const getDirectMessages = async (): Promise<Messages[]> => {
   }
 };
 
-/**
- * Send a new message
- * @param messageData - Message data including receiver ID and content
- * @returns Promise with the sent message
- */
-export const sendMessage = async (messageData: SendMessageRequest): Promise<Message> => {
-  try {
-    const response = await api.post<Message>(API_CONFIG.ENDPOINTS.MESSAGES.SEND, messageData);
-    return response.data;
-  } catch (error) {
-    const errorMessage = handleError(error);
-    throw new Error(errorMessage || "Failed to send message");
-  }
-};
 
 /**
  * Update typing status
@@ -158,4 +146,48 @@ export const organizeDirectMessages = (messages: Messages[]): Record<string, Dir
   });
   
   return directMessagesMap;
+};
+
+/////////////////////
+type Message = BaseMessage | DirectMessage;
+
+/**
+ * Send a new direct message to a user.
+ * @param receiverId - The ID of the receiver.
+ * @param content - The message content to send.
+ * @param addMessageToState - Function to add the new message to the state.
+ * @param setNewMessage - Function to clear the message input.
+ * @param setSendingMessage - Function to indicate message-sending state.
+ */
+export const sendDirectMessage = async (
+  receiverId: string,
+  content: string,
+  addMessageToState: (newMessage: Message) => void,
+  setNewMessage: Dispatch<SetStateAction<string>>,
+  setSendingMessage: Dispatch<SetStateAction<boolean>>
+) => {
+  if (!content.trim()) return;
+
+  try {
+    setSendingMessage(true);
+
+    const user = useUserStore.getState().user;
+    const payload = {
+      senderId: user?.uid || "",
+      receiverId,
+      content,
+      senderName: user?.username || "Anonymous",
+    };
+
+    const response = await api.post(API_CONFIG.ENDPOINTS.MESSAGES.DIRECT, payload);
+
+    const sentMessage: DirectMessage = response.data.message;
+    addMessageToState(sentMessage);
+    setNewMessage("");
+  } catch (error) {
+    const errorMessage = handleError(error);
+    toast.error("Failed to send message. " + errorMessage);
+  } finally {
+    setSendingMessage(false);
+  }
 };

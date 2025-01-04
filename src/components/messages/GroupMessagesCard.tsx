@@ -8,7 +8,7 @@ import { BaseMessage } from "@/store/groupChat";
 import { sendMessageToGroup } from "@/utils/groupChatUtils";
 import { Participants } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
-import { sendDirectMessage } from "@/utils/directMessageUtils";
+import { sendDirectMessage } from "@/services/message.service";
 import { DirectMessage } from "@/store/message";
 import ChatSettings from "./ChatSettings";
 import { FaCamera, FaCopy, FaEllipsisH, FaFile, FaImage, FaMapMarkerAlt, 
@@ -205,7 +205,6 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
       await sendDirectMessage(
         directRecipient.id,
         newMessage,
-        token,
         addMessageToState,
         setNewMessage,
         setSendingMessage

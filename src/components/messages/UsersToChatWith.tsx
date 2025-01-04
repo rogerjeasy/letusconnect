@@ -8,7 +8,6 @@ import {
   ModalContent,
   Input,
   Avatar,
-  Button,
 } from "@nextui-org/react";
 import { User } from "@/store/userStore";
 

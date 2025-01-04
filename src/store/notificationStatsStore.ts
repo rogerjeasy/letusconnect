@@ -11,7 +11,7 @@ interface NotificationStatsState {
   // Actions
   decrementUnreadCount: () => void;
   updateStats: () => Promise<void>;
-  fetchUnreadCount: () => Promise<void>;  // Keep as Promise<void>
+  fetchUnreadCount: () => Promise<void>;
   resetError: () => void;
 }
 
