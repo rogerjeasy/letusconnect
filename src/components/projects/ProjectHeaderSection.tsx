@@ -37,12 +37,12 @@ const ProjectHeaderSection = () => {
               Sign Up to Join Projects
             </Link>
           )}
-          <a
+          <Link
             href="/projects/why-projects"
             className="bg-white text-gray-800 hover:bg-gray-200 font-semibold py-3 px-6 rounded-lg text-lg transition duration-300"
           >
             Learn More About Projects
-          </a>
+          </Link>
         </div>
       </div>
     </div>
