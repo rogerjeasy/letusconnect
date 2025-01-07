@@ -57,7 +57,7 @@ interface NavigationMenuProps {
 interface ListItemProps
   extends React.ComponentPropsWithoutRef<"a"> {
   title: string;
-  href?: string;
+  href: string;
   children: React.ReactNode;
 }
 
@@ -357,8 +357,7 @@ const ListItem = React.forwardRef<
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
-          ref={ref}
+      <Link
           href={href}
           onClick={onClick}
           className={cn(
@@ -367,11 +366,13 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
+          <a ref={ref}>
+            <div className="text-sm font-medium leading-none">{title}</div>
+            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+              {children}
+            </p>
+          </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
