@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Cookie, ExternalLink, ChevronDown, ChevronUp, Lock, X, Check, ChartBar } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from 'next/link';
 
 interface CookiePreferences {
   essential: boolean;
@@ -142,9 +143,9 @@ const CookieBanner = () => {
 
                         <div className="flex items-center gap-3 mt-4">
                           <ExternalLink className="h-4 w-4 text-blue-600" />
-                          <a href="/privacy" className="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                          <Link href="/privacy" className="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium">
                             View our detailed Privacy Policy
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     </motion.div>

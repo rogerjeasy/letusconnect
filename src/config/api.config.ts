@@ -89,6 +89,13 @@ export const API_CONFIG = {
         MARK_READ: '/messages/mark-as-read',
       },
 
+      CHATGPT: {
+        BASE: '/chat',
+        POST_MESSAGE: '/chat',
+        GET_HISTORY: '/chat/history',
+        DELETE_HISTORY: (id: string) => `/chat/history/${id}`,
+      },
+
       NEWSLETTERS: {
         BASE: '/newsletters',
         SUBSCRIBE: '/newsletters/subscribe',

@@ -220,11 +220,13 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 relative">
       {/* Accessibility Skip Link */}
-      <a href="#main-content" 
-         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
-                   bg-blue-600 text-white p-2 rounded">
+      <Link
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
+                   bg-blue-600 text-white p-2 rounded"
+      >
         Skip to main content
-      </a>
+      </Link>
 
       {/* Background Pattern */}
       {/* <div className="absolute inset-0 opacity-5">
