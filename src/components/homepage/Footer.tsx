@@ -106,7 +106,6 @@ const Footer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState("English");
   const [region, setRegion] = useState("Global");
-  const [cookieConsent, setCookieConsent] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [newsletterPreferences, setNewsletterPreferences] = useState<NewsletterPreference[]>([
     { id: "events", label: "Events & Meetups", checked: true },
@@ -218,8 +217,6 @@ const Footer: React.FC = () => {
     { href: "https://youtube.com", icon: <FaYoutube size={24} />, color: "text-red-600", hoverColor: "hover:text-red-400", label: "YouTube" }
   ];
 
-  if (!showBanner) return null;
-
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 relative">
       {/* Accessibility Skip Link */}
@@ -278,9 +275,9 @@ const Footer: React.FC = () => {
           </Dropdown>
         </div>
         {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-16 mb-12">
           {/* Branding Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="flex flex-col items-center md:items-start">
               <Link href="/" aria-label="Go to homepage">
                 <img
@@ -291,8 +288,8 @@ const Footer: React.FC = () => {
                   className="mb-4 hover:opacity-90 transition-opacity"
                 />
               </Link>
-              <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-                Empowering meaningful connections and fostering innovation through 
+              <p className="text-sm text-gray-400 mt-2 leading-relaxed max-w-[150px] text-center md:text-left">
+                Empowering meaningful connections and fostering innovation through
                 collaborative learning and shared experiences.
               </p>
               {/* Mobile App Links */}
@@ -300,6 +297,9 @@ const Footer: React.FC = () => {
                 <Link href="/app/ios" className="flex items-center text-gray-400 hover:text-white">
                   <FaApple className="mr-1" /> iOS App
                 </Link>
+              </div>
+              {/* Desktop App Links */}
+              <div className="flex gap-4 mt-4">
                 <Link href="/app/android" className="flex items-center text-gray-400 hover:text-white">
                   <FaGooglePlay className="mr-1" /> Android App
                 </Link>
@@ -309,210 +309,206 @@ const Footer: React.FC = () => {
 
           {/* Features Section */}
           <div className="lg:col-span-1">
-            <h3 className={`text-lg font-bold mb-4 ${features.titleColor}`}>
-              {features.title}
-            </h3>
-            <ul className="space-y-3">
-              {features.links.map((link, index) => (
-                <li key={index}>
-                  <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
-                    {link.icon}
-                    <span>{link.text}</span>
-                  </FooterLink>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className={`text-lg font-bold mb-4 ${features.titleColor}`}>
+                {features.title}
+              </h3>
+              <ul className="space-y-3">
+                {features.links.map((link, index) => (
+                  <li key={index}>
+                    <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
+                      {link.icon}
+                      <span>{link.text}</span>
+                    </FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Community Section */}
           <div className="lg:col-span-1">
-            <h3 className={`text-lg font-bold mb-4 ${community.titleColor}`}>
-              {community.title}
-            </h3>
-            <ul className="space-y-3">
-              {community.links.map((link, index) => (
-                <li key={index}>
-                  <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
-                    {link.icon}
-                    <span>{link.text}</span>
-                    {link.badge && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-blue-600 rounded-full">
-                        {link.badge}
-                      </span>
-                    )}
-                  </FooterLink>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className={`text-lg font-bold mb-4 ${community.titleColor}`}>
+                {community.title}
+              </h3>
+              <ul className="space-y-3">
+                {community.links.map((link, index) => (
+                  <li key={index}>
+                    <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
+                      {link.icon}
+                      <span>{link.text}</span>
+                      {link.badge && (
+                        <span className="ml-2 px-2 py-1 text-xs bg-blue-600 rounded-full">
+                          {link.badge}
+                        </span>
+                      )}
+                    </FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Quick Links Section */}
           <div className="lg:col-span-1">
-            <h3 className={`text-lg font-bold mb-4 ${quickLinks.titleColor}`}>
-              {quickLinks.title}
-            </h3>
-            <ul className="space-y-3">
-              {quickLinks.links.map((link, index) => (
-                <li key={index}>
-                  <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
-                    {link.icon}
-                    <span>{link.text}</span>
-                    {link.badge && (
-                      <span className="ml-2 px-2 py-1 text-xs bg-green-600 rounded-full">
-                        {link.badge}
-                      </span>
-                    )}
-                  </FooterLink>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className={`text-lg font-bold mb-4 ${quickLinks.titleColor}`}>
+                {quickLinks.title}
+              </h3>
+              <ul className="space-y-3">
+                {quickLinks.links.map((link, index) => (
+                  <li key={index}>
+                    <FooterLink href={link.href} ariaLabel={`Go to ${link.text}`}>
+                      {link.icon}
+                      <span>{link.text}</span>
+                      {link.badge && (
+                        <span className="ml-2 px-2 py-1 text-xs bg-green-600 rounded-full">
+                          {link.badge}
+                        </span>
+                      )}
+                    </FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Legal Section */}
           <div className="lg:col-span-1">
-            <h3 className={`text-lg font-bold mb-4 ${legal.titleColor}`}>
-              {legal.title}
-            </h3>
-            <ul className="space-y-3">
-              {legal.links.map((link, index) => (
-                <li key={index}>
-                  <FooterLink href={link.href}>
-                    {link.text}
-                  </FooterLink>
-                </li>
-              ))}
-            </ul>
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className={`text-lg font-bold mb-4 ${legal.titleColor}`}>
+                {legal.title}
+              </h3>
+              <ul className="space-y-3">
+                {legal.links.map((link, index) => (
+                  <li key={index}>
+                    <FooterLink href={link.href}>
+                      {link.text}
+                    </FooterLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
         </div>
-
-          {/* Support Section */}
-          <div className="lg:col-span-1">
-            <h3 className="text-lg font-bold mb-4 text-orange-400">{support.title}</h3>
-            <ul className="space-y-3">
-              {support.links.map((link, index) => (
-                <li key={index}>
-                  <FooterLink href={link.href}>
-                    {link.text}
-                  </FooterLink>
-                </li>
-              ))}
-            </ul>
-          </div>
 
           {/* Newsletter Section */}
           <div className="lg:col-span-1">
-            <h3 className="text-lg font-bold mb-4 text-orange-400">Stay Connected</h3>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-400">
-                Join our newsletter for exclusive updates and insights.
-              </p>
-              <div className="space-y-2">
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="bg-gray-700/50 text-white border-gray-600 focus:border-blue-500"
-                  size="sm"
-                  aria-label="Email subscription input"
-                  disabled={isLoading || isSubscribed}
-                />
-                {/* Newsletter Preferences */}
-                <div className="space-y-2">
-                  {newsletterPreferences.map(pref => (
-                    <label key={pref.id} className="flex items-center space-x-2 text-sm text-gray-400">
-                      <input
-                        type="checkbox"
-                        checked={pref.checked}
-                        onChange={() => toggleNewsletterPreference(pref.id)}
-                        className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-500 
-                                 focus:ring-blue-500 bg-gray-700"
-                        aria-label={`Subscribe to ${pref.label}`}
-                      />
-                      <span>{pref.label}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {/* Frequency Selection */}
-                <div className="flex flex-wrap gap-2 my-3">
-                  <ButtonGroup size="sm" className="bg-gray-700 rounded-lg">
-                    <Button
-                      className="text-xs px-3"
-                      variant="ghost"
-                      color="primary"
-                      aria-label="Daily updates"
-                    >
-                      Daily
-                    </Button>
-                    <Button
-                      className="text-xs px-3"
-                      variant="ghost"
-                      color="primary"
-                      aria-label="Weekly updates"
-                    >
-                      Weekly
-                    </Button>
-                    <Button
-                      className="text-xs px-3"
-                      variant="ghost"
-                      color="primary"
-                      aria-label="Monthly updates"
-                    >
-                      Monthly
-                    </Button>
-                  </ButtonGroup>
-                </div>
-
-                {/* Subscribe Button */}
-                <Button
-                  onClick={handleSubscribe}
-                  className={`transition-colors w-full ${
-                    isSubscribed 
-                      ? 'bg-green-600 hover:bg-green-700' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white`}
-                  size="sm"
-                  isLoading={isLoading}
-                  disabled={isLoading || isSubscribed}
-                >
-                  {isSubscribed ? (
-                    <span className="flex items-center justify-center">
-                      Thank you! 🎉
-                    </span>
-                  ) : (
-                    <span>Subscribe</span>
-                  )}
-                </Button>
-
-                {/* Subscription Message */}
-                {isSubscribed && (
-                  <p className="text-xs text-green-400 mt-2">
-                    You have been successfully subscribed to our newsletter!
-                  </p>
-                )}
-
-                {/* Privacy Note */}
-                <p className="text-xs text-gray-500 mt-2">
-                  By subscribing, you agree to our{' '}
-                  <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
-                    Privacy Policy
-                  </Link>
-                  . You can unsubscribe at any time.
+            <div className="flex flex-col items-center md:items-start">
+              <h3 className="text-lg font-bold mb-4 text-orange-400">Stay Connected</h3>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-400">
+                  Join our newsletter for exclusive updates and insights.
                 </p>
+                <div className="space-y-2">
+                  <Input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="bg-gray-700/50 text-white border-gray-600 focus:border-blue-500"
+                    size="sm"
+                    aria-label="Email subscription input"
+                    disabled={isLoading || isSubscribed}
+                  />
+                  {/* Newsletter Preferences */}
+                  <div className="space-y-2">
+                    {newsletterPreferences.map(pref => (
+                      <label key={pref.id} className="flex items-center space-x-2 text-sm text-gray-400">
+                        <input
+                          type="checkbox"
+                          checked={pref.checked}
+                          onChange={() => toggleNewsletterPreference(pref.id)}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-500 
+                                  focus:ring-blue-500 bg-gray-700"
+                          aria-label={`Subscribe to ${pref.label}`}
+                        />
+                        <span>{pref.label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Frequency Selection */}
+                  <div className="flex flex-wrap gap-2 my-3">
+                    <ButtonGroup size="sm" className="bg-gray-700 rounded-lg">
+                      <Button
+                        className="text-xs px-3"
+                        variant="ghost"
+                        color="primary"
+                        aria-label="Daily updates"
+                      >
+                        Daily
+                      </Button>
+                      <Button
+                        className="text-xs px-3"
+                        variant="ghost"
+                        color="primary"
+                        aria-label="Weekly updates"
+                      >
+                        Weekly
+                      </Button>
+                      <Button
+                        className="text-xs px-3"
+                        variant="ghost"
+                        color="primary"
+                        aria-label="Monthly updates"
+                      >
+                        Monthly
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+
+                  {/* Subscribe Button */}
+                  <Button
+                    onClick={handleSubscribe}
+                    className={`transition-colors w-full ${
+                      isSubscribed 
+                        ? 'bg-green-600 hover:bg-green-700' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    } text-white`}
+                    size="sm"
+                    isLoading={isLoading}
+                    disabled={isLoading || isSubscribed}
+                  >
+                    {isSubscribed ? (
+                      <span className="flex items-center justify-center">
+                        Thank you! 🎉
+                      </span>
+                    ) : (
+                      <span>Subscribe</span>
+                    )}
+                  </Button>
+
+                  {/* Subscription Message */}
+                  {isSubscribed && (
+                    <p className="text-xs text-green-400 mt-2">
+                      You have been successfully subscribed to our newsletter!
+                    </p>
+                  )}
+
+                  {/* Privacy Note */}
+                  <p className="text-xs text-gray-500 mt-2">
+                    By subscribing, you agree to our{' '}
+                    <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+                      Privacy Policy
+                    </Link>
+                    . You can unsubscribe at any time.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
         <div className="border-t border-gray-700 mt-8 pt-8">
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <div className="flex space-x-4">
-            {socialLinks.map((social, index) => (
-              <SocialLink key={index} {...social} />
-            ))}
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex space-x-4">
+              {socialLinks.map((social, index) => (
+                <SocialLink key={index} {...social} />
+              ))}
+            </div>
+            <p className="text-sm text-gray-400">
+              © {new Date().getFullYear()} Let Us Connect. All rights reserved.
+            </p>
           </div>
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Let Us Connect. All rights reserved.
-          </p>
-        </div>
       </div>
       </div>
       <CookieBanner />
