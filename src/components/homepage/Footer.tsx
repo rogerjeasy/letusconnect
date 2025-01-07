@@ -88,7 +88,7 @@ const SocialLink: React.FC<SocialLinkProps> = ({
   hoverColor, 
   label 
 }) => (
-  <a
+  <Link
     href={href}
     target="_blank"
     rel="noopener noreferrer"
@@ -97,7 +97,7 @@ const SocialLink: React.FC<SocialLinkProps> = ({
                 transform hover:scale-110 hover:-translate-y-1`}
   >
     {icon}
-  </a>
+  </Link>
 );
 
 const Footer: React.FC = () => {
