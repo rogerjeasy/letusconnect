@@ -31,15 +31,6 @@ interface Message {
     role: 'assistant' | 'user';
   }
 
-interface Conversation {
-  id: string;
-  userId: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  messages: Message[];
-}
-
 const AIAssistant: React.FC = () => {
   const currentUser = useUserStore((state) => state.user);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -66,59 +57,63 @@ const AIAssistant: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const initializeChat = async () => {
-      if (currentUser) {
-        try {
-          const conversations = await getConversations();
-          if (conversations && conversations.length > 0) {
-            const latestConversation = conversations[conversations.length - 1];
-            setCurrentConversationId(latestConversation.id);
-            
-            // Add explicit type assertion for the Message interface
-            const mappedMessages: Message[] = latestConversation.messages.flatMap(msg => [
-              // User message
-              {
-                id: msg.id,
-                createdAt: msg.createdAt,
-                message: msg.message,
-                response: '',
-                role: 'user' as const 
-              },
-              // Assistant's response
-              {
-                id: msg.id + '_response',
-                createdAt: msg.createdAt,
-                message: '',
-                response: msg.response,
-                role: 'assistant' as const
-              }
-            ]);
-            
-            setMessages(mappedMessages);
-          } else {
-            setMessages([{
-              id: 'initial',
-              createdAt: new Date().toISOString(),
+  const initializeChat = async () => {
+    setIsInitializing(true);
+    if (currentUser) {
+      try {
+        const conversations = await getConversations();
+        if (conversations && conversations.length > 0) {
+          const latestConversation = conversations[conversations.length - 1];
+          setCurrentConversationId(latestConversation.id);
+          
+          const mappedMessages: Message[] = latestConversation.messages.flatMap(msg => [
+            {
+              id: msg.id,
+              createdAt: msg.createdAt,
+              message: msg.message,
+              response: '',
+              role: 'user' as const 
+            },
+            {
+              id: msg.id + '_response',
+              createdAt: msg.createdAt,
               message: '',
-              response: `Hello ${currentUser.username}! 👋 I'm your AI assistant. How can I help you navigate our website or answer any questions you might have?`,
-              role: 'assistant'
-            }]);
-          }
-        } catch (error) {
-          console.error('Failed to fetch conversations:', error);
-          setMessages([{
-            id: 'initial',
-            createdAt: new Date().toISOString(),
-            message: '',
-            response: 'Hello! 👋 I\'m your AI assistant. How can I help you navigate our website or answer any questions you might have?',
-            role: 'assistant'
-          }]);
+              response: msg.response,
+              role: 'assistant' as const
+            }
+          ]);
+          
+          setMessages(mappedMessages);
+        } else {
+          resetToInitialMessage(true);
         }
+      } catch (error) {
+        console.error('Failed to fetch conversations:', error);
+        resetToInitialMessage(true);
       }
-      setIsInitializing(false);
-    };
+    } else {
+      resetToInitialMessage(false);
+    }
+    setIsInitializing(false);
+  };
 
+  const resetToInitialMessage = (isLoggedIn: boolean) => {
+    const welcomeMessage = isLoggedIn && currentUser
+      ? `Hello ${currentUser.username}! 👋 I'm your AI assistant. How can I help you navigate our website or answer any questions you might have?`
+      : 'Hello! 👋 I\'m your AI assistant. How can I help you navigate our website or answer any questions you might have?';
+
+    setMessages([{
+      id: 'initial',
+      createdAt: new Date().toISOString(),
+      message: '',
+      response: welcomeMessage,
+      role: 'assistant'
+    }]);
+    setCurrentConversationId(undefined);
+  };
+
+  // Watch for changes in currentUser
+  useEffect(() => {
     initializeChat();
   }, [currentUser]);
 
@@ -238,20 +233,28 @@ if (isInitializing) {
             exit={{ scale: 0, opacity: 0 }}
           >
             <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="h-12 w-12 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setIsOpen(true)}
-                  >
-                    <MessageSquare className="h-6 w-6 text-white" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Click Me to Assist You and Guide you through our Website
-                </TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button
+                        className="h-14 w-14 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 relative"
+                        onClick={() => setIsOpen(true)}
+                    >
+                        <div className="relative">
+                        <MessageSquare className="h-6 w-6 text-white" />
+                        <div className="absolute -top-4 -right-4">
+                            <div className="bg-white rounded-full p-1">
+                            <Bot className="h-4 w-4 text-blue-600" />
+                            </div>
+                        </div>
+                        </div>
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Click Me to Assist You and Guide you through our Website
+                    </TooltipContent>
+                </Tooltip>
             </TooltipProvider>
+            
           </motion.div>
         )}
 

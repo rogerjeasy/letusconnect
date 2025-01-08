@@ -97,6 +97,12 @@ export const API_CONFIG = {
         DELETE_CONVERSATION: (id: string) => `/chat/conversations/${id}`,
       },
 
+      UPLOAD_PDF: {
+        BASE: '/uploads',
+        UPLOAD: '/uploads/pdf',
+        DOWNLOAD: '/upload-pdf/download',
+      },
+
       NEWSLETTERS: {
         BASE: '/newsletters',
         SUBSCRIBE: '/newsletters/subscribe',

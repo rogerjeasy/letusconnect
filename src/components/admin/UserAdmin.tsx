@@ -20,18 +20,9 @@ import ModalPopup from "@/components/forms/ModalPopup";
 import { api, handleError } from "@/helpers/api";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import { useUserStore } from "@/store/userStore";
-
-interface User {
-  id: string;
-  username: string;
-  lastName: string;
-  firstName: string;
-  email: string;
-  role: string[];
-  status: string;
-  createdAt: string;
-  lastLogin: string;
-}
+import { User } from "@/store/userStore";
+import { getAllUsers } from "@/services/users.services";
+import GeneratePDF from "@/components/utils/GeneratePDF";
 
 export default function UserAdmin() {
   const [users, setUsers] = useState<User[]>([]);
@@ -52,9 +43,9 @@ export default function UserAdmin() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/api/users");
-      setUsers(response.data.users);
-      setFilteredUsers(response.data.users);
+      const response = await getAllUsers();
+      setUsers(response);
+      setFilteredUsers(response);
     } catch (error) {
       const errorMessage = handleError(error);
       console.error("Error fetching users:", errorMessage);
@@ -107,14 +98,21 @@ export default function UserAdmin() {
     <div className="pt-24 md:pt-28 px-4 md:px-8"> {/* Added top padding and horizontal padding */}
       <h2 className="text-3xl font-bold mb-6 text-center">User Management</h2>
 
-      <div className="flex justify-center mb-6">
-        <Input
-          placeholder="Search users..."
-          startContent={<FaSearch />}
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full max-w-md"
-        />
+      <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Search users..."
+            startContent={<FaSearch />}
+            value={searchTerm}
+            onChange={handleSearch}
+            className="w-full max-w-md"
+          />
+        </div>
+        <div className="flex items-center">
+          <Tooltip content="Generate PDF Report">
+            <GeneratePDF />
+          </Tooltip>
+        </div>
       </div>
 
       {loading ? (
@@ -141,14 +139,14 @@ export default function UserAdmin() {
               </TableRow>
             ) : (
               paginatedUsers.map((user) => (
-                <TableRow key={user.id || user.email || `${user.username}-${user.email}`}>
+                <TableRow key={user.uid || user.email || `${user.username}-${user.email}`}>
                   <TableCell>{user.username}</TableCell>
                   <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     {user.role.map((r) => (
                       <Chip
-                        key={`${user.id}-${r}`}
+                        key={`${user.uid}-${r}`}
                         color={r === "admin" ? "danger" : "default"}
                         className="mr-1"
                       >
@@ -157,9 +155,9 @@ export default function UserAdmin() {
                     ))}
                   </TableCell>
                   <TableCell>
-                    <Tooltip content={user.status === "active" ? "Active User" : "Inactive User"}>
-                      <Chip color={user.status === "active" ? "success" : "danger"}>
-                        {user.status}
+                    <Tooltip content={user.isActive === true ? "Active User" : "Inactive User"}>
+                      <Chip color={user.isActive === true ? "success" : "danger"}>
+                        {user.isActive === true ? "Active" : "Inactive"}
                       </Chip>
                     </Tooltip>
                   </TableCell>
@@ -175,7 +173,7 @@ export default function UserAdmin() {
                           isIconOnly
                           color="danger"
                           variant="light"
-                          onClick={() => openDeleteModal(user.id)}
+                          onClick={() => openDeleteModal(user.uid || user.email || "")}
                         >
                           <FaTrash />
                         </Button>
