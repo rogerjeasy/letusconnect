@@ -7,6 +7,7 @@ import Footer from "@/components/homepage/Footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NotificationProvider } from "@/services/NotificationService";
+import AIAssistant from "@/components/aiassistant/ChatGPT";
 
 export const metadata: Metadata = {
   title: "Let Us Connect",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AuthWrapper>
               <TopNav />
               <main className="pt-16">{children}</main>
+              <AIAssistant />
               <Footer />
             </AuthWrapper>
           </NotificationProvider>

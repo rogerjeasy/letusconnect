@@ -1,82 +1,98 @@
 "use client";
-
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
 
-interface ChatMessage {
-    id: string;
-    chatId: string;
-    userId: string;
-    message: string;
-    response: string;
-    createdAt: string;
-  }
-  
-  interface ChatHistoryResponse {
-    history: ChatMessage[];
-  }
-  
-  interface ChatResponse {
-    success: boolean;
-    message: string;
-    chatMessage?: ChatMessage;
-  }
-  
-  /**
-   * Send Chat Request Response
-   */
-  interface SendChatRequestResponse {
-    response: string;
-    chatId?: string;
-    success: boolean;
-  }
-  
+interface Message {
+  id: string;
+  createdAt: string;
+  message: string;
+  response: string;
+  role: string;
+}
+
+interface Conversation {
+  id: string;
+  userId: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: Message[];
+}
+
+interface SendChatRequestPayload {
+  message: string;
+  id?: string; // Optional conversation ID for continuing a conversation
+}
+
 /**
  * Function to send a message to the chat endpoint.
  * @param message - The user's message
- * @returns A promise that resolves to the chat response
+ * @param conversationId - Optional ID of existing conversation
+ * @returns A promise that resolves to the conversation containing the message
  */
 export const sendChatMessage = async (
-    message: string
-  ): Promise<SendChatRequestResponse> => {
-    try {
-      const response = await api.post<SendChatRequestResponse>(
-        API_CONFIG.ENDPOINTS.CHATGPT.POST_MESSAGE,
-        { message }
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error) || "Failed to send chat message");
-    }
-  };
-  
-  /**
-   * Function to fetch the chat history for the current user.
-   * @returns A promise that resolves to the chat history response
-   */
-  export const getChatHistory = async (): Promise<ChatHistoryResponse> => {
-    try {
-      const response = await api.get<ChatHistoryResponse>(
-        API_CONFIG.ENDPOINTS.CHATGPT.GET_HISTORY
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error) || "Failed to fetch chat history");
-    }
-  };
-  
-  /**
-   * Function to delete a specific chat message by ID.
-   * @param id - The ID of the chat message to delete
-   * @returns A promise that resolves to the chat action response
-   */
-  export const deleteChatMessage = async (id: string): Promise<ChatResponse> => {
-    try {
-      const response = await api.delete<ChatResponse>(
-        API_CONFIG.ENDPOINTS.CHATGPT.DELETE_HISTORY(id)
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(handleError(error) || `Failed to delete chat message with ID: ${id}`);
-    }
-  };
+  message: string,
+  conversationId?: string
+): Promise<Conversation> => {
+  try {
+    const payload: SendChatRequestPayload = {
+      message,
+      id: conversationId
+    };
+    
+    const response = await api.post<Conversation>(
+      API_CONFIG.ENDPOINTS.CHATGPT.POST_MESSAGE,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleError(error) || "Failed to send chat message");
+  }
+};
+
+/**
+ * Function to fetch all conversations for the current user.
+ * @returns A promise that resolves to an array of conversations
+ */
+export const getConversations = async (): Promise<Conversation[]> => {
+  try {
+    const response = await api.get<Conversation[]>(
+      API_CONFIG.ENDPOINTS.CHATGPT.GET_CONVERSATIONS
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleError(error) || "Failed to fetch conversations");
+  }
+};
+
+/**
+ * Function to fetch a specific conversation by ID.
+ * @param id - The ID of the conversation to fetch
+ * @returns A promise that resolves to the conversation
+ */
+export const getConversation = async (id: string): Promise<Conversation> => {
+  try {
+    const response = await api.get<Conversation>(
+      API_CONFIG.ENDPOINTS.CHATGPT.GET_CONVERSATION(id)
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleError(error) || `Failed to fetch conversation with ID: ${id}`);
+  }
+};
+
+/**
+ * Function to delete a specific conversation by ID.
+ * @param id - The ID of the conversation to delete
+ * @returns A promise that resolves when the conversation is deleted
+ */
+export const deleteConversation = async (id: string): Promise<{ message: string }> => {
+  try {
+    const response = await api.delete<{ message: string }>(
+      API_CONFIG.ENDPOINTS.CHATGPT.DELETE_CONVERSATION(id)
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleError(error) || `Failed to delete conversation with ID: ${id}`);
+  }
+};

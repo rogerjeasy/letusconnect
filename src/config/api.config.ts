@@ -92,8 +92,9 @@ export const API_CONFIG = {
       CHATGPT: {
         BASE: '/chat',
         POST_MESSAGE: '/chat',
-        GET_HISTORY: '/chat/history',
-        DELETE_HISTORY: (id: string) => `/chat/history/${id}`,
+        GET_CONVERSATIONS: '/chat/conversations',
+        GET_CONVERSATION: (id: string) => `/chat/conversations/${id}`,
+        DELETE_CONVERSATION: (id: string) => `/chat/conversations/${id}`,
       },
 
       NEWSLETTERS: {
