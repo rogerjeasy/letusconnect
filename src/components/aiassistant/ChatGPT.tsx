@@ -287,42 +287,47 @@ if (isInitializing) {
                 <div className="space-y-4">
                   {messages.map((message, index) => (
                     <div
-                        key={index}
-                        className={`flex ${
+                      key={index}
+                      className={`flex ${
                         message.role === 'user' ? 'justify-end' : 'justify-start'
-                        }`}
+                      }`}
                     >
-                        <div
+                      <div
                         className={`flex items-start space-x-2 max-w-[80%] ${
-                            message.role === 'user' ? 'flex-row-reverse' : ''
+                          message.role === 'user' ? 'flex-row-reverse' : ''
                         }`}
-                        >
+                      >
                         {renderAvatar(message.role)}
                         <div className="flex flex-col">
-                            <div
+                          <div
                             className={`rounded-lg p-3 ${
-                                message.role === 'user'
+                              message.role === 'user'
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-900'
                             }`}
-                            >
-                            {message.role === 'user' ? message.message : message.response}
-                            </div>
-                            <span 
+                          >
+                            {(message.role === 'user' ? message.message : message.response).split(/(\*\*[^*]+\*\*)/).map((part, index) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                                return <strong key={index}>{part.slice(2, -2)}</strong>;
+                            }
+                            return part;
+                            })}
+                          </div>
+                          <span 
                             className={`text-xs text-gray-500 mt-1 ${
-                                message.role === 'user' ? 'text-right' : 'text-left'
+                              message.role === 'user' ? 'text-right' : 'text-left'
                             }`}
-                            >
+                          >
                             {new Date(message.createdAt).toLocaleTimeString()}
-                            </span>
+                          </span>
                         </div>
-                        </div>
+                      </div>
                     </div>
-                    ))}
+                  ))}
                   {isLoading && (
                     <div className="flex justify-start">
                       <div className="flex items-center space-x-2">
-                          {renderAvatar('assistant')}   
+                        {renderAvatar('assistant')}   
                         <div className="bg-gray-100 rounded-lg p-3">
                           <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
