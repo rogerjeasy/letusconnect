@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -117,6 +116,11 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
     }
   ];
 
+  const handleNavigation = (path: string) => {
+    closeMenu();
+    router.push(path);
+  };
+
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -146,8 +150,9 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
   const handleMessagesClick = () => {
     // setUnreadCount(0);
     closeMenu();
-    router.push("/messages");
+    handleNavigation("/messages");
   };
+
 
   const renderMenuSection = (section: MenuSection) => {
     if ((section.authRequired && !isAuthenticated) || 
@@ -168,12 +173,11 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
                 title={component.title}
                 href={component.href}
                 onClick={() => {
-                  closeMenu();
-                  router.push(component.href);
+                  closeMenu()
+                  router.push(component.href)
                 }}
               >
                 {component.description}
-
               </ListItem>
             ))}
           </ul>
@@ -194,6 +198,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
           size="md"
           variant="light"
           className="font-bold text-white"
+          onPress={() => handleNavigation("/notifications")}
         >
           <div className="relative flex items-center">
             {isLoading ? (
@@ -266,22 +271,35 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
           {isAuthenticated && (
             <>
               <NavigationMenuItem>
-              <Link href="/dashboard" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <Button
-                    size="md"
-                    variant="light"
-                    className="font-bold text-white"
-                  >
-                    Dashboard
-                  </Button>
-                </NavigationMenuLink>
-              </Link>
+                <Link href="/dashboard" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    <Button
+                      size="md"
+                      variant="light"
+                      className="font-bold text-white"
+                    >
+                      Dashboard
+                    </Button>
+                  </NavigationMenuLink>
+                </Link>
               </NavigationMenuItem>
                 <NavigationMenuItem>
                 <Link href="/messages" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     <MessageBadgeTooltip />
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="/admin/users" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    <Button
+                      size="md"
+                      variant="light"
+                      className="font-bold text-white"
+                    >
+                      Admin Panel
+                    </Button>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -325,10 +343,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
               color="primary"
               size="sm"
               className="bg-green-500 hover:bg-green-600 text-white"
-              onPress={() => {
-                closeMenu();
-                router.push("/register");
-              }}
+              onPress={() => handleNavigation("/register")}
             >
               Register
             </Button>
@@ -336,10 +351,7 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
               color="secondary"
               size="sm"
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onPress={() => {
-                closeMenu();
-                router.push("/login");
-              }}
+              onPress={() => handleNavigation("/login")}
             >
               Login
             </Button>
@@ -350,34 +362,27 @@ const  NavigationMenuCombined= ({ isAuthenticated, user, closeMenu, isMobile=fal
   );
 };
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  ListItemProps
->(({ className, title, children, href, onClick, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-      <Link
-          href={href}
-          onClick={onClick}
+const ListItem = React.forwardRef<HTMLAnchorElement, React.ComponentPropsWithRef<"a">>(
+  ({ className, title, children, href, onClick, ...props }, ref) => {
+    return (
+      <li>
+        <Link
+          href={href || "#"}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
-          {...props}
+          onClick={onClick}
         >
-          <a ref={ref}>
-            <div className="text-sm font-medium leading-none">{title}</div>
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-              {children}
-            </p>
-          </a>
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
         </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-
-ListItem.displayName = "ListItem";
+      </li>
+    )
+  }
+)
+ListItem.displayName = "ListItem"
 
 export default NavigationMenuCombined;

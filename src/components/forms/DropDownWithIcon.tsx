@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "../navbar/Icons";
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DropdownOption {
-  label: string;
+  title: string;
   icon: JSX.Element;
-  link: string;
+  href: string;
+  description?: string;
 }
 
 interface DropDownWithIconProps {
@@ -39,7 +40,7 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
             color={buttonColor}
             variant="light"
             className="font-bold text-white"
-            endContent={<ChevronDown fill="currentColor" size={16} />}
+            endContent={isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           >
             {buttonLabel}
           </Button>
@@ -48,15 +49,16 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
           {options.map((option, index) => (
             <DropdownItem
               key={index}
+              description={option.description}
               startContent={option.icon}
-              onPress={() => handleOptionClick(option.link)}
+              onPress={() => handleOptionClick(option.href)}
             >
               <Button
                 variant="light"
                 className="w-full justify-start text-left"
-                onPress={() => handleOptionClick(option.link)}
+                onPress={() => handleOptionClick(option.href)}
               >
-                {option.label}
+                {option.title}
               </Button>
             </DropdownItem>
           ))}

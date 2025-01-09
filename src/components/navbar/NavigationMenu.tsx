@@ -2,15 +2,6 @@
 
 import { Badge, Button, Input, Spinner, Tooltip } from "@nextui-org/react";
 import DropDownWithIcon from "../forms/DropDownWithIcon";
-import { adminOptions } from "../dropdownoptions/adminOptions";
-import { mentorshipOptionsForDropDown } from "../dropdownoptions/menuOptonsForDropDown";
-import { connectStudentOptions } from "../dropdownoptions/connectStudentOptions";
-import { aboutOptions } from "../dropdownoptions/AboutOptions";
-import { projectsOptions } from "../dropdownoptions/projectOptions";
-import { jobsOptions } from "../dropdownoptions/jobOptions";
-import { eventsOptions } from "../dropdownoptions/eventOptions";
-import { testimonialsOptions } from "../dropdownoptions/testimonialOptions";
-import { groupsOptions } from "../dropdownoptions/forumOptions";
 import { SearchIcon } from "./SearchIcon";
 import { useRouter } from "next/navigation";
 import { FaComments } from "react-icons/fa";
@@ -21,15 +12,84 @@ import { NotificationIcon } from "../icons/NotificationIcon";
 import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 import { getUnreadMessageCount } from "@/services/message.service";
 
+import { aboutComponents } from "@/components/utils/aboutusmenu"
+import { projectsNonAuthComponents, projectsAuthComponents } from "@/components/utils/projectsOptions"
+import { mentorshipNonAuthComponents, mentorshipAuthComponents } from "@/components/utils/mentorshipOptions"
+import { connectAuthComponents, connectNonAuthComponents } from "@/components/utils/connectStudentOptions"
+import { eventsNonAuthComponents, eventsAuthComponents } from "@/components/utils/eventOptions"
+import { jobsNonAuthComponents, jobsAuthComponents } from "@/components/utils/jobOptions"
+import { groupsAuthComponents, groupsNonAuthComponents } from "@/components/utils/forumOptions"
+import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/components/utils/testimonialOptions"
+import { adminComponents } from "@/components/utils/adminOptions"
+import { useNotificationCount } from "../notifications/ManagingNotifications";
+
 interface NavigationMenuProps {
   isAuthenticated: boolean;
   user?: User | null;
   closeMenu: () => void;
+  isMobile?: boolean;
 }
 
-const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProps) => {
+interface MenuComponent {
+  title: string;
+  href: string;
+  description: string;
+  icon: JSX.Element;
+}
+
+interface MenuSection {
+  title: string;
+  getComponents: (isAuth: boolean) => MenuComponent[];
+  visibilityCondition: (isAuth: boolean) => boolean;
+}
+
+const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: NavigationMenuProps) => {
   const router = useRouter();
   const [unreadCountMsg, setUnreadCountMsg] = useState<number>(0);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  const menuSections: MenuSection[] = [
+    {
+      title: "About Us",
+      getComponents: () => aboutComponents,
+      visibilityCondition: (isAuth) => !isAuth
+    },
+    {
+      title: "Students & Alumni",
+      getComponents: (isAuth) => isAuth ? connectAuthComponents : connectNonAuthComponents,
+      visibilityCondition: () => true
+    },
+    {
+      title: "Mentorship",
+      getComponents: (isAuth) => isAuth ? mentorshipAuthComponents : mentorshipNonAuthComponents,
+      visibilityCondition: () => true
+    },
+    {
+      title: "Projects",
+      getComponents: (isAuth) => isAuth ? projectsAuthComponents : projectsNonAuthComponents,
+      visibilityCondition: () => true
+    },
+    // {
+    //   title: "Jobs & Careers",
+    //   getComponents: (isAuth) => isAuth ? jobsAuthComponents : jobsNonAuthComponents,
+    //   visibilityCondition: () => true
+    // },
+    {
+      title: "Events",
+      getComponents: (isAuth) => isAuth ? eventsAuthComponents : eventsNonAuthComponents,
+      visibilityCondition: () => true
+    },
+    {
+      title: "Groups/Forums",
+      getComponents: (isAuth) => isAuth ? groupsAuthComponents : groupsNonAuthComponents,
+      visibilityCondition: () => true
+    },
+    // {
+    //   title: "Testimonials",
+    //   getComponents: (isAuth) => isAuth ? testimonialsAuthComponents : testimonialsNonAuthComponents,
+    //   visibilityCondition: () => true
+    // }
+  ];
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -57,19 +117,19 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
     };
   }, [user?.uid]);
 
+  const handleNavigation = (path: string) => {
+    closeMenu();
+    router.push(path);
+  };
+
   const handleMessagesClick = () => {
     // setUnreadCount(0);
     closeMenu();
     router.push("/messages");
   };
 
-  const NotificationBadge = ({ token, onPress }: { token: string; onPress?: () => void }) => {
-    const { 
-    unreadCount, 
-    isLoading, 
-    fetchUnreadCount,
-    decrementUnreadCount 
-  } = useNotificationStatsStore();
+  const NotificationBadge = () => {
+    const { unreadCount, isLoading } = useNotificationCount();
   
     return (
       <Tooltip
@@ -77,10 +137,10 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
         placement="bottom"
       >
         <Button
-          size="sm"
+          size="md"
           variant="light"
           className="font-bold text-white"
-          onPress={onPress}
+          onPress={() => handleNavigation("/notifications")}
         >
           <div className="relative flex items-center">
             {isLoading ? (
@@ -108,9 +168,60 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
     );
   };
 
+  const MessageBadge = () => {
+    return (
+      <Tooltip
+        content={
+        unreadCountMsg
+        ? `You have ${unreadCountMsg} new message${unreadCountMsg > 1 ? "s" : ""}`
+          : "No new messages 😊"
+        }
+        // isDisabled={unreadCount === 0}
+        >
+        <Button
+          size="sm"
+          variant="light"
+          className="font-bold text-white"
+          onPress={handleMessagesClick}
+        >
+        <div className="relative flex items-center">
+                  
+          {unreadCountMsg > 0 && (
+          <Badge
+            color="danger"
+            content={unreadCountMsg > 99 ? "99+" : unreadCountMsg}
+            isInvisible={false}
+            shape="circle"
+            size="sm"
+          >
+          <FaComments className="text-green-500"  size={20}/>
+            </Badge>
+                  
+          )}
+          {unreadCountMsg === 0 && <FaComments className="text-green-500" size={20} />}
+            <span className="ml-2">My Chats & Messages</span>
+          </div>
+            </Button>
+      </Tooltip>
+    );
+  }
+
+  const renderMenuSections = () => {
+    return menuSections
+      .filter(section => section.visibilityCondition(isAuthenticated))
+      .map((section, index) => (
+        <DropDownWithIcon
+          key={index}
+          buttonLabel={section.title}
+          options={section.getComponents(isAuthenticated)}
+          buttonColor="default"
+          closeMenu={closeMenu}
+        />
+      ));
+  };
+
   return (
-    <div className="flex flex-wrap items-center gap-1 md:gap-2 justify-between w-full">
-      <div className="flex flex-wrap items-center gap-1 md:gap-2">
+    <div className={`flex ${isMobile ? "flex-col" : "flex-wrap"} items-center gap-2 w-full`}>
         {isAuthenticated ? (
           <>
             {/* Dashboard Button */}
@@ -130,174 +241,27 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
             {user?.role?.includes("admin") && (
               <DropDownWithIcon
                 buttonLabel="Admin Dashboard"
-                options={adminOptions.adminDashboard}
+                options={adminComponents}
                 buttonColor="default"
                 closeMenu={closeMenu}
               />
             )}
 
-            {/* Mentorship Dropdown */}
-            <DropDownWithIcon
-              buttonLabel="Mentorship"
-              options={mentorshipOptionsForDropDown.mentorshipAuthUsers}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            {/* Connect with Fellow Students */}
-            <DropDownWithIcon
-              buttonLabel="Students & Alumni"
-              options={connectStudentOptions.connectAuthUsers}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
+            
             {/* Messages button */}
-            <Tooltip
-              content={
-                unreadCountMsg
-                  ? `You have ${unreadCountMsg} new message${unreadCountMsg > 1 ? "s" : ""}`
-                  : "No new messages 😊"
-              }
-              // isDisabled={unreadCount === 0}
-            >
-              <Button
-                size="sm"
-                variant="light"
-                className="font-bold text-white"
-                onPress={handleMessagesClick}
-              >
-                <div className="relative flex items-center">
-                  
-                  {unreadCountMsg > 0 && (
-                    <Badge
-                    color="danger"
-                    content={unreadCountMsg > 99 ? "99+" : unreadCountMsg}
-                    isInvisible={false}
-                    shape="circle"
-                    size="sm"
-                  >
-                    <FaComments className="text-green-500"  size={20}/>
-                  </Badge>
-                  
-                  )}
-                  {unreadCountMsg === 0 && <FaComments className="text-green-500" size={20} />}
-                  <span className="ml-2">My Chats & Messages</span>
-                </div>
-              </Button>
-            </Tooltip>
+            <MessageBadge />
 
             {/* Notification */}
-            <NotificationBadge 
-              token={localStorage.getItem("token") || ""} 
-              onPress={() => {
-                closeMenu();
-                router.push("/notifications");
-              }}
-            />
-
-
-            {/* Projects Dropdown */}
-            <DropDownWithIcon
-              buttonLabel="Projects"
-              options={projectsOptions.projectsAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            {/* Jobs & Careers Dropdown */}
-            <DropDownWithIcon
-              buttonLabel="Jobs & Careers"
-              options={jobsOptions.jobs}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            {/* Events Dropdown */}
-            <DropDownWithIcon
-              buttonLabel="Events"
-              options={eventsOptions.events}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            {/* Testimonials Dropdown */}
-            {/* <DropDownWithIcon
-              buttonLabel="Testimonials"
-              options={testimonialsOptions.testimonials}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            /> */}
-
-            {/* Groups/Forums Dropdown */}
-            <DropDownWithIcon
-              buttonLabel="Groups/Forums"
-              options={groupsOptions.groups}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
+            <NotificationBadge />
           </>
-        ) : (
-          <>
-            <DropDownWithIcon buttonLabel="About" options={aboutOptions.aboutUs} buttonColor="default" closeMenu={closeMenu} />
+        ):null}
+      {renderMenuSections()}
 
-            <DropDownWithIcon
-              buttonLabel="Mentorship"
-              options={mentorshipOptionsForDropDown.mentorshipNonAuthUsers}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Students & Alumni"
-              options={connectStudentOptions.connectNonAuthUsers}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Projects"
-              options={projectsOptions.projectsNonAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Jobs & Careers"
-              options={jobsOptions.jobsNonAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Events"
-              options={eventsOptions.eventsNonAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Groups/Forums"
-              options={groupsOptions.groupsNonAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-
-            <DropDownWithIcon
-              buttonLabel="Testimonials"
-              options={testimonialsOptions.testimonialsNonAuth}
-              buttonColor="default"
-              closeMenu={closeMenu}
-            />
-          </>
-        )}
-      </div>
-
-      {/* Search Bar, Register, and Login Buttons on the Right Side */}
-      <div className="flex items-center gap-2 mt-2 md:mt-0 md:ml-auto">
+      {/* Search and Auth Buttons */}
+      <div className={`flex ${isMobile ? "flex-col w-full" : "items-center"} gap-2 mt-2 md:mt-0 ${isMobile ? "" : "md:ml-auto"}`}>
         <Input
           classNames={{
-            base: "max-w-full sm:max-w-[12rem] h-10 bg-gray-200 rounded-full",
+            base: `max-w-full ${isMobile ? "" : "sm:max-w-[12rem]"} h-10 bg-gray-200 rounded-full`,
             mainWrapper: "h-full",
             input: "text-small",
             inputWrapper: "h-full font-normal text-default-500 bg-gray-200",
@@ -309,15 +273,12 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
         />
 
         {!isAuthenticated && (
-          <div className="flex gap-1">
+          <div className={`flex ${isMobile ? "flex-col w-full" : ""} gap-1`}>
             <Button
               color="primary"
               size="sm"
               className="bg-green-500 hover:bg-green-600 text-white"
-              onPress={() => {
-                closeMenu();
-                router.push("/register");
-              }}
+              onPress={() => router.push("/register")}
             >
               Register
             </Button>
@@ -325,10 +286,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu }: NavigationMenuProp
               color="secondary"
               size="sm"
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onPress={() => {
-                closeMenu();
-                router.push("/login");
-              }}
+              onPress={() => router.push("/login")}
             >
               Login
             </Button>

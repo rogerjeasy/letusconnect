@@ -66,25 +66,19 @@ export const connectNonAuthComponents: ConnectOption[] = [
 
 // Options for Logged-In Users
 export const connectAuthComponents: ConnectOption[] = [
+  
+  {
+    title: "My Connections",
+    href: "/connections",
+    description: "View and manage your connections with students and alumni.",
+    icon: <FaHandshake className="text-green-500" />,
+  },
   {
     title: "Find Students & Alumni",
     href: "/users-directory",
     description:
       "Search for students and alumni in your field or with shared interests.",
     icon: <FaSearch className="text-teal-500" />,
-  },
-  {
-    title: "Upcoming Networking Events",
-    href: "/events/networking",
-    description:
-      "Stay updated on networking events and opportunities to meet your peers.",
-    icon: <FaCalendarAlt className="text-purple-500" />,
-  },
-  {
-    title: "My Connections",
-    href: "/connections",
-    description: "View and manage your connections with students and alumni.",
-    icon: <FaHandshake className="text-green-500" />,
   },
   {
     title: "Join Groups & Forums",
@@ -98,6 +92,13 @@ export const connectAuthComponents: ConnectOption[] = [
     href: "/groups/create",
     description: "Start your own group to share ideas and collaborate with others.",
     icon: <FaPlusCircle className="text-orange-500" />,
+  },
+  {
+    title: "Upcoming Networking Events",
+    href: "/events/networking",
+    description:
+      "Stay updated on networking events and opportunities to meet your peers.",
+    icon: <FaCalendarAlt className="text-purple-500" />,
   },
   {
     title: "Recommended Connections",

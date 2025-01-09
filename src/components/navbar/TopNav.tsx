@@ -35,8 +35,11 @@ const Navbar = () => {
         </button>
 
         {/* Navigation Menu */}
-        <div className={`w-full md:w-auto ${isMenuOpen ? "block" : "hidden"} md:flex flex-col md:flex-row md:items-center`}>
+        {/* <div className={`w-full md:w-auto ${isMenuOpen ? "block" : "hidden"} md:flex flex-col md:flex-row md:items-center`}>
           <NavigationMenuCombined isAuthenticated={isAuthenticated} user={user} closeMenu={() => setIsMenuOpen(false)} />
+        </div> */}
+        <div className={`w-full md:w-auto ${isMenuOpen ? "block" : "hidden"} md:flex flex-col md:flex-row md:items-center`}>
+          <NavigationMenu isAuthenticated={isAuthenticated} user={user} closeMenu={() => setIsMenuOpen(false)} />
         </div>
 
         {/* Profile or Auth Buttons */}
