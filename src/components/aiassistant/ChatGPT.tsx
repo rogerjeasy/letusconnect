@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { getConversations, sendChatMessage } from '@/services/chatgpt.service';
 import { useUserStore } from '@/store/userStore';
+import RenderBotMessage from '../utils/RenderBotMessage';
 
 interface Message {
     id: string;
@@ -306,12 +307,11 @@ if (isInitializing) {
                                 : 'bg-gray-100 text-gray-900'
                             }`}
                           >
-                            {(message.role === 'user' ? message.message : message.response).split(/(\*\*[^*]+\*\*)/).map((part, index) => {
-                            if (part.startsWith('**') && part.endsWith('**')) {
-                                return <strong key={index}>{part.slice(2, -2)}</strong>;
-                            }
-                            return part;
-                            })}
+                            {message.role === 'user' ? (
+                                message.message
+                            ) : (
+                                <RenderBotMessage message={message.response} />
+                            )}
                           </div>
                           <span 
                             className={`text-xs text-gray-500 mt-1 ${
