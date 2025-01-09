@@ -10,6 +10,18 @@ interface RenderBotMessageProps {
 
 const RenderBotMessage: React.FC<RenderBotMessageProps> = ({ message }) => {
   const router = useRouter();
+  const getHeadingComponent = (level: number, content: string, key: string) => {
+    const className = {
+      1: "text-2xl font-bold mb-4",
+      2: "text-xl font-bold mb-3",
+      3: "text-lg font-bold mb-2",
+      4: "text-base font-bold mb-2",
+      5: "text-sm font-bold mb-2",
+      6: "text-xs font-bold mb-2"
+    }[level] || "text-base font-bold mb-2";
+
+    return <div key={key} className={className}>{content}</div>;
+  };
   const processMessageParts = (text: string) => {
     // Split the text into lines first
     const lines = text.split('\n');
@@ -17,6 +29,12 @@ const RenderBotMessage: React.FC<RenderBotMessageProps> = ({ message }) => {
     return lines.map((line, lineIndex) => {
       // Check if the line starts with a number
       const numberedItemMatch = line.match(/^(\d+)\.\s+(.+)$/);
+      const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+      if (headingMatch) {
+        const headingLevel = headingMatch[1].length;
+        const headingContent = headingMatch[2];
+        return getHeadingComponent(headingLevel, headingContent, `heading-${lineIndex}`);
+      }
       
       if (numberedItemMatch) {
         const [_, number, content] = numberedItemMatch;
@@ -113,9 +131,9 @@ const RenderBotMessage: React.FC<RenderBotMessageProps> = ({ message }) => {
   };
 
   return (
-    <div className="whitespace-pre-wrap break-words">
+    <span className="whitespace-pre-wrap break-words">
       {processMessageParts(message)}
-    </div>
+    </span>
   );
 };
 

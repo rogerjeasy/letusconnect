@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { HomeIcon, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { Spinner } from "@nextui-org/react";
+import RenderBotMessage from "@/components/utils/RenderBotMessage";
 
 export default function NotFound() {
   const [message, setMessage] = useState<string | null>(null);
@@ -42,7 +43,6 @@ export default function NotFound() {
 
     fetchChatResponse();
   }, []);
-
 
   const homePath = currentUser ? "/dashboard" : "/";
 
@@ -86,14 +86,14 @@ export default function NotFound() {
                   <AlertDescription>{message}</AlertDescription>
                 </Alert>
               ) : (
-                <motion.p
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-lg text-center text-gray-600"
                 >
-                  {message}
-                </motion.p>
+                  <RenderBotMessage message={message || ""} />
+                </motion.div>
               )}
             </CardContent>
             <CardFooter className="flex justify-center gap-4 pb-8">
