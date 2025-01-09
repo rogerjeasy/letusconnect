@@ -278,7 +278,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: Na
               color="primary"
               size="sm"
               className="bg-green-500 hover:bg-green-600 text-white"
-              onPress={() => router.push("/register")}
+              onPress={() => handleNavigation("/register")}
             >
               Register
             </Button>
@@ -286,7 +286,7 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: Na
               color="secondary"
               size="sm"
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onPress={() => router.push("/login")}
+              onPress={() => handleNavigation("/login")}
             >
               Login
             </Button>

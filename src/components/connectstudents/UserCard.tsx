@@ -63,7 +63,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
   
     try {
       const connectionsResponse = await getUserConnections();
-      console.log("Connections response:", connectionsResponse);
   
       // Check if connected
       const isConnected = connectionsResponse?.connections && 
@@ -134,7 +133,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
         <Button
           color="primary"
           size="sm"
-          onClick={handleConnect}
+          onPress={handleConnect}
           isLoading={loading}
           isDisabled={hasExistingRequest}
         >
@@ -146,7 +145,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
           <Button
             color="secondary"
             size="sm"
-            onClick={() => router.push(`/profile/${user.uid}`)}
+            onPress={() => router.push(`/profile/${user.uid}`)}
           >
             <FaEnvelope className="mr-2" /> View Profile
           </Button>
