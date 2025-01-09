@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
@@ -22,10 +21,10 @@ interface DropDownWithIconProps {
 export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "primary", closeMenu }: DropDownWithIconProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-
+  
   const handleMouseEnter = () => setIsOpen(true);
   const handleMouseLeave = () => setIsOpen(false);
-
+  
   const handleOptionClick = (link: string) => {
     setIsOpen(false);
     if (closeMenu) closeMenu();
@@ -45,13 +44,18 @@ export default function DropDownWithIcon({ buttonLabel, options, buttonColor = "
             {buttonLabel}
           </Button>
         </DropdownTrigger>
-        <DropdownMenu aria-label={buttonLabel} variant="faded">
+        <DropdownMenu 
+          aria-label={buttonLabel} 
+          variant="faded"
+          className="w-full min-w-[200px] max-w-sm md:max-w-md lg:max-w-lg"
+        >
           {options.map((option, index) => (
             <DropdownItem
               key={index}
               description={option.description}
               startContent={option.icon}
               onPress={() => handleOptionClick(option.href)}
+              // className="p-2 sm:p-3 md:p-4"
             >
               <Button
                 variant="light"
