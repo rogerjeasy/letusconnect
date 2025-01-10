@@ -25,6 +25,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isJoiningProject, setIsJoiningProject] = useState<string | null>(null);
   const [updatedProjects, setUpdatedProjects] = useState(projects);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -82,6 +83,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
     }
 
     setLoading(true);
+    setIsJoiningProject(projectId);
     try {
       const message = "Request to join the project";
       await api.post(API_CONFIG.ENDPOINTS.PROJECTS.JOIN(projectId), {
@@ -126,6 +128,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
       });
     } finally {
       setLoading(false);
+      setIsJoiningProject(null);
       setIsJoinModalOpen(true);
     }
   };
@@ -183,13 +186,38 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
                 onUpdateProject={handleUpdateProject}
                 onDeleteProject={handleDeleteProject}
                 onJoinProject={handleJoinProject}
+                isLoading={isJoiningProject === project.id}
               />
             </div>
           ))
         ) : (
-          <div className="text-center col-span-full text-gray-500 flex flex-col items-center gap-2">
-            <FaFolderOpen size={100} />
-            <p>No projects available.</p>
+          <div className="text-center col-span-full flex flex-col items-center gap-6 py-8 px-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gray-100 rounded-full blur-lg opacity-50"></div>
+              <FaFolderOpen className="text-gray-400 relative z-10" size={100} />
+            </div>
+            
+            <div className="space-y-3 max-w-md">
+              <h3 className="text-xl font-semibold text-gray-700">No Projects Available Yet</h3>
+            </div>
+
+            <div className="mt-4">
+              <Button
+                color="primary"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+                text-white font-semibold px-8 py-4 rounded-xl shadow-lg transform transition-all 
+                hover:scale-105 hover:shadow-xl flex items-center gap-3"
+                onClick={() => router.push("/projects/create")}
+              >
+                <div className="relative bg-blue-400/20 p-2 rounded-lg">
+                  <Rocket className="w-5 h-5" />
+                </div>
+                <span>Start Your Project Journey</span>
+              </Button>
+              <p className="text-sm text-gray-400 mt-4">
+                Create a project and start building something amazing together
+              </p>
+            </div>
           </div>
         )}
       </div>

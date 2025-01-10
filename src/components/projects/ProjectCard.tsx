@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, CardFooter, Avatar, Button, Tooltip, Spinner } from "@nextui-org/react";
 import { FaEdit, FaEye, FaTrash, FaUserPlus, FaClock, FaUserCheck, FaBell } from "react-icons/fa";
 import { Project } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
@@ -26,9 +26,10 @@ interface ProjectCardProps {
   onUpdateProject?: (project: Project) => void;
   onDeleteProject?: (projectId: string) => void;
   onJoinProject?: (projectId: string) => void;
+  isLoading?: boolean;
 }
 
-const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject, onJoinProject }: ProjectCardProps) => {
+const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject, onJoinProject, isLoading = false }: ProjectCardProps) => {
   const user = useUserStore((state) => state.user);
 
   // Function to truncate long descriptions
@@ -140,8 +141,23 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
             <FaUserCheck className="mr-2" /> Joined
           </Button>
         ) : (
-          <Button color="success" size="sm" className="w-1/2" onClick={() => onJoinProject && onJoinProject(project.id)}>
-            <FaUserPlus className="mr-2" /> Join Now
+          <Button 
+            color="success" 
+            size="sm" 
+            className="w-1/2"
+            isDisabled={isLoading}
+            onClick={() => onJoinProject && onJoinProject(project.id)}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" color="white" /> 
+                Joining...
+              </div>
+            ) : (
+              <>
+                <FaUserPlus className="mr-2" /> Join Now
+              </>
+            )}
           </Button>
         )}
       </CardFooter>

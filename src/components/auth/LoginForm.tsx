@@ -11,7 +11,6 @@ import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { handleGetUserEducation } from "../apihandling/HandleUserEducation";
 import { login } from "@/services/auth.service";
 import { setAuthToken } from "@/helpers/tokenManagement";
 
