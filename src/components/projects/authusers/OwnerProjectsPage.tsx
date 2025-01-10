@@ -7,6 +7,7 @@ import { api, handleError } from "@/helpers/api";
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import ProjectCardWhileLoading from "../ProjectCardWhileLoading";
+import { API_CONFIG } from "@/config/api.config";
 
 const OwnerProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -20,17 +21,7 @@ const OwnerProjectsPage = () => {
       setError("");
 
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Authorization token is missing. Please log in.");
-          return;
-        }
-
-        const response = await api.get("/api/projects/owner", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(API_CONFIG.ENDPOINTS.PROJECTS.OWNER);
 
         setProjects(response.data.data);
       } catch (err) {
