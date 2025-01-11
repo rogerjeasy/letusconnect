@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 import ManageUserConnections from "@/components/userprofile/ManageUserConnections";
 import { useUserStore } from '@/store/userStore';
 import { Spinner } from "@nextui-org/react";
+import { div } from 'framer-motion/client';
 
 const ConnectionsPage = () => {
   const router = useRouter();
-  const { token, isAuthenticated, loading, hasChecked } = useUserStore();
+  const { isAuthenticated, loading, hasChecked } = useUserStore();
   
   useEffect(() => {
     if (hasChecked && !isAuthenticated) {
@@ -25,11 +26,11 @@ const ConnectionsPage = () => {
     );
   }
 
-  if (!token || !isAuthenticated) {
-    return null; // Return null while redirecting
-  }
-
-  return <ManageUserConnections token={token} />;
+  return (
+    <div className="mt-16">
+      <ManageUserConnections />
+    </div>
+  );
 };
 
 export default ConnectionsPage;

@@ -24,7 +24,9 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const currentUser = useUserStore((state) => state.user);
-  const [hasExistingRequest, setHasExistingRequest] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [hasSentRequest, setHasSentRequest] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const handleConnect = async () => {
     if (!currentUser) {
@@ -42,7 +44,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
       await sendConnectionRequest(user.uid, message);
       setIsConnectModalOpen(false);
       setMessage("");
-      setHasExistingRequest(true);
+      setHasSentRequest(true);
 
     } catch (error) {
       toast.error("Failed to send connection request."+ handleError(error));
@@ -58,31 +60,36 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
   }, [currentUser, user.uid]);
   
   const checkExistingRequest = async () => {
-    console.log("Starting checkExistingRequest");
     if (!currentUser) return;
   
     try {
       const connectionsResponse = await getUserConnections();
   
       // Check if connected
-      const isConnected = connectionsResponse?.connections && 
+      const isConnected = !!(connectionsResponse?.connections && 
         typeof connectionsResponse.connections === 'object' &&
         user?.uid && 
-        connectionsResponse.connections[user.uid] != null;
+        connectionsResponse.connections[user.uid] != null);
       
       // Check pending requests (requests received)
-      const hasPendingRequest = connectionsResponse?.pendingRequests && 
-        connectionsResponse.pendingRequests[user.uid] != null;
+      const hasPendingRequest = !!(connectionsResponse?.pendingRequests && 
+        connectionsResponse.pendingRequests[user.uid] != null);
       
       // Check sent requests
-      const hasSentRequest = connectionsResponse?.sentRequests && 
-      connectionsResponse.sentRequests[user.uid] != null;
+      const hasSentRequest = !!(connectionsResponse?.sentRequests && 
+        connectionsResponse.sentRequests[user.uid] != null);
   
-      setHasExistingRequest(isConnected || hasPendingRequest || hasSentRequest);
+      setHasPendingRequest(hasPendingRequest);
+      setHasSentRequest(hasSentRequest);
+      setIsConnected(isConnected);
   
     } catch (error) {
       console.error("Error checking connection status:", error);
     }
+  };
+
+  const navigateToManageConnections = () => {
+    router.push("/connections");
   };
 
   return (
@@ -123,24 +130,34 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
         {user.willingToMentor && (
           <p className="text-green-500 font-semibold">Willing to Mentor</p>
         )}
-        {/* <p className="text-gray-600">
-          <strong>Connections:</strong> {user.connections.length || 0}
-        </p> */}
       </CardBody>
 
       <CardFooter className="flex gap-2">
-      <Tooltip content={hasExistingRequest ? "Request Pending" : "Connect"}>
-        <Button
-          color="primary"
-          size="sm"
-          onPress={handleConnect}
-          isLoading={loading}
-          isDisabled={hasExistingRequest}
-        >
-          <FaUserPlus className="mr-2" />
-          {hasExistingRequest ? "Request Sent" : "Connect"}
-        </Button>
-      </Tooltip>
+        <Tooltip content={
+          isConnected ? "Connected" : 
+          hasPendingRequest ? "Request to Connect Received. Click to manage." : 
+          hasSentRequest ? "Request Sent. Waiting for response. Click to manage." : 
+          "Connect"
+        }>
+          <Button
+            color={
+              isConnected ? "success" :
+              hasPendingRequest ? "warning" :
+              hasSentRequest ? "danger" :
+              "primary"
+            }
+            size="sm"
+            onPress={hasPendingRequest || hasSentRequest ? navigateToManageConnections : handleConnect}
+            isLoading={loading}
+            isDisabled={isConnected}
+          >
+            <FaUserPlus className="mr-2" />
+            {isConnected ? "Connected" : 
+             hasPendingRequest ? "Request to Connect" :
+             hasSentRequest ? "Request Sent" :
+             "Connect"}
+          </Button>
+        </Tooltip>
         <Tooltip content="View Profile">
           <Button
             color="secondary"
@@ -151,6 +168,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
           </Button>
         </Tooltip>
       </CardFooter>
+
       <ModalPopup
         isOpen={isLoginPromptOpen}
         title="Login Required"
@@ -194,7 +212,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
         isLoading={loading}
       />
     </Card>
-    
   );
 };
 
