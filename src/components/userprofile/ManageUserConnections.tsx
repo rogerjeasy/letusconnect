@@ -13,11 +13,8 @@ import { toast } from 'react-toastify';
 import { getAllUsers } from '@/services/users.services';
 import { User } from '@/store/userStore';
 
-interface ManageUserConnectionsProps {
-  token: string;
-}
 
-const ManageUserConnections: React.FC<ManageUserConnectionsProps> = ({ token }) => {
+const ManageUserConnections = () => {
   const [activeConnections, setActiveConnections] = useState<Record<string, Connection>>({});
   const [pendingRequests, setPendingRequests] = useState<Record<string, ConnectionRequest>>({});
   const [sentRequests, setSentRequests] = useState<Record<string, SentRequest>>({});

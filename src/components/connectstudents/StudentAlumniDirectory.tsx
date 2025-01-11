@@ -7,33 +7,58 @@ import {
   Pagination,
   Select,
   SelectItem,
+  DateValue,
 } from "@nextui-org/react";
 import {
   FaSearch,
   FaFilter,
   FaBook,
   FaUsers,
-  FaBan,
   FaUndo,
+  FaCalendar,
+  FaStar,
+  FaExclamationTriangle,
+  FaTimes,
 } from "react-icons/fa";
-import { api } from "@/helpers/api";
 import UserCard from "./UserCard";
 import { User, useUserStore } from "@/store/userStore";
 import UserCardWhileLoading from "./UserCardWhileLoading";
 import { getAllUsers } from "@/services/users.services";
 
+// Define interfaces for state management
+interface FilteredUsersState {
+  users: User[];
+  error: {
+    type: 'program' | 'year' | 'interest' | 'general' | string;
+    message: string;
+  } | null;
+}
+
+interface FilterState {
+  program: string;
+  year: string;
+  interest: string;
+}
+
 export default function StudentAlumniDirectory() {
+  // State management
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<FilteredUsersState>({
+    users: [],
+    error: null,
+  });
   const [searchTerm, setSearchTerm] = useState("");
-  const [programFilter, setProgramFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [interestFilter, setInterestFilter] = useState("");
+  const [filters, setFilters] = useState<FilterState>({
+    program: "",
+    year: "",
+    interest: "",
+  });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const currentUser = useUserStore((state) => state.user);
 
+  // Initial data fetch
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -42,55 +67,154 @@ export default function StudentAlumniDirectory() {
     setLoading(true);
     try {
       const fetchedUsers = await getAllUsers();
+      const processedUsers = currentUser
+        ? fetchedUsers.filter((user: User) => user.uid !== currentUser.uid)
+        : fetchedUsers;
 
-      if (currentUser) {
-        const filteredUsers = fetchedUsers.filter((user: User) => user.uid !== currentUser.uid);
-        setUsers(filteredUsers);
-        setFilteredUsers(filteredUsers);
-      } else {
-        setUsers(fetchedUsers);
-        setFilteredUsers(fetchedUsers);
-      }
+      setUsers(processedUsers);
+      setFilteredUsers({
+        users: processedUsers,
+        error: null,
+      });
     } catch (error) {
       console.error("Error fetching users:", error);
+      setFilteredUsers({
+        users: [],
+        error: {
+          type: 'general',
+          message: 'Failed to load users. Please try again later.',
+        },
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    let filtered = users.filter((user) =>
-      user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    if (programFilter) {
-      filtered = filtered.filter((user) => user.program === programFilter);
+  // Debounced search function
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      performSearch();
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, filters]);
+
+  const performSearch = () => {
+    setLoading(true);
+    try {
+      let filtered = users;
+
+      // Apply name search if there's a search term
+      if (searchTerm.trim()) {
+        filtered = filtered.filter((user) => {
+          const fullName = `${user.firstName} ${user.lastName} ${user.username}`.toLowerCase();
+          return fullName.includes(searchTerm.toLowerCase());
+        });
+
+        if (filtered.length === 0) {
+          return setFilteredUsers({
+            users: [],
+            error: {
+              type: 'search',
+              message: 'No users match your search term. Try a different search.',
+            },
+          });
+        }
+      }
+
+      // Apply program filter
+      if (filters.program) {
+        const beforeCount = filtered.length;
+        filtered = filtered.filter((user) => user.program === filters.program);
+        if (filtered.length === 0 && beforeCount > 0) {
+          return setFilteredUsers({
+            users: [],
+            error: {
+              type: 'program',
+              message: 'No users found in this program. Try a different program.',
+            },
+          });
+        }
+      }
+
+      // Apply year filter
+      if (filters.year) {
+        const beforeCount = filtered.length;
+        filtered = filtered.filter((user) => user.graduationYear.toString() === filters.year);
+        if (filtered.length === 0 && beforeCount > 0) {
+          return setFilteredUsers({
+            users: [],
+            error: {
+              type: 'year',
+              message: 'No users found for this graduation year. Try a different year.',
+            },
+          });
+        }
+      }
+
+      // Apply interest filter
+      if (filters.interest) {
+        const beforeCount = filtered.length;
+        filtered = filtered.filter((user) =>
+          user.interests.some((interest) =>
+            interest.toLowerCase().includes(filters.interest.toLowerCase())
+          )
+        );
+        if (filtered.length === 0 && beforeCount > 0) {
+          return setFilteredUsers({
+            users: [],
+            error: {
+              type: 'interest',
+              message: 'No users found with this interest. Try a different interest.',
+            },
+          });
+        }
+      }
+
+      setFilteredUsers({
+        users: filtered,
+        error: null,
+      });
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error during search:', error);
+      setFilteredUsers({
+        users: [],
+        error: {
+          type: 'general',
+          message: 'An error occurred while searching. Please try again.',
+        },
+      });
+    } finally {
+      setLoading(false);
     }
-    if (yearFilter) {
-      filtered = filtered.filter((user) => user.graduationYear.toString() === yearFilter);
-    }
-    if (interestFilter) {
-      filtered = filtered.filter((user) =>
-        user.interests.some((interest) =>
-          interest.toLowerCase().includes(interestFilter.toLowerCase())
-        )
-      );
-    }    
-    setFilteredUsers(filtered);
-    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
     setSearchTerm("");
-    setProgramFilter("");
-    setYearFilter("");
-    setInterestFilter("");
-    setFilteredUsers(users);
+    setFilters({
+      program: "",
+      year: "",
+      interest: "",
+    });
+    setFilteredUsers({
+      users: users,
+      error: null,
+    });
     setCurrentPage(1);
   };
 
+  // Handle input changes
+  const handleFilterChange = (type: keyof FilterState, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [type]: value
+    }));
+  };
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const paginatedUsers = filteredUsers.slice(
+  const totalPages = Math.ceil(filteredUsers.users.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.users.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -101,18 +225,37 @@ export default function StudentAlumniDirectory() {
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold mb-4">🎓 Student & Alumni Directory</h1>
         <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-          Connect with fellow students and alumni based on program, graduation year, and shared interests. Grow your network, collaborate on projects, and share knowledge!
+          Connect with fellow students and alumni based on program, graduation year, and shared interests. 
+          Grow your network, collaborate on projects, and share knowledge!
         </p>
         <FaUsers className="text-6xl text-teal-500 mx-auto mb-8" />
 
         {/* Search Bar */}
         <div className="max-w-md mx-auto mb-4">
           <Input
-            placeholder="Search by username..."
-            startContent={<FaSearch />}
+            placeholder="Search by name..."
+            startContent={<FaSearch className="text-teal-500" />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+            classNames={{
+              input: "bg-gradient-to-r from-teal-50 to-white border-teal-200 focus:border-teal-500",
+              inputWrapper: "hover:border-teal-400 focus-within:border-teal-500"
+            }}
+            endContent={
+              searchTerm && (
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  onPress={() => {
+                    setSearchTerm("");
+                    performSearch();
+                  }}
+                >
+                  <FaTimes className="text-gray-400 hover:text-gray-600" />
+                </Button>
+              )
+            }
             fullWidth
           />
         </div>
@@ -122,7 +265,11 @@ export default function StudentAlumniDirectory() {
           <Select
             label="Filter by Program"
             placeholder="Select a program"
-            onChange={(e) => setProgramFilter(e.target.value)}
+            value={filters.program}
+            onChange={(e) => handleFilterChange('program', e.target.value)}
+            classNames={{
+              trigger: "bg-gradient-to-r from-teal-50 to-white"
+            }}
           >
             <SelectItem key="Applied Information and Data Science" value="Applied Information and Data Science">
               Applied Information and Data Science
@@ -134,53 +281,83 @@ export default function StudentAlumniDirectory() {
               Business Analytics
             </SelectItem>
           </Select>
+
           <Select
             label="Filter by Graduation Year"
             placeholder="Select a year"
-            onChange={(e) => setYearFilter(e.target.value)}
+            value={filters.year}
+            onChange={(e) => handleFilterChange('year', e.target.value)}
+            classNames={{
+              trigger: "bg-gradient-to-r from-teal-50 to-white"
+            }}
           >
-            <SelectItem key="2024" value="2024">
-              2024
-            </SelectItem>
-            <SelectItem key="2023" value="2023">
-              2023
-            </SelectItem>
-            <SelectItem key="2022" value="2022">
-              2022
-            </SelectItem>
+            <SelectItem key="2024" value="2024">2024</SelectItem>
+            <SelectItem key="2023" value="2023">2023</SelectItem>
+            <SelectItem key="2022" value="2022">2022</SelectItem>
           </Select>
+
           <Input
             placeholder="Filter by area of interest..."
-            startContent={<FaBook />}
-            value={interestFilter}
-            onChange={(e) => setInterestFilter(e.target.value)}
+            startContent={<FaBook className="text-teal-500" />}
+            value={filters.interest}
+            onChange={(e) => handleFilterChange('interest', e.target.value)}
+            classNames={{
+              input: "bg-gradient-to-r from-teal-50 to-white border-teal-200 focus:border-teal-500",
+              inputWrapper: "hover:border-teal-400 focus-within:border-teal-500"
+            }}
             fullWidth
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-center gap-4">
-          <Button color="primary" startContent={<FaFilter />} onClick={handleSearch}>
-            Apply Filters
-          </Button>
-          <Button color="secondary" startContent={<FaUndo />} onClick={handleResetFilters}>
-            Reset Filters
-          </Button>
-        </div>
       </div>
 
-      {/* User Cards */}
+      {/* User Cards Section */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
-          {/* Display placeholder cards while loading */}
           {Array.from({ length: 6 }).map((_, index) => (
             <UserCardWhileLoading key={index} />
           ))}
         </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className="text-center">
-          <FaBan className="text-6xl text-gray-400 mb-4 mx-auto block" />
-          <p className="text-gray-500">No users found. Please adjust your filters and try again.</p>
+      ) : filteredUsers.error ? (
+        <div className="text-center p-8 bg-white rounded-lg shadow-sm">
+          {filteredUsers.error.type === 'program' && (
+            <FaBook className="text-6xl text-orange-400 mb-4 mx-auto" />
+          )}
+          {filteredUsers.error.type === 'year' && (
+            <FaCalendar className="text-6xl text-blue-400 mb-4 mx-auto" />
+          )}
+          {filteredUsers.error.type === 'interest' && (
+            <FaStar className="text-6xl text-purple-400 mb-4 mx-auto" />
+          )}
+          {filteredUsers.error.type === 'general' && (
+            <FaExclamationTriangle className="text-6xl text-red-400 mb-4 mx-auto" />
+          )}
+          <p className="text-gray-600 font-medium mb-2">{filteredUsers.error.message}</p>
+          <p className="text-gray-500 mb-4">Try adjusting your filters or search terms.</p>
+          <Button
+            color="danger"
+            variant="light"
+            onPress={handleResetFilters}
+            startContent={<FaUndo />}
+            className="mx-auto"
+          >
+            Reset All Filters
+          </Button>
+        </div>
+      ) : filteredUsers.users.length === 0 ? (
+        <div className="text-center p-8 bg-white rounded-lg shadow-sm max-w-3xl mx-auto">
+          <FaSearch className="text-6xl text-gray-400 mb-4 mx-auto" />
+          <p className="text-gray-600 font-medium mb-2">No users match your search criteria.</p>
+          <p className="text-gray-500 mb-4">Try adjusting your filters or search terms.</p>
+          <Button
+            color="danger"
+            variant="light"
+            onPress={handleResetFilters}
+            startContent={<FaUndo />}
+            className="mx-auto"
+          >
+            Reset All Filters
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
@@ -190,17 +367,19 @@ export default function StudentAlumniDirectory() {
         </div>
       )}
 
-
       {/* Pagination */}
-      <div className="flex justify-center mt-8">
-        <Pagination
-          total={totalPages}
-          initialPage={1}
-          page={currentPage}
-          onChange={setCurrentPage}
-          color="primary"
-        />
-      </div>
+      {filteredUsers.users.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <Pagination
+            total={totalPages}
+            initialPage={1}
+            page={currentPage}
+            onChange={setCurrentPage}
+            color="primary"
+            className="bg-white rounded-lg shadow-sm p-2"
+          />
+        </div>
+      )}
     </div>
   );
 }
