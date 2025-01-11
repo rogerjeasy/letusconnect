@@ -53,7 +53,7 @@ export default function StudentAlumniDirectory() {
     year: "",
     interest: "",
   });
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const currentUser = useUserStore((state) => state.user);
@@ -64,7 +64,7 @@ export default function StudentAlumniDirectory() {
   }, []);
 
   const fetchUsers = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const fetchedUsers = await getAllUsers();
       const processedUsers = currentUser
@@ -86,7 +86,7 @@ export default function StudentAlumniDirectory() {
         },
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -100,7 +100,8 @@ export default function StudentAlumniDirectory() {
   }, [searchTerm, filters]);
 
   const performSearch = () => {
-    setLoading(true);
+    if (isLoading) return;
+
     try {
       let filtered = users;
 
@@ -186,7 +187,7 @@ export default function StudentAlumniDirectory() {
         },
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -312,7 +313,7 @@ export default function StudentAlumniDirectory() {
       </div>
 
       {/* User Cards Section */}
-      {loading ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
           {Array.from({ length: 6 }).map((_, index) => (
             <UserCardWhileLoading key={index} />
