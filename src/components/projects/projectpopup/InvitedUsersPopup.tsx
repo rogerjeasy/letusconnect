@@ -346,7 +346,8 @@ const InvitedUsersPopup: React.FC<InvitedUsersPopupProps> = ({
 
         <ModalFooter>
           <Button
-            variant="bordered"
+            variant="ghost"
+            color="danger"
             onPress={handleDialogClose}
           >
             Cancel

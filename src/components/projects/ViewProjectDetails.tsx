@@ -5,7 +5,7 @@ import ProjectDetailsForm from "../../components/projects/ProjectDetailsForm";
 import ProjectTaskFormDetails from "../../components/projects/ProjectTaskFormDetails";
 import AssignedToComponent from "../../components/projects/authusers/AssignedToComponent";
 import { Card, CardHeader, Divider, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-import { FaTasks, FaUserPlus, FaChartLine, FaCommentDots, FaComments, FaUsers, FaArrowLeft, FaClock } from "react-icons/fa";
+import { FaArrowLeft, FaClock } from "react-icons/fa";
 import { Project } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,7 @@ import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
 import GroupChatModal from "@/components/messages/GroupChatModal";
 import ProjectHeaderDetails from "./ProjectHeaderDetails";
 import { API_CONFIG } from "@/config/api.config";
-import { InvitedUser, InviteResponse } from "@/store/project";
-
+import { InviteResponse } from "@/store/project";
 
 interface ViewProjectDetailsProps {
   project: Project;
@@ -26,7 +25,6 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = useState(0);
-
 
   const [formData, setFormData] = useState({
     id: project.id,

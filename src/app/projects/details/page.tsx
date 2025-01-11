@@ -6,6 +6,7 @@ import { Spinner } from "@nextui-org/react";
 import ViewProjectDetails from "@/components/projects/ViewProjectDetails";
 import { Project } from "@/store/project";
 import { api, handleError } from "@/helpers/api";
+import ProjectDetailsLoadingSkeleton from "@/components/projects/ProjectDetailsLoadingSkeleton";
 
 const ViewDetailsContent = () => {
   const searchParams = useSearchParams();
@@ -43,7 +44,7 @@ const ViewDetailsContent = () => {
 
   return loading ? (
     <div className="flex justify-center p-6">
-      <Spinner size="lg" />
+      <ProjectDetailsLoadingSkeleton />
     </div>
   ) : project ? (
     <ViewProjectDetails project={project} />
