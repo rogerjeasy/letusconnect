@@ -13,8 +13,8 @@ import { api, handleError } from "@/helpers/api";
 import ModalPopup from "../forms/ModalPopup";
 import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
 import GroupChatModal from "@/components/messages/GroupChatModal";
-import GroupChatDrawer from "@/components/messages/GroupChatDrawer";
 import ProjectHeaderDetails from "./ProjectHeaderDetails";
+import { API_CONFIG } from "@/config/api.config";
 
 
 interface ViewProjectDetailsProps {
@@ -106,11 +106,8 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
 
     try {
-      await api.post(`/api/projects/${formData.id}/join`, null, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await api.post(API_CONFIG.ENDPOINTS.PROJECTS.JOIN(formData.id), null);
 
-      // Add the current user to the joinRequests state
       setFormData((prev) => ({
         ...prev,
         joinRequests: [
@@ -148,9 +145,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   // Function to refresh project data
     const refreshProjectData = async () => {
         try {
-        const response = await api.get(`/api/projects/${formData.id}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await api.get(API_CONFIG.ENDPOINTS.PROJECTS.BY_ID(formData.id));
         setFormData(response.data);
         } catch (err) {
         handleError(err);
@@ -159,12 +154,8 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
 
     const handleAddParticipant = async (emailOrUsername: string, role: string): Promise<{ success: boolean; message: string }> => {
       try {
-        const response = await api.post(
-          `/api/projects/${formData.id}/invite`,
-          { emailOrUsername, role },
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
+        const response = await api.post(API_CONFIG.ENDPOINTS.PROJECTS.INVITE(formData.id),
+          { emailOrUsername, role }
         );
 
         const responseObtained = response.data;
@@ -201,14 +192,15 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
     
     try {
-      const response = await api.get(`/api/group-chats/unread-messages/count?projectId=${projectId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      // const response = await api.get(`/api/group-chats/unread-messages/count?projectId=${projectId}`, {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //   },
+      // });
     
       // Extract the unreadCount from the response
-      const unreadCount = response.data.unreadCount;
+      // const unreadCount = response.data.unreadCount;
+      const unreadCount = 0;
       return unreadCount;
     } catch (err) {
       console.error("Failed to fetch unread messages count", err);
@@ -219,7 +211,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     
   
   return (
-    <div className="p-6 max-w-5xl mx-auto pt-28">
+    <div className="p-6 max-w-5xl mx-auto mt-16">
       <Card className="p-6 shadow-lg">
         <CardHeader className="text-2xl font-bold mb-4 flex justify-between items-center">
           <span>Project Details</span>

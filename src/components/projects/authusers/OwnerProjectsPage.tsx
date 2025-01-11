@@ -39,7 +39,7 @@ const OwnerProjectsPage = () => {
     <section className="p-6">
       {loading && (
         <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">👤 Your Projects</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">👤 Your Created Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
             {/* Display placeholder cards while loading */}
             {Array.from({ length: 4 }).map((_, index) => (
@@ -56,7 +56,7 @@ const OwnerProjectsPage = () => {
       )}
 
       {!loading && !error && (
-        <ProjectListingObject projects={projects} title="👤 Your Projects" />
+        <ProjectListingObject projects={projects} title="👤 Your Created Projects" />
       )}
 
       {!loading && error && (

@@ -24,6 +24,7 @@ import TaskCard from "./TaskCard";
 import ModalPopup from "../../forms/ModalPopup";
 import { collaborationTypes, industries, skills, statuses } from "../../../store/project";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
+import { API_CONFIG } from "@/config/api.config";
 
 const ProjectCreationForm = () => {
   const { user, isAuthenticated } = useUserStore();
@@ -87,21 +88,14 @@ const ProjectCreationForm = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token")
       projectSchema.parse(formData);
-      const response = await api.post(
-        "/api/projects",
-        { ...formData },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await api.post(API_CONFIG.ENDPOINTS.PROJECTS.BASE,
+        { ...formData }
       );
       setModalProps({
         isOpen: true,
         title: "Success",
-        content: `${response.data.message}. Redirecting to project page...`,
+        content: `${response.data.message}`,
         onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
       });
       handleReset();

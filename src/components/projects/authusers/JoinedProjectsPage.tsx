@@ -7,6 +7,7 @@ import { api, handleError } from "@/helpers/api";
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import ProjectCardWhileLoading from "../ProjectCardWhileLoading";
+import { API_CONFIG } from "@/config/api.config";
 
 const JoinedProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -26,11 +27,7 @@ const JoinedProjectsPage = () => {
           return;
         }
 
-        const response = await api.get("/api/projects/participation", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(API_CONFIG.ENDPOINTS.PROJECTS.PARTICIPATION);
         setProjects(response.data.data);
       } catch (err) {
         const errorMessage = handleError(err);

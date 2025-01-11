@@ -137,7 +137,7 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
             <FaClock className="mr-2" /> Waiting for Approval
           </Button>
         ) : isParticipant ? (
-          <Button color="success" size="sm" className="w-1/2" disabled>
+          <Button color="warning" size="sm" className="w-1/2" disabled>
             <FaUserCheck className="mr-2" /> Joined
           </Button>
         ) : (

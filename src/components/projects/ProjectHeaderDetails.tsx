@@ -5,7 +5,6 @@ import { Button, Divider, Modal } from "@nextui-org/react";
 import { FaTasks, FaUserPlus, FaUsers, FaCommentDots, FaComments, FaUserFriends } from "react-icons/fa";
 import { Project } from "@/store/project";
 import InvitedUsersPopup from "./projectpopup/InvitedUsersPopup";
-import { api, handleError } from "@/helpers/api";
 import { GroupChat, BaseMessage } from "@/store/groupChat";
 import ModalGroupChat from "@/components/messages/ModalGroupChat";
 
