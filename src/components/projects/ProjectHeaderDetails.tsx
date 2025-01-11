@@ -5,7 +5,6 @@ import { Button, Divider, Modal } from "@nextui-org/react";
 import { FaTasks, FaUserPlus, FaUsers, FaCommentDots, FaComments, FaUserFriends } from "react-icons/fa";
 import { Project } from "@/store/project";
 import InvitedUsersPopup from "./projectpopup/InvitedUsersPopup";
-import { api, handleError } from "@/helpers/api";
 import { GroupChat, BaseMessage } from "@/store/groupChat";
 import ModalGroupChat from "@/components/messages/ModalGroupChat";
 
@@ -17,7 +16,7 @@ interface ProjectHeaderDetailsProps {
   setShowParticipants: (value: boolean) => void;
   setShowJoinRequests: (value: boolean) => void;
   setIsGroupChatModalOpen: (value: boolean) => void;
-  onAddParticipant: (emailOrUsername: string, role: string) => Promise<{ success: boolean; message: string }>;
+  onAddParticipant: (users: Array<{ emailOrUsername: string; role: string }>) => Promise<{ success: boolean; message: string }>;
 }
 
 const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({

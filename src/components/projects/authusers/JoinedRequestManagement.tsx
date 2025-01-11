@@ -22,6 +22,8 @@ import { FaCheck, FaTimes, FaUserShield } from "react-icons/fa";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { api, handleError } from "@/helpers/api";
 import { JoinRequest, projectRoles } from "@/store/project";
+import { lowerCase } from "lodash";
+import { API_CONFIG } from "@/config/api.config";
 
 interface JoinedRequestManagementProps {
   joinRequests?: JoinRequest[];
@@ -44,16 +46,15 @@ const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClo
     setLoading(true);
     try {
       await api.put(
-        `/api/projects/${projectId}/join-requests/${selectedRequest.userId}`,
+        API_CONFIG.ENDPOINTS.PROJECTS.JOIN_REQUESTS(projectId, selectedRequest.userId),
         {
           action: "accept",
           userId: selectedRequest.userId,
-          role: selectedRole,
+          role: lowerCase(selectedRole),
           username: selectedRequest.username,
           email: selectedRequest.email,
           profilePicture: selectedRequest.profilePicture || "",
-        },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        }
       );
       onUpdate();
       setShowRoleModal(false);
@@ -72,7 +73,7 @@ const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClo
     setLoading(true);
     try {
       await api.put(
-        `/api/projects/${projectId}/join-requests/${selectedRequest.userId}`,
+        API_CONFIG.ENDPOINTS.PROJECTS.JOIN_REQUESTS(projectId, selectedRequest.userId),
         { action: "reject",
           userId: selectedRequest.userId,
           username: selectedRequest.username,

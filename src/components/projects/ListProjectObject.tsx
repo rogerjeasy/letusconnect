@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { api, handleError } from "@/helpers/api";
 import { useUserStore } from "@/store/userStore";
 import { FaFolderOpen } from "react-icons/fa";
+import { API_CONFIG } from "@/config/api.config";
+import { Rocket, Sparkles, Users } from "lucide-react";
 
 const INITIAL_DISPLAY_COUNT = 4;
 const ITEMS_PER_LOAD = 4;
@@ -23,6 +25,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isJoiningProject, setIsJoiningProject] = useState<string | null>(null);
   const [updatedProjects, setUpdatedProjects] = useState(projects);
   const router = useRouter();
   const user = useUserStore((state) => state.user);
@@ -62,9 +65,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
     if (!selectedProjectId) return;
     setLoading(true);
     try {
-      await api.delete(`/api/projects/${selectedProjectId}`,
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-      );
+      await api.delete(API_CONFIG.ENDPOINTS.PROJECTS.DELETE(selectedProjectId));
       setUpdatedProjects((prevProjects) => prevProjects.filter((p) => p.id !== selectedProjectId));
       setIsDeleteModalOpen(false);
       setSelectedProjectId(null);
@@ -82,9 +83,12 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
     }
 
     setLoading(true);
+    setIsJoiningProject(projectId);
     try {
-      await api.post(`/api/projects/${projectId}/join`, null, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      const message = "Request to join the project";
+      await api.post(API_CONFIG.ENDPOINTS.PROJECTS.JOIN(projectId), {
+        message : message,
+        title : projects.find((p) => p.id === projectId)?.title,
       });
 
       setUpdatedProjects((prevProjects) =>
@@ -97,7 +101,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
                   {
                     userId: user.uid,
                     username: user.username || "Unknown User",
-                    message: "Request to join the project",
+                    message: message,
                     profilePicture: user.profilePicture || "",
                     email: user.email || "",
                     status: "pending",
@@ -124,13 +128,53 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
       });
     } finally {
       setLoading(false);
+      setIsJoiningProject(null);
       setIsJoinModalOpen(true);
     }
   };
 
   return (
     <section className="p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">{title}</h2>
+      {/* Enhanced Title Section */}
+      <div className="max-w-5xl mx-auto mb-12">
+        <div className="text-center space-y-4">
+          {/* Icon Group */}
+          <div className="flex justify-center gap-4 mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-200 rounded-full blur-lg opacity-50 animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-full">
+                <Rocket className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-green-200 rounded-full blur-lg opacity-50 animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-full">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-purple-200 rounded-full blur-lg opacity-50 animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-full">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+
+          {/* Title and Subtitle */}
+          <div className="space-y-2">
+            <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 inline-block">
+              {title}
+            </h2>
+          </div>
+
+          {/* Decorative Line */}
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+            <div className="h-px w-16 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
         {updatedProjects && updatedProjects.length > 0 ? (
@@ -142,13 +186,38 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
                 onUpdateProject={handleUpdateProject}
                 onDeleteProject={handleDeleteProject}
                 onJoinProject={handleJoinProject}
+                isLoading={isJoiningProject === project.id}
               />
             </div>
           ))
         ) : (
-          <div className="text-center col-span-full text-gray-500 flex flex-col items-center gap-2">
-            <FaFolderOpen size={100} />
-            <p>No projects available.</p>
+          <div className="text-center col-span-full flex flex-col items-center gap-6 py-8 px-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gray-100 rounded-full blur-lg opacity-50"></div>
+              <FaFolderOpen className="text-gray-400 relative z-10" size={100} />
+            </div>
+            
+            <div className="space-y-3 max-w-md">
+              <h3 className="text-xl font-semibold text-gray-700">No Projects Available Yet</h3>
+            </div>
+
+            <div className="mt-4">
+              <Button
+                color="primary"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
+                text-white font-semibold px-8 py-4 rounded-xl shadow-lg transform transition-all 
+                hover:scale-105 hover:shadow-xl flex items-center gap-3"
+                onClick={() => router.push("/projects/create")}
+              >
+                <div className="relative bg-blue-400/20 p-2 rounded-lg">
+                  <Rocket className="w-5 h-5" />
+                </div>
+                <span>Start Your Project Journey</span>
+              </Button>
+              <p className="text-sm text-gray-400 mt-4">
+                Create a project and start building something amazing together
+              </p>
+            </div>
           </div>
         )}
       </div>

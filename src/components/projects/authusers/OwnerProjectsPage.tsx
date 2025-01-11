@@ -7,6 +7,7 @@ import { api, handleError } from "@/helpers/api";
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import ProjectCardWhileLoading from "../ProjectCardWhileLoading";
+import { API_CONFIG } from "@/config/api.config";
 
 const OwnerProjectsPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -20,17 +21,7 @@ const OwnerProjectsPage = () => {
       setError("");
 
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Authorization token is missing. Please log in.");
-          return;
-        }
-
-        const response = await api.get("/api/projects/owner", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api.get(API_CONFIG.ENDPOINTS.PROJECTS.OWNER);
 
         setProjects(response.data.data);
       } catch (err) {
@@ -48,7 +39,7 @@ const OwnerProjectsPage = () => {
     <section className="p-6">
       {loading && (
         <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">👤 Your Projects</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">👤 Your Created Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
             {/* Display placeholder cards while loading */}
             {Array.from({ length: 4 }).map((_, index) => (
@@ -65,7 +56,7 @@ const OwnerProjectsPage = () => {
       )}
 
       {!loading && !error && (
-        <ProjectListingObject projects={projects} title="👤 Your Projects" />
+        <ProjectListingObject projects={projects} title="👤 Your Created Projects" />
       )}
 
       {!loading && error && (

@@ -10,7 +10,7 @@ export type NotificationType =
   | "feedback_reminder" | "feedback_summary" | "feedback_report"
   | "feedback_analysis" | "feedback_action" | "feedback_goal"
   | "new_user" | "new_mentor" | "new_mentee" | "new_request"
-  | "new_review" | "new_feedback";
+  | "new_review" | "new_feedback" | "join_project_request";
 
 export type NotificationStatus = "unread" | "read" | "hidden" | "archived" | "deleted";
 

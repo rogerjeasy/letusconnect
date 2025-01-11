@@ -5,7 +5,7 @@ import ProjectDetailsForm from "../../components/projects/ProjectDetailsForm";
 import ProjectTaskFormDetails from "../../components/projects/ProjectTaskFormDetails";
 import AssignedToComponent from "../../components/projects/authusers/AssignedToComponent";
 import { Card, CardHeader, Divider, Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
-import { FaTasks, FaUserPlus, FaChartLine, FaCommentDots, FaComments, FaUsers, FaArrowLeft, FaClock } from "react-icons/fa";
+import { FaArrowLeft, FaClock } from "react-icons/fa";
 import { Project } from "@/store/project";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
@@ -13,9 +13,9 @@ import { api, handleError } from "@/helpers/api";
 import ModalPopup from "../forms/ModalPopup";
 import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
 import GroupChatModal from "@/components/messages/GroupChatModal";
-import GroupChatDrawer from "@/components/messages/GroupChatDrawer";
 import ProjectHeaderDetails from "./ProjectHeaderDetails";
-
+import { API_CONFIG } from "@/config/api.config";
+import { InviteResponse } from "@/store/project";
 
 interface ViewProjectDetailsProps {
   project: Project;
@@ -25,7 +25,6 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = useState(0);
-
 
   const [formData, setFormData] = useState({
     id: project.id,
@@ -106,11 +105,8 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
 
     try {
-      await api.post(`/api/projects/${formData.id}/join`, null, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await api.post(API_CONFIG.ENDPOINTS.PROJECTS.JOIN(formData.id), null);
 
-      // Add the current user to the joinRequests state
       setFormData((prev) => ({
         ...prev,
         joinRequests: [
@@ -148,44 +144,46 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
   // Function to refresh project data
     const refreshProjectData = async () => {
         try {
-        const response = await api.get(`/api/projects/${formData.id}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await api.get(API_CONFIG.ENDPOINTS.PROJECTS.BY_ID(formData.id));
         setFormData(response.data);
         } catch (err) {
         handleError(err);
         }
     };
 
-    const handleAddParticipant = async (emailOrUsername: string, role: string): Promise<{ success: boolean; message: string }> => {
+    const handleAddParticipant = async (users: Array<{ emailOrUsername: string; role: string }>): Promise<{ success: boolean; message: string }> => {
       try {
-        const response = await api.post(
-          `/api/projects/${formData.id}/invite`,
-          { emailOrUsername, role },
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
+        const response = await api.post<InviteResponse>(
+          API_CONFIG.ENDPOINTS.PROJECTS.INVITE(formData.id),
+          { users }
         );
+  
+        const responseData = response.data;
+  
+        if (responseData.successfulInvites?.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            invitedUsers: [
+              ...prev.invitedUsers,
+              ...responseData.successfulInvites.map((invite) => ({
+                userId: invite.userId,
+                username: invite.username,
+                email: invite.email,
+                profilePicture: invite.profilePicture,
+                role: invite.role,
+              })),
+            ],
+          }));
+        }
+    
+        const message = responseData.errors && responseData.errors.length > 0
+        ? `Success with some warnings: ${responseData.errors.join(", ")}`
+        : responseData.message;
 
-        const responseObtained = response.data;
-    
-        const invitedUser = responseObtained.invitedUser;
-    
-        setFormData((prev) => ({
-          ...prev,
-          invitedUsers: [
-            ...prev.invitedUsers,
-            {
-              userId: invitedUser.userId || "",
-              username: invitedUser.username || emailOrUsername,
-              email: invitedUser.email || emailOrUsername,
-              profilePicture: invitedUser.profilePicture || "",
-              role: invitedUser.role || role,
-            },
-          ],
-        }));
-    
-        return { success: true, message: responseObtained.message };
+      return { 
+        success: true, 
+        message: message 
+      };
       } catch (error) {
         const errorMessage = handleError(error);
         // console.error("Error inviting participant:", errorMessage);
@@ -201,14 +199,15 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     }
     
     try {
-      const response = await api.get(`/api/group-chats/unread-messages/count?projectId=${projectId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      // const response = await api.get(`/api/group-chats/unread-messages/count?projectId=${projectId}`, {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //   },
+      // });
     
       // Extract the unreadCount from the response
-      const unreadCount = response.data.unreadCount;
+      // const unreadCount = response.data.unreadCount;
+      const unreadCount = 0;
       return unreadCount;
     } catch (err) {
       console.error("Failed to fetch unread messages count", err);
@@ -219,7 +218,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
     
   
   return (
-    <div className="p-6 max-w-5xl mx-auto pt-28">
+    <div className="p-6 max-w-5xl mx-auto mt-16">
       <Card className="p-6 shadow-lg">
         <CardHeader className="text-2xl font-bold mb-4 flex justify-between items-center">
           <span>Project Details</span>

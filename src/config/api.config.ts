@@ -56,6 +56,7 @@ export const API_CONFIG = {
         PUBLIC: '/projects/public',
         BY_ID: (id: string) => `/projects/${id}`,
         JOIN: (id: string) => `/projects/${id}/join`,
+        DELETE: (id: string) => `/projects/${id}`,
         JOIN_REQUESTS: (id: string, uid: string) => `/projects/${id}/join-requests/${uid}`,
         INVITE: (id: string) => `/projects/${id}/invite`,
         PARTICIPANTS: (id: string, uid: string) => `/projects/${id}/participants/${uid}`,
