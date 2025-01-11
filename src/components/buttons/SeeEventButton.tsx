@@ -33,7 +33,7 @@ export default function SeeEventButton({
           />
         </svg>
       }
-      onClick={onClick}
+      onPress={onClick}
     >
       See Event
     </Button>
