@@ -7,11 +7,9 @@ import {
   Pagination,
   Select,
   SelectItem,
-  DateValue,
 } from "@nextui-org/react";
 import {
   FaSearch,
-  FaFilter,
   FaBook,
   FaUsers,
   FaUndo,
@@ -25,7 +23,6 @@ import { User, useUserStore } from "@/store/userStore";
 import UserCardWhileLoading from "./UserCardWhileLoading";
 import { getAllUsers } from "@/services/users.services";
 
-// Define interfaces for state management
 interface FilteredUsersState {
   users: User[];
   error: {
@@ -94,7 +91,7 @@ export default function StudentAlumniDirectory() {
   useEffect(() => {
     const timer = setTimeout(() => {
       performSearch();
-    }, 300); // 300ms delay
+    }, 300); 
 
     return () => clearTimeout(timer);
   }, [searchTerm, filters]);
