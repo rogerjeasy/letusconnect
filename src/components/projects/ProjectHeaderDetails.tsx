@@ -16,7 +16,7 @@ interface ProjectHeaderDetailsProps {
   setShowParticipants: (value: boolean) => void;
   setShowJoinRequests: (value: boolean) => void;
   setIsGroupChatModalOpen: (value: boolean) => void;
-  onAddParticipant: (emailOrUsername: string, role: string) => Promise<{ success: boolean; message: string }>;
+  onAddParticipant: (users: Array<{ emailOrUsername: string; role: string }>) => Promise<{ success: boolean; message: string }>;
 }
 
 const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({

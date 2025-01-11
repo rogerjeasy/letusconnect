@@ -23,6 +23,11 @@ export interface InvitedUser {
     // joinedAt: Date;
   }
 
+export interface InviteResponse {
+  message: string;
+  successfulInvites: InvitedUser[];
+  errors?: string[];
+}
 
 export interface Participants {
     userId: string;

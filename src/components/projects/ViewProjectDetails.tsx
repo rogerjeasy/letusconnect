@@ -15,6 +15,7 @@ import JoinedRequestManagement from "./authusers/JoinedRequestManagement";
 import GroupChatModal from "@/components/messages/GroupChatModal";
 import ProjectHeaderDetails from "./ProjectHeaderDetails";
 import { API_CONFIG } from "@/config/api.config";
+import { InvitedUser, InviteResponse } from "@/store/project";
 
 
 interface ViewProjectDetailsProps {
@@ -152,31 +153,39 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
         }
     };
 
-    const handleAddParticipant = async (emailOrUsername: string, role: string): Promise<{ success: boolean; message: string }> => {
+    const handleAddParticipant = async (users: Array<{ emailOrUsername: string; role: string }>): Promise<{ success: boolean; message: string }> => {
       try {
-        const response = await api.post(API_CONFIG.ENDPOINTS.PROJECTS.INVITE(formData.id),
-          { emailOrUsername, role }
+        const response = await api.post<InviteResponse>(
+          API_CONFIG.ENDPOINTS.PROJECTS.INVITE(formData.id),
+          { users }
         );
+  
+        const responseData = response.data;
+  
+        if (responseData.successfulInvites?.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            invitedUsers: [
+              ...prev.invitedUsers,
+              ...responseData.successfulInvites.map((invite) => ({
+                userId: invite.userId,
+                username: invite.username,
+                email: invite.email,
+                profilePicture: invite.profilePicture,
+                role: invite.role,
+              })),
+            ],
+          }));
+        }
+    
+        const message = responseData.errors && responseData.errors.length > 0
+        ? `Success with some warnings: ${responseData.errors.join(", ")}`
+        : responseData.message;
 
-        const responseObtained = response.data;
-    
-        const invitedUser = responseObtained.invitedUser;
-    
-        setFormData((prev) => ({
-          ...prev,
-          invitedUsers: [
-            ...prev.invitedUsers,
-            {
-              userId: invitedUser.userId || "",
-              username: invitedUser.username || emailOrUsername,
-              email: invitedUser.email || emailOrUsername,
-              profilePicture: invitedUser.profilePicture || "",
-              role: invitedUser.role || role,
-            },
-          ],
-        }));
-    
-        return { success: true, message: responseObtained.message };
+      return { 
+        success: true, 
+        message: message 
+      };
       } catch (error) {
         const errorMessage = handleError(error);
         // console.error("Error inviting participant:", errorMessage);
