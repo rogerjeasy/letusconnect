@@ -1,62 +1,333 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User } from "@/store/userStore";
+import { User, useUserStore } from "@/store/userStore";
 import { useParams, useRouter } from "next/navigation";
-import { api, handleError } from "@/helpers/api";
+import { handleError } from "@/helpers/api";
 import NoConnectionsPage from "./NoConectionsComponent";
-import { Connection, UserConnections } from "@/store/userConnections";
-import { UsersRound, MessageCircle, UserRoundX, ExternalLink } from "lucide-react";
+import { Connection, ConnectionRequest, ConnectionRequestResponse, SentRequest } from "@/store/userConnections";
+import { AlertCircle, Clock, UserCheck, UserCircle, UserPlus } from "lucide-react";
+import { getConnectionRequests } from "@/services/connection.service";
+import { getUserByUid } from "@/services/users.services";
+import { Alert, AlertDescription } from "../ui/alert";
+import { sendConnectionRequest } from "@/services/connection.service";
+import { toast } from "react-toastify";
+import { Time } from "@internationalized/date";
+import  CustomizedTooltip from "@/components/forms/CustomizedTooltip"
+import { TooltipContent } from "@radix-ui/react-tooltip";
+
+interface ConnectionState {
+  connections: Record<string, Connection>;
+  users: Map<string, User>;
+  loading: boolean;
+  error: string | null;
+  sentRequest?: Record<string, SentRequest>;
+  pendingRequest?: Record<string, ConnectionRequest>;
+}
 
 const UserConnectionComponents = () => {
-  const { userId } = useParams();
-  const [connections, setConnections] = useState<Record<string, Connection>>({});
-  const [users, setUsers] = useState<Map<string, User>>(new Map());
-  const [isLoading, setIsLoading] = useState(true);
+  const params = useParams();
+  const uid = Array.isArray(params.userId) ? params.userId[0] : params.userId;
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [selectedTargetUid, setSelectedTargetUid] = useState<string>("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const currentLoggedInUser = useUserStore((state) => state.user);
+  const [pendingRequestIDs, setPendingRequestIDs] = useState<string[]>([]);
+  const [sentRequestIDs, setSentRequestIDs] = useState<string[]>([]);
+  const [connectionsIDs, setConnectionsIDs] = useState<string[]>([]);
+  const [state, setState] = useState<ConnectionState>({
+    connections: {},
+    users: new Map(),
+    loading: true, 
+    error: null,
+    sentRequest: {},
+    pendingRequest: {}
+  });
+
+  const fetchCurrentUser = useCallback(async () => {
+    if (!uid) return;
+    try {
+      const user = await getUserByUid(uid);
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Failed to fetch current user:', error);
+    }
+  }, [uid]);
 
   useEffect(() => {
-    const fetchConnections = async () => {
-      setIsLoading(true);
-      try {
-        const response = await api.get(`/api/connections/${userId}`);
-        const userConnections: UserConnections = response.data;
-        setConnections(userConnections.connections);
-        await fetchConnectionUsers(userConnections.connections);
-      } catch (error) {
-        handleError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
 
-    const fetchConnectionUsers = async (connections: Record<string, Connection>) => {
-      const userIds = Object.values(connections).map(conn => conn.targetUid);
-      const userMap = new Map<string, User>();
-      
-      for (const uid of userIds) {
-        if (uid !== userId) {
-          try {
-            const response = await api.get(`/api/users/${uid}`);
-            userMap.set(uid, response.data.user);
-          } catch (error) {
-            console.error(`Failed to fetch user ${uid}:`, error);
-          }
+  const fetchMyConnections = useCallback(async () => {
+    const myUid = currentLoggedInUser?.uid;
+    if (!myUid) return;
+    try {
+      const response = await getConnectionRequests(myUid);
+      const userConnections: ConnectionRequestResponse = response;
+
+      const connectionKeys = Object.keys(userConnections.connections);
+      setConnectionsIDs(connectionKeys);
+      const pendingRequestKeys = Object.keys(userConnections.pendingRequests);
+      setPendingRequestIDs(pendingRequestKeys);
+      const sentRequestKeys = Object.keys(userConnections.sentRequests);
+      setSentRequestIDs(sentRequestKeys);
+
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch connections'
+      }));
+      handleError(error);
+    }
+  }, [uid]);
+
+  useEffect(() => {
+    if (!currentLoggedInUser?.uid) {
+      return;
+    }
+    fetchMyConnections();
+  }, [currentLoggedInUser?.uid, fetchMyConnections]);
+
+  const fetchConnectionUsers = useCallback(async (connections: Record<string, Connection>) => {
+    const userIds = Object.values(connections).map(conn => conn.targetUid);
+    const userMap = new Map<string, User>();
+    
+    try {
+      const userPromises = userIds.map(async (targetUid) => {
+        if (targetUid === uid) return;
+        
+        try {
+          const response = await getUserByUid(targetUid);
+          userMap.set(targetUid, response);
+        } catch (error) {
+          console.error(`Failed to fetch user ${targetUid}:`, error);
         }
-      }
-      setUsers(userMap);
-    };
+      });
 
-    if (userId) fetchConnections();
-  }, [userId]);
+      await Promise.all(userPromises);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+    
+    return userMap;
+  }, [uid]);
 
-  if (isLoading) {
+  const fetchConnections = useCallback(async () => {
+    if (!uid) return;
+    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      if (!uid) return;
+      const response = await getConnectionRequests(uid);
+      const userConnections: ConnectionRequestResponse = response;
+      const userMap = await fetchConnectionUsers(userConnections.connections);
+      
+      setState({
+        connections: userConnections.connections,
+        users: userMap,
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch connections'
+      }));
+      handleError(error);
+    }
+  }, [uid, fetchConnectionUsers]);
+
+  useEffect(() => {
+    if (!uid) {
+      setState(prev => ({ ...prev, loading: false, error: 'No user ID provided' }));
+      return;
+    }
+    
+    fetchConnections();
+  }, [uid, fetchConnections]);
+
+  // Check if user is already connected
+  const isConnected = useCallback((targetUid: string) => {
+    if (!currentLoggedInUser) return false;
+    
+    return connectionsIDs.includes(targetUid);
+
+  }, [connectionsIDs, currentLoggedInUser]);
+
+  const isPendingRequest = useCallback((targetUid: string) => {
+    if (!currentLoggedInUser) return false;
+    
+    return pendingRequestIDs.includes(targetUid);
+  }, [pendingRequestIDs, currentLoggedInUser]);
+  
+  const isSentRequest = useCallback((targetUid: string) => {
+    if (!currentLoggedInUser) return false;
+    
+    return sentRequestIDs.includes(targetUid);
+  }, [sentRequestIDs, currentLoggedInUser]);
+
+  const handleConnectClick = (targetUid: string) => {
+    if (!currentLoggedInUser) {
+      setIsLoginDialogOpen(true);
+      return;
+    }
+    setSelectedTargetUid(targetUid);
+    setIsConnectModalOpen(true);
+  };
+
+  const handleSendRequest = async (targetUid: string) => {
+    if (!currentLoggedInUser) return;
+   
+    setLoading(true);
+    try {
+      await sendConnectionRequest(targetUid, message);
+      setIsConnectModalOpen(false);
+      setMessage("");
+  
+      const now = new Date();
+      const newRequest: SentRequest = {
+        toUid: targetUid,
+        sentAt: now.toISOString(),
+        message: message,
+        status: 'pending',
+        accepted: {
+          hour: now.getHours(),
+          minute: now.getMinutes(),
+          second: now.getSeconds()
+        } as Time
+      };
+  
+      setState(prev => ({
+        ...prev,
+        sentRequest: {
+          ...prev.sentRequest,
+          [targetUid]: newRequest
+        }
+      }));
+  
+      setSentRequestIDs(prev => [...prev, targetUid]);
+  
+      toast.success("Connection request sent successfully!");
+      
+      await Promise.all([
+        fetchConnections(),
+        fetchMyConnections()
+      ]);
+    } catch (error) {
+      toast.error("Failed to send connection request. " + handleError(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Replace the Connect button in the card with this:
+  const renderConnectionButton = (connection: Connection) => {
+    const targetUid = connection.targetUid;
+
+    if (!currentLoggedInUser) {
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleConnectClick(targetUid)}
+        >
+          <UserPlus className="h-4 w-4 mr-2" />
+          Connect
+        </Button>
+      );
+    }
+
+    if (isConnected(targetUid)) {
+      return (
+        <CustomizedTooltip
+          tooltipContent="You are already connected"
+          buttonColor="success"
+          buttonText={
+            <>
+              <UserCheck className="h-4 w-4 mr-2" />
+              <span>Connected</span>
+            </>
+          }
+          placement="top"
+        />
+      );
+    }
+
+    if (isSentRequest(targetUid)) {
+      return (
+        <CustomizedTooltip
+          tooltipContent="You Sent a Request to Connect, Waiting for Approval"
+          buttonColor="danger"
+          buttonText={
+            <>
+              <Clock className="h-4 w-4 mr-2 animate-pulse" />
+              <span>Request Sent</span>
+            </>
+          }
+          placement="top"
+          // isDisabled
+        />
+      );
+    }
+
+    if (currentLoggedInUser.uid === targetUid) {
+      return (
+        <CustomizedTooltip
+          tooltipContent="You cannot connect with yourself"
+          buttonColor="default"
+          buttonText="Connect"
+          placement="top"
+          // isDisabled
+        />
+      );
+    }
+
+    if (isPendingRequest(targetUid)) {
+      return (
+        <CustomizedTooltip
+          tooltipContent="Request to Connect Received. Click to manage."
+          buttonColor="warning"
+          buttonText={
+            <>
+              <Clock className="h-4 w-4 mr-2 animate-pulse" />
+              <span>Request to Connect</span>
+            </>
+          }
+          placement="top"
+          // isDisabled
+        />
+      );
+    }
+
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => handleConnectClick(targetUid)}
+      >
+        <UserPlus className="h-4 w-4 mr-2" />
+        Connect
+      </Button>
+    );
+  };
+
+  // Check loading state first
+  if (state.loading) {
     return (
       <div className="container mx-auto p-4 space-y-4">
         <Card>
@@ -65,7 +336,7 @@ const UserConnectionComponents = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -85,83 +356,103 @@ const UserConnectionComponents = () => {
     );
   }
 
-  if (Object.keys(connections).length === 0) {
+  // Then check for errors
+  if (state.error) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{state.error}</AlertDescription>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchConnections}
+            className="mt-2"
+          >
+            Retry
+          </Button>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Finally check for empty connections after loading is complete and there are no errors
+  if (!state.loading && !state.error && Object.keys(state.connections).length === 0) {
     return <NoConnectionsPage />;
   }
 
+  const connectionCount = Object.keys(state.connections).length;
+
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <>
+    <div className="w-full max-w-4xl mx-auto">
       <Card className="border-none shadow-md">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <UsersRound className="h-6 w-6 text-primary" />
-            <div>
-              <CardTitle>Your Network</CardTitle>
+          <div className="flex items-center justify-center gap-3">
+            <Avatar className="h-12 w-12 border-2 border-primary/10">
+              <AvatarImage src={currentUser?.profilePicture} />
+              <AvatarFallback className="bg-primary/5 text-primary">
+                {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <CardTitle className="text-xl">{currentUser?.username}</CardTitle>
               <CardDescription>
-                You have {Object.keys(connections).length} connections in your network
+                has {connectionCount} {connectionCount === 1 ? 'connection' : 'connections'} in their network
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[70vh] pr-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(connections).map(([connectionId, connection]) => {
-                const connectedUser = users.get(connection.targetUid);
+            <div className="flex flex-col space-y-4">
+              {Object.entries(state.connections).map(([connectionId, connection]) => {
+                const connectedUser = state.users.get(connection.targetUid);
                 
                 if (!connectedUser) return null;
 
                 return (
                   <Card 
                     key={connectionId} 
-                    className="group hover:shadow-lg transition-all duration-300 border border-muted hover:border-primary/20"
+                    className="group hover:shadow-lg transition-all duration-300 border border-muted hover:border-primary/20 w-full"
                   >
                     <CardContent className="p-6">
-                      <div className="flex flex-col space-y-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-14 w-14 border-2 border-primary/10">
-                              <AvatarImage src={connectedUser.profilePicture} />
-                              <AvatarFallback className="bg-primary/5 text-primary">
-                                {connectedUser.firstName?.[0]}{connectedUser.lastName?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-semibold text-lg">
-                                {connection.targetName}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {connectedUser.currentJobTitle || 'No title'}
-                              </p>
-                              <Badge 
-                                variant={connection.status === 'active' ? 'default' : 'secondary'}
-                                className="mt-2"
-                              >
-                                {connection.status}
-                              </Badge>
-                            </div>
+                      <div className="flex justify-between items-center group">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-14 w-14 border-2 border-primary/10">
+                            <AvatarImage src={connectedUser.profilePicture} />
+                            <AvatarFallback className="bg-primary/5 text-primary">
+                              {connectedUser.firstName?.[0]}{connectedUser.lastName?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold text-lg">
+                              {connection.targetName}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {connectedUser.currentJobTitle}
+                            </p>
+                            <p className="text-sm text-muted-foreground hidden group-hover:block">
+                              Connected since {new Date(connection.acceptedAt).toLocaleString()}
+                            </p>
                           </div>
                         </div>
-                        
-                        <div className="flex gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => router.push(`/messages/${connection.targetUid}`)}
-                          >
-                            <MessageCircle className="h-4 w-4 mr-2" />
-                            Message
-                          </Button>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => router.push(`/profile/${connection.targetUid}`)}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Profile
-                          </Button>
+                      
+                        <div className="flex flex-col items-end gap-2">
+                          <p className="text-sm text-muted-foreground group-hover:hidden">
+                            Connected since {new Date(connection.acceptedAt).toLocaleString()}
+                          </p>
+                          <div className="hidden group-hover:flex gap-2">
+                            {renderConnectionButton(connection)}
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => router.push(`/profile/${connection.targetUid}`)}
+                            >
+                              <UserCircle className="h-4 w-4 mr-2" />
+                              Profile
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -173,6 +464,56 @@ const UserConnectionComponents = () => {
         </CardContent>
       </Card>
     </div>
+    {/* Login Dialog */}
+    <AlertDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Login Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please login to connect with other users.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push('/login')}>
+              Login
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Connection Request Dialog */}
+      <AlertDialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Connection Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Add a personal message to your connection request (optional)
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Type your message here..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="min-h-[100px] my-4"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setMessage("");
+              setIsConnectModalOpen(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleSendRequest(selectedTargetUid)}
+              disabled={loading}
+            >
+              {loading ? "Sending..." : "Send Request"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

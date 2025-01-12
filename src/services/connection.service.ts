@@ -2,45 +2,11 @@
 
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
-import { Connection, ConnectionRequest, UserConnections, SentRequest } from "@/store/userConnections";
-
-interface ConnectionsResponse {
-  pendingRequests: Record<string, ConnectionRequest>;
-  sentRequests: Record<string, SentRequest>;
-  connections: Record<string, Connection>;
-}
-
-interface ConnectionRequestResponse {
-  connections: {
-    [uid: string]: {
-      acceptedAt: string;
-      sentAt: string;
-      status: string;
-      targetName: string;
-      targetUid: string;
-    };
-  };
-  pendingRequests: {
-    [uid: string]: {
-      fromName: string;
-      fromUid: string;
-      message: string;
-      sentAt: string;
-      status: string;
-    }
-  };
-}
-
-interface ConnectionActionResponse {
-  success: boolean;
-  message: string;
-  connection?: Connection;
-}
-
-interface SendConnectionRequestResponse {
-  success: boolean;
-  message: string;
-}
+import { ConnectionActionResponse, 
+  ConnectionsResponse, 
+  ConnectionRequestResponse, 
+  SendConnectionRequestResponse,
+  UserConnectionsCount } from "@/store/userConnections";
 
 /**
  * Function to send a connection request to another user.
@@ -157,3 +123,20 @@ export const cancelSentRequest = async (toUID: string): Promise<ConnectionAction
       throw new Error(handleError(error) || "Failed to cancel connection request");
     }
   };
+
+/**
+ * Function to get the count of connections for a user
+ * @param uid - The UID of the user
+ * @returns A promise that resolves to the user connections count
+ * @throws An error if the request fails
+ */
+export const getUserConnectionsCount = async (uid: string): Promise<UserConnectionsCount> => {
+  try {
+    const response = await api.get<UserConnectionsCount>(
+      API_CONFIG.ENDPOINTS.CONNECTIONS.COUNT(uid)
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleError(error) || "Failed to fetch user connections count");
+  }
+}

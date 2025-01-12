@@ -1,14 +1,43 @@
 "use client";
 import { Time } from "@internationalized/date";
 
-export interface Connection {
-    targetUid: string;
-    targetName: string;
-    sentAt: string;
-    acceptedAt: string;
-    status: string;  // "active", "blocked", etc.
-}
-
+export interface ConnectionsResponse {
+    pendingRequests: Record<string, ConnectionRequest>;
+    sentRequests: Record<string, SentRequest>;
+    connections: Record<string, Connection>;
+  }
+  
+export interface ConnectionRequestResponse {
+    connections: {
+      [uid: string]: {
+        acceptedAt: string;
+        sentAt: string;
+        status: string;
+        targetName: string;
+        targetUid: string;
+      };
+    };
+    pendingRequests: {
+      [uid: string]: {
+        fromName: string;
+        fromUid: string;
+        message: string;
+        sentAt: string;
+        status: string;
+        toUid: string;
+      }
+    };
+    sentRequests: {
+      [uid: string]: {
+        accepted: Time;
+        message: string;
+        sentAt: string;
+        status: string;
+        toUid: string;
+      }
+    };
+  }
+  
 export interface ConnectionRequest {
     fromUid: string;
     fromName: string;
@@ -17,6 +46,27 @@ export interface ConnectionRequest {
     message: string;
     status: string;  // "pending", "accepted", "rejected"
 }
+
+export interface ConnectionActionResponse {
+    success: boolean;
+    message: string;
+    connection?: Connection;
+  }
+  
+export interface SendConnectionRequestResponse {
+    success: boolean;
+    message: string;
+  }
+
+export interface Connection {
+    targetUid: string;
+    targetName: string;
+    sentAt: string;
+    acceptedAt: string;
+    status: string;  // "active", "blocked", etc.
+}
+
+
 
 export interface SentRequest {
     toUid: string;
@@ -32,4 +82,8 @@ export interface UserConnections {
     connections: Record<string, Connection>;
     pendingRequests: Record<string, ConnectionRequest>;
     sentRequests: Record<string, SentRequest>;
+}
+
+export interface UserConnectionsCount {
+    count: number;
 }
