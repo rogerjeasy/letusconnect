@@ -23,6 +23,7 @@ interface SendRequestComponentProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   targetUid: string;
+  targetUsername?: string;
   onRequestSent?: (request: SentRequest) => void;
   onRequestComplete?: () => void;
 }
@@ -31,6 +32,7 @@ const SendRequestComponent: React.FC<SendRequestComponentProps> = ({
   isOpen,
   onOpenChange,
   targetUid,
+  targetUsername = "",
   onRequestSent,
   onRequestComplete
 }) => {
@@ -92,7 +94,7 @@ const SendRequestComponent: React.FC<SendRequestComponentProps> = ({
         <AlertDialogContent className="w-[95%] sm:w-[85%] md:w-[65%] lg:w-[50%] xl:w-[40%] p-4 sm:p-6 md:p-8 gap-4 sm:gap-6">
           <AlertDialogHeader className="space-y-2 sm:space-y-3">
             <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
-              Send Connection Request
+              Send Connection Request {targetUsername}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm sm:text-base">
               Add a personal message to your connection request (optional)

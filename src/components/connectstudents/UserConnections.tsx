@@ -17,9 +17,6 @@ import { AlertCircle, Clock, UserCheck, UserCircle, UserPlus } from "lucide-reac
 import { getConnectionRequests } from "@/services/connection.service";
 import { getUserByUid } from "@/services/users.services";
 import { Alert, AlertDescription } from "../ui/alert";
-import { sendConnectionRequest } from "@/services/connection.service";
-import { toast } from "react-toastify";
-import { Time } from "@internationalized/date";
 import  CustomizedTooltip from "@/components/forms/CustomizedTooltip"
 import UserWithNoConnectionsPage from "./UserWithNoConnections";
 import SendRequestComponent from "./SendRequestComponent";
@@ -38,11 +35,8 @@ const UserConnectionComponents = () => {
   const uid = Array.isArray(params.userId) ? params.userId[0] : params.userId;
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [selectedTargetUid, setSelectedTargetUid] = useState<string>("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const currentLoggedInUser = useUserStore((state) => state.user);
   const [pendingRequestIDs, setPendingRequestIDs] = useState<string[]>([]);
   const [sentRequestIDs, setSentRequestIDs] = useState<string[]>([]);
@@ -207,6 +201,7 @@ const UserConnectionComponents = () => {
   // Replace the Connect button in the card with this:
   const renderConnectionButton = (connection: Connection) => {
     const targetUid = connection.targetUid;
+    const targetUsername = connection.targetName;
 
     if (!currentLoggedInUser) {
       return (
@@ -223,6 +218,7 @@ const UserConnectionComponents = () => {
             isOpen={isConnectModalOpen && selectedTargetUid === targetUid}
             onOpenChange={setIsConnectModalOpen}
             targetUid={targetUid}
+            targetUsername={targetUsername}
             onRequestSent={handleRequestSent}
             onRequestComplete={handleRequestComplete}
           />
@@ -306,6 +302,7 @@ const UserConnectionComponents = () => {
         isOpen={isConnectModalOpen && selectedTargetUid === targetUid}
         onOpenChange={setIsConnectModalOpen}
         targetUid={targetUid}
+        targetUsername={targetUsername}
         onRequestSent={handleRequestSent}
         onRequestComplete={handleRequestComplete}
       />

@@ -54,7 +54,7 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
                   No Connections Yet
                 </CardTitle>
                 <p className="text-gray-600 text-base sm:text-lg px-4">
-                  {username} hasn't made any connections on the platform yet
+                  {username} hasn&apos;t made any connections on the platform yet
                 </p>
               </div>
             </div>
@@ -71,7 +71,7 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
                       Be the First to Connect!
                     </p>
                     <p className="text-gray-600 text-sm">
-                      Want to be one of {username}'s first connections?
+                      Want to be one of {username}&apos;s first connections?
                     </p>
                   </div>
                   {user?.uid && (
@@ -130,6 +130,7 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
           isOpen={isRequestModalOpen}
           onOpenChange={setIsRequestModalOpen}
           targetUid={user.uid}
+          targetUsername={username}
           onRequestSent={handleRequestSent}
           onRequestComplete={onRequestComplete}
         />
