@@ -1,23 +1,113 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Calendar, Briefcase, Book, Award, MapPin, Globe, Mail, Phone, Check, UserCheck, Users, Activity } from 'lucide-react';
+import { Calendar, Briefcase, Book, Award, MapPin, Globe, Mail, Phone, Check, UserCheck, Users, Activity, RefreshCcw } from 'lucide-react';
 import { User, useUserStore, WorkExperience } from "@/store/userStore";
 import { Skill } from "@/store/skills";
 import { ExpertiseSkill } from "@/store/areaOfExpertise";
 import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
 import { Tooltip } from '@nextui-org/react';
+import { getUserConnectionsCount } from '@/services/connection.service';
 
 interface UserProfileProps {
   user: User;
 }
 
+interface ConnectionState {
+  count: number;
+  loading: boolean;
+  error: string | null;
+}
+
 const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   const userWorkExperience = useUserStore((state) => state.workExperience);
   const router = useRouter();
+  const [connectionState, setConnectionState] = useState<ConnectionState>({
+    count: 0,
+    loading: true,
+    error: null
+  });
+
+  const fetchConnectionCount = useCallback(async (retryCount = 0) => {
+    setConnectionState(prev => ({ ...prev, loading: true, error: null }));
+    
+    try {
+      const response = await getUserConnectionsCount(user.uid);
+      setConnectionState({
+        count: response.count,
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      if (retryCount < 3) {
+        setTimeout(() => {
+          fetchConnectionCount(retryCount + 1);
+        }, Math.pow(2, retryCount) * 1000);
+      } else {
+        setConnectionState({
+          count: 0,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Failed to fetch connections'
+        });
+      }
+    }
+  }, [user.uid]);
+
+  useEffect(() => {
+    let isActive = true;
+    
+    const fetch = async () => {
+      if (!isActive) return;
+      await fetchConnectionCount();
+    };
+    
+    fetch();
+    
+    return () => {
+      isActive = false;
+    };
+  }, [user.uid, fetchConnectionCount]);
+
+  const renderConnectionBadge = () => {
+    const content = connectionState.loading ? (
+      <span className="flex items-center gap-1">
+        <RefreshCcw className="h-4 w-4 animate-spin" />
+        Loading...
+      </span>
+    ) : connectionState.error ? (
+      <span className="flex items-center gap-1 cursor-pointer" onClick={() => fetchConnectionCount()}>
+        <RefreshCcw className="h-4 w-4" />
+        Retry
+      </span>
+    ) : (
+      <span className="flex items-center gap-1">
+        <Users className="h-4 w-4" />
+        {connectionState.count} {connectionState.count <= 1 ? 'Connection' : 'Connections'}
+      </span>
+    );
+
+    return (
+      <Tooltip 
+        content={connectionState.error || "Click to see connections"} 
+        placement="top"
+      >
+        <Badge
+          variant="outline"
+          className={`flex gap-1 ${!connectionState.error && 'cursor-pointer'}`}
+          onClick={() => {
+            if (!connectionState.error && !connectionState.loading) {
+              router.push(`/connections/${user.uid}`);
+            }
+          }}
+        >
+          {content}
+        </Badge>
+      </Tooltip>
+    );
+  };
+  
   return (
     // p-6 max-w-5xl mx-auto pt-28
     <div className="container mx-auto p-4 space-y-6">
@@ -64,16 +154,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                 <Check className="h-4 w-4" />
                 {user.isVerified ? 'Verified' : 'Unverified'}
                 </Badge>
-                <Tooltip content="Click to see connections" placement="top">
-                    <Badge
-                    variant="outline"
-                    className="flex gap-1 cursor-pointer"
-                    onClick={() => router.push(`/connections/${user.uid}`)}
-                    >
-                    <Users className="h-4 w-4" />
-                    {user.connectionsMade} Connections
-                    </Badge>
-                </Tooltip>
+                {renderConnectionBadge()}
 
                 {user.lookingForMentor && (
                 <Badge variant="secondary">Looking for Mentor</Badge>

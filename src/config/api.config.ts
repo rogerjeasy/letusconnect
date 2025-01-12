@@ -11,6 +11,7 @@ export const API_CONFIG = {
             BASE: '/connections',
             GET_ALL: '/connections',
             GET_BY_UID: (uid: string) => `/connections/${uid}`,
+            COUNT: (uid: string) => `/connections/${uid}/count`,
             REMOVE: (uid: string) => `/connections/${uid}`,
             REQUESTS: {
                 BASE: '/connections/requests',

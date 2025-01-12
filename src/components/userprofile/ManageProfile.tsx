@@ -9,7 +9,7 @@ import UserEducationComponent from "./EducationCard";
 import UserProfileSettingWhileLoading from "./UserProfileSettingWhileLoading";
 
 export default function ManageUser() {
-  const { user } = useUserStore();
+  const user = useUserStore((state) => state.user);
 
   if (!user) 
     return (

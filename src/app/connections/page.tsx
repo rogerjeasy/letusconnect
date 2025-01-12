@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import ManageUserConnections from "@/components/userprofile/ManageUserConnections";
 import { useUserStore } from '@/store/userStore';
 import { Spinner } from "@nextui-org/react";
-import { div } from 'framer-motion/client';
 
 const ConnectionsPage = () => {
   const router = useRouter();
