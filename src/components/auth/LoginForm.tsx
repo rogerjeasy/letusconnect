@@ -9,7 +9,7 @@ import { Spinner, Button, Card } from "@nextui-org/react";
 import Image from "next/image";
 import { useUserStore } from "../../store/userStore";
 import { api, handleError } from "../../helpers/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { login } from "@/services/auth.service";
 import { setAuthToken } from "@/helpers/tokenManagement";
@@ -27,6 +27,7 @@ const LoginForm = () => {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setSchoolExperience = useUserStore((state) => state.setSchoolExperience);
 
   const {
@@ -36,6 +37,24 @@ const LoginForm = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
+
+  const handleSuccessfulLogin = () => {
+    setLoading(true);
+    try {
+      const returnUrl = searchParams.get('returnUrl');
+      if (returnUrl) {
+        const decodedUrl = decodeURIComponent(returnUrl);
+        router.push(decodedUrl);
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      router.push('/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
     setLoading(true);
@@ -59,9 +78,9 @@ const LoginForm = () => {
         //   setSchoolExperience(educationData);
         // }
         
-        toast.success("Login successful!");
+      toast.success("Login successful!");
   
-        router.push("/dashboard");
+      handleSuccessfulLogin();
     } catch (error) {
       const errorMessage = handleError(error);
       setSubmissionError(errorMessage || "An unexpected error occurred. Please try again.");

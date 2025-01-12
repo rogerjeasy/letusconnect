@@ -12,15 +12,52 @@ import { acceptConnectionRequest, cancelSentRequest, getUserConnections, rejectC
 import { toast } from 'react-toastify';
 import { getAllUsers } from '@/services/users.services';
 import { User } from '@/store/userStore';
+import NoConnectionsPage from '../connectstudents/NoConectionsComponent';
+import { useRouter } from 'next/navigation';
 
 
-const ManageUserConnections = () => {
+const ManageUserConnections = ({ initialStatus = 'active' }) => {
   const [activeConnections, setActiveConnections] = useState<Record<string, Connection>>({});
   const [pendingRequests, setPendingRequests] = useState<Record<string, ConnectionRequest>>({});
   const [sentRequests, setSentRequests] = useState<Record<string, SentRequest>>({});
   const [users, setUsers] = useState<Record<string, User>>({});
-  const [activeTab, setActiveTab] = useState("connections");
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  const getTabValue = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'connections';
+      case 'pending':
+        return 'requests';
+      case 'sent':
+        return 'sent';
+      default:
+        return 'connections';
+    }
+  };
+
+  const getStatus = (tab: string) => {
+    switch (tab) {
+      case 'connections':
+        return 'active';
+      case 'requests':
+        return 'pending';
+      case 'sent':
+        return 'sent';
+      default:
+        return 'active';
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabValue(initialStatus));
+
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    const status = getStatus(newTab);
+    // Update URL without full page reload
+    router.push(`/connections?status=${status}`, { scroll: false });
+  };
 
   useEffect(() => {
     fetchData();
@@ -242,7 +279,7 @@ const ManageUserConnections = () => {
         <CardDescription>View and manage your network connections</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Navigation Card */}
           <Card className="w-full">
             <CardContent className="p-4">
@@ -250,7 +287,7 @@ const ManageUserConnections = () => {
                 {/* Active Connections */}
                 <div 
                   className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${activeTab === "connections" ? 'bg-green-100 hover:bg-green-200' : 'bg-gray-50 hover:bg-gray-100'}`}
-                  onClick={() => setActiveTab("connections")}
+                  onClick={() => handleTabChange("connections")}
                 >
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2" />
@@ -264,7 +301,7 @@ const ManageUserConnections = () => {
                 {/* Pending Requests */}
                 <div 
                   className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${activeTab === "requests" ? 'bg-green-100 hover:bg-green-200' : 'bg-gray-50 hover:bg-gray-100'}`}
-                  onClick={() => setActiveTab("requests")}
+                  onClick={() => handleTabChange("requests")}
                 >
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
@@ -278,7 +315,7 @@ const ManageUserConnections = () => {
                 {/* Sent Requests */}
                 <div 
                   className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${activeTab === "sent" ? 'bg-green-100 hover:bg-green-200' : 'bg-gray-50 hover:bg-gray-100'}`}
-                  onClick={() => setActiveTab("sent")}
+                  onClick={() => handleTabChange("sent")}
                 >
                   <div className="flex items-center">
                     <SendHorizontal className="h-4 w-4 mr-2" />
@@ -302,11 +339,12 @@ const ManageUserConnections = () => {
                       <ConnectionCard key={connection.targetUid} connection={connection} />
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <UserPlus className="h-12 w-12 mx-auto mb-4" />
-                      <p>No active connections yet</p>
-                      <p className="text-sm">Start connecting with other users to grow your network</p>
-                    </div>
+                    <NoConnectionsPage />
+                    // <div className="text-center py-8 text-gray-500">
+                    //   <UserPlus className="h-12 w-12 mx-auto mb-4" />
+                    //   <p>No active connections yet</p>
+                    //   <p className="text-sm">Start connecting with other users to grow your network</p>
+                    // </div>
                   )}
                 </ScrollArea>
               </TabsContent>

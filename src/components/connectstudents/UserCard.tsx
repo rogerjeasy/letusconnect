@@ -6,9 +6,10 @@ import { FaUserPlus, FaEnvelope, FaUserTie, FaGraduationCap } from "react-icons/
 import { User, useUserStore } from "@/store/userStore";
 import ModalPopup from "../forms/ModalPopup";
 import { useRouter } from "next/navigation";
-import { getConnectionRequests, getUserConnections, sendConnectionRequest } from "@/services/connection.service";
-import { toast } from "react-toastify";
-import { handleError } from "@/helpers/api";
+import { getUserConnections } from "@/services/connection.service";
+import SendRequestComponent from "./SendRequestComponent";
+import { SentRequest } from "@/store/userConnections";
+import { Users2, UsersIcon } from "lucide-react";
 
 interface UserCardProps {
   user: User;
@@ -19,38 +20,28 @@ interface UserCardProps {
 const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) => {
   const avatarPicture = user?.profilePicture;
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const currentUser = useUserStore((state) => state.user);
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [hasSentRequest, setHasSentRequest] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [isSendRequestOpen, setIsSendRequestOpen] = useState(false);
 
   const handleConnect = async () => {
     if (!currentUser) {
       setIsLoginPromptOpen(true);
       return;
     }
-    setIsConnectModalOpen(true);
+    setIsSendRequestOpen(true);
   };
 
-  const handleSendRequest = async () => {
-    if (!currentUser) return;
-    
-    setLoading(true);
-    try {
-      await sendConnectionRequest(user.uid, message);
-      setIsConnectModalOpen(false);
-      setMessage("");
-      setHasSentRequest(true);
+  const handleRequestSent = (request: SentRequest) => {
+    setHasSentRequest(true);
+  };
 
-    } catch (error) {
-      toast.error("Failed to send connection request."+ handleError(error));
-    } finally {
-      setLoading(false);
-    }
+  const handleRequestComplete = () => {
+    checkExistingRequest();
   };
 
   useEffect(() => {
@@ -86,10 +77,6 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
     } catch (error) {
       console.error("Error checking connection status:", error);
     }
-  };
-
-  const navigateToManageConnections = () => {
-    router.push("/connections");
   };
 
   return (
@@ -134,9 +121,9 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
 
       <CardFooter className="flex gap-2">
         <Tooltip content={
-          isConnected ? "Connected" : 
-          hasPendingRequest ? "Request to Connect Received. Click to manage." : 
-          hasSentRequest ? "Request Sent. Waiting for response. Click to manage." : 
+          isConnected ? user.username + " is your connection" : 
+          hasPendingRequest ? "Request Pending - Click to review" : 
+          hasSentRequest ? "Request Sent - Click to check status" : 
           "Connect"
         }>
           <Button
@@ -147,24 +134,29 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
               "primary"
             }
             size="sm"
-            onPress={hasPendingRequest || hasSentRequest ? navigateToManageConnections : handleConnect}
+            onPress={
+              isConnected ? () => router.push("/connections?status=active") :
+              hasPendingRequest ? () => router.push("/connections?status=pending") :
+              hasSentRequest ? () => router.push("/connections?status=sent") :
+              handleConnect
+            }
             isLoading={loading}
-            isDisabled={isConnected}
+            // isDisabled={isConnected}
           >
             <FaUserPlus className="mr-2" />
             {isConnected ? "Connected" : 
-             hasPendingRequest ? "Request to Connect" :
-             hasSentRequest ? "Request Sent" :
-             "Connect"}
+            hasPendingRequest ? "Request to Connect" :
+            hasSentRequest ? "Request Sent" :
+            "Connect"}
           </Button>
         </Tooltip>
-        <Tooltip content="View Profile">
+        <Tooltip content={`Click to view ${user.username}'s Profile`}>
           <Button
             color="secondary"
             size="sm"
             onPress={() => router.push(`/profile/${user.uid}`)}
           >
-            <FaEnvelope className="mr-2" /> View Profile
+            <Users2 className="mr-2 h-4 w-4" /> View Profile
           </Button>
         </Tooltip>
       </CardFooter>
@@ -185,31 +177,14 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
         showCancelButton={true}
       />
 
-      <ModalPopup
-        isOpen={isConnectModalOpen}
-        title="Add a Personalized Message"
-        content={
-          <div className="space-y-4">
-            <p>Send a connection request to {user.firstName} {user.lastName}</p>
-            <Textarea
-              placeholder="Write a message (optional)"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full"
-            />
-          </div>
-        }
-        confirmLabel="Send Request"
-        cancelLabel="Cancel"
-        confirmColor="primary"
-        cancelColor="danger"
-        onConfirm={handleSendRequest}
-        onCancel={() => {
-          setIsConnectModalOpen(false);
-          setMessage("");
-        }}
-        showCancelButton={true}
-        isLoading={loading}
+      {/* Add SendRequestComponent */}
+      <SendRequestComponent
+        isOpen={isSendRequestOpen}
+        onOpenChange={setIsSendRequestOpen}
+        targetUid={user.uid}
+        targetUsername={`${user.firstName} ${user.lastName}` || user.username}
+        onRequestSent={handleRequestSent}
+        onRequestComplete={handleRequestComplete}
       />
     </Card>
   );
