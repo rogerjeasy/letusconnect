@@ -12,6 +12,7 @@ import { acceptConnectionRequest, cancelSentRequest, getUserConnections, rejectC
 import { toast } from 'react-toastify';
 import { getAllUsers } from '@/services/users.services';
 import { User } from '@/store/userStore';
+import NoConnectionsPage from '../connectstudents/NoConectionsComponent';
 
 
 const ManageUserConnections = () => {
@@ -302,11 +303,12 @@ const ManageUserConnections = () => {
                       <ConnectionCard key={connection.targetUid} connection={connection} />
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <UserPlus className="h-12 w-12 mx-auto mb-4" />
-                      <p>No active connections yet</p>
-                      <p className="text-sm">Start connecting with other users to grow your network</p>
-                    </div>
+                    <NoConnectionsPage />
+                    // <div className="text-center py-8 text-gray-500">
+                    //   <UserPlus className="h-12 w-12 mx-auto mb-4" />
+                    //   <p>No active connections yet</p>
+                    //   <p className="text-sm">Start connecting with other users to grow your network</p>
+                    // </div>
                   )}
                 </ScrollArea>
               </TabsContent>

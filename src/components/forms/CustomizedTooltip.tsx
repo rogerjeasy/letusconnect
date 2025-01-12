@@ -28,7 +28,7 @@ const CustomizedTooltip: React.FC<CustomizedTooltipProps> = ({
       className={`bg-gradient-to-br from-neutral-50 to-neutral-200 ${
         isDisabled ? "opacity-70" : "hover:from-neutral-100 hover:to-neutral-300"
       }`}
-      onClick={onClick}
+      onPress={onClick}
       isDisabled={isDisabled}
       color={buttonColor}
       size="sm"

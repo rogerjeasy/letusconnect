@@ -12,7 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, useUserStore } from "@/store/userStore";
 import { useParams, useRouter } from "next/navigation";
 import { handleError } from "@/helpers/api";
-import NoConnectionsPage from "./NoConectionsComponent";
 import { Connection, ConnectionRequest, ConnectionRequestResponse, SentRequest } from "@/store/userConnections";
 import { AlertCircle, Clock, UserCheck, UserCircle, UserPlus } from "lucide-react";
 import { getConnectionRequests } from "@/services/connection.service";
@@ -22,7 +21,8 @@ import { sendConnectionRequest } from "@/services/connection.service";
 import { toast } from "react-toastify";
 import { Time } from "@internationalized/date";
 import  CustomizedTooltip from "@/components/forms/CustomizedTooltip"
-import { TooltipContent } from "@radix-ui/react-tooltip";
+import UserWithNoConnectionsPage from "./UserWithNoConnections";
+import SendRequestComponent from "./SendRequestComponent";
 
 interface ConnectionState {
   connections: Record<string, Connection>;
@@ -182,57 +182,26 @@ const UserConnectionComponents = () => {
   }, [sentRequestIDs, currentLoggedInUser]);
 
   const handleConnectClick = (targetUid: string) => {
-    if (!currentLoggedInUser) {
-      setIsLoginDialogOpen(true);
-      return;
-    }
     setSelectedTargetUid(targetUid);
     setIsConnectModalOpen(true);
   };
 
-  const handleSendRequest = async (targetUid: string) => {
-    if (!currentLoggedInUser) return;
-   
-    setLoading(true);
-    try {
-      await sendConnectionRequest(targetUid, message);
-      setIsConnectModalOpen(false);
-      setMessage("");
-  
-      const now = new Date();
-      const newRequest: SentRequest = {
-        toUid: targetUid,
-        sentAt: now.toISOString(),
-        message: message,
-        status: 'pending',
-        accepted: {
-          hour: now.getHours(),
-          minute: now.getMinutes(),
-          second: now.getSeconds()
-        } as Time
-      };
-  
-      setState(prev => ({
-        ...prev,
-        sentRequest: {
-          ...prev.sentRequest,
-          [targetUid]: newRequest
-        }
-      }));
-  
-      setSentRequestIDs(prev => [...prev, targetUid]);
-  
-      toast.success("Connection request sent successfully!");
-      
-      await Promise.all([
-        fetchConnections(),
-        fetchMyConnections()
-      ]);
-    } catch (error) {
-      toast.error("Failed to send connection request. " + handleError(error));
-    } finally {
-      setLoading(false);
-    }
+  const handleRequestComplete = async () => {
+    await Promise.all([
+      fetchConnections(),
+      fetchMyConnections()
+    ]);
+  };
+
+  const handleRequestSent = (request: SentRequest) => {
+    setState(prev => ({
+      ...prev,
+      sentRequest: {
+        ...prev.sentRequest,
+        [request.toUid]: request
+      }
+    }));
+    setSentRequestIDs(prev => [...prev, request.toUid]);
   };
 
   // Replace the Connect button in the card with this:
@@ -241,14 +210,23 @@ const UserConnectionComponents = () => {
 
     if (!currentLoggedInUser) {
       return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleConnectClick(targetUid)}
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          Connect
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleConnectClick(targetUid)}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Connect
+          </Button>
+          <SendRequestComponent
+            isOpen={isConnectModalOpen && selectedTargetUid === targetUid}
+            onOpenChange={setIsConnectModalOpen}
+            targetUid={targetUid}
+            onRequestSent={handleRequestSent}
+            onRequestComplete={handleRequestComplete}
+          />
+        </>
       );
     }
 
@@ -309,12 +287,13 @@ const UserConnectionComponents = () => {
             </>
           }
           placement="top"
-          // isDisabled
+          onClick={() => router.push("/connections")}
         />
       );
     }
 
     return (
+      <>
       <Button
         variant="outline"
         size="sm"
@@ -323,6 +302,14 @@ const UserConnectionComponents = () => {
         <UserPlus className="h-4 w-4 mr-2" />
         Connect
       </Button>
+      <SendRequestComponent
+        isOpen={isConnectModalOpen && selectedTargetUid === targetUid}
+        onOpenChange={setIsConnectModalOpen}
+        targetUid={targetUid}
+        onRequestSent={handleRequestSent}
+        onRequestComplete={handleRequestComplete}
+      />
+    </>
     );
   };
 
@@ -378,7 +365,14 @@ const UserConnectionComponents = () => {
 
   // Finally check for empty connections after loading is complete and there are no errors
   if (!state.loading && !state.error && Object.keys(state.connections).length === 0) {
-    return <NoConnectionsPage />;
+    return (
+      <UserWithNoConnectionsPage 
+        user={currentUser}
+        onRequestComplete={() => {
+          fetchConnections();
+        }}
+/>
+    );
   }
 
   const connectionCount = Object.keys(state.connections).length;
@@ -464,66 +458,6 @@ const UserConnectionComponents = () => {
         </CardContent>
       </Card>
     </div>
-    {/* Login Dialog */}
-    <AlertDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
-      <AlertDialogContent className="w-[95%] sm:w-[85%] md:w-[65%] lg:w-[50%] xl:w-[40%] p-4 sm:p-6 md:p-8 gap-4 sm:gap-6">
-        <AlertDialogHeader className="space-y-2 sm:space-y-3">
-          <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
-            Login Required
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm sm:text-base">
-            Please login to connect with other users.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="sm:space-x-2 flex flex-col sm:flex-row gap-2 sm:gap-0">
-          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={() => router.push('/login')}
-            className="w-full sm:w-auto"
-          >
-            Login
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
-      {/* Connection Request Dialog */}
-      <AlertDialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
-        <AlertDialogContent className="w-[95%] sm:w-[85%] md:w-[65%] lg:w-[50%] xl:w-[40%] p-4 sm:p-6 md:p-8 gap-4 sm:gap-6">
-          <AlertDialogHeader className="space-y-2 sm:space-y-3">
-            <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
-              Send Connection Request
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm sm:text-base">
-              Add a personal message to your connection request (optional)
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Textarea
-            placeholder="Type your message here..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="min-h-[100px] my-2 sm:my-4 text-sm sm:text-base"
-          />
-          <AlertDialogFooter className="sm:space-x-2 flex flex-col sm:flex-row gap-2 sm:gap-0 mt-2 sm:mt-4">
-            <AlertDialogCancel 
-              onClick={() => {
-                setMessage("");
-                setIsConnectModalOpen(false);
-              }}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleSendRequest(selectedTargetUid)}
-              disabled={loading}
-              className="w-full sm:w-auto"
-            >
-              {loading ? "Sending..." : "Send Request"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 };
