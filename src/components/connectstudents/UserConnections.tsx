@@ -433,16 +433,16 @@ const UserConnectionComponents = () => {
                               {connectedUser.currentJobTitle}
                             </p>
                             <p className="text-sm text-muted-foreground hidden group-hover:block">
-                              Connected since {new Date(connection.acceptedAt).toLocaleString()}
+                              Connected since {new Date(connection.acceptedAt).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
                       
                         <div className="flex flex-col items-end gap-2">
                           <p className="text-sm text-muted-foreground group-hover:hidden">
-                            Connected since {new Date(connection.acceptedAt).toLocaleString()}
+                            Connected since {new Date(connection.acceptedAt).toLocaleDateString()}
                           </p>
-                          <div className="hidden group-hover:flex gap-2">
+                          <div className="hidden group-hover:flex flex-row lg:flex-row flex-col gap-2">
                             {renderConnectionButton(connection)}
                             <Button
                               variant="default"
@@ -466,28 +466,35 @@ const UserConnectionComponents = () => {
     </div>
     {/* Login Dialog */}
     <AlertDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Login Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please login to connect with other users.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => router.push('/login')}>
-              Login
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialogContent className="w-[95%] sm:w-[85%] md:w-[65%] lg:w-[50%] xl:w-[40%] p-4 sm:p-6 md:p-8 gap-4 sm:gap-6">
+        <AlertDialogHeader className="space-y-2 sm:space-y-3">
+          <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
+            Login Required
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm sm:text-base">
+            Please login to connect with other users.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="sm:space-x-2 flex flex-col sm:flex-row gap-2 sm:gap-0">
+          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => router.push('/login')}
+            className="w-full sm:w-auto"
+          >
+            Login
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
       {/* Connection Request Dialog */}
       <AlertDialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Send Connection Request</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="w-[95%] sm:w-[85%] md:w-[65%] lg:w-[50%] xl:w-[40%] p-4 sm:p-6 md:p-8 gap-4 sm:gap-6">
+          <AlertDialogHeader className="space-y-2 sm:space-y-3">
+            <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
+              Send Connection Request
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm sm:text-base">
               Add a personal message to your connection request (optional)
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -495,18 +502,22 @@ const UserConnectionComponents = () => {
             placeholder="Type your message here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="min-h-[100px] my-4"
+            className="min-h-[100px] my-2 sm:my-4 text-sm sm:text-base"
           />
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setMessage("");
-              setIsConnectModalOpen(false);
-            }}>
+          <AlertDialogFooter className="sm:space-x-2 flex flex-col sm:flex-row gap-2 sm:gap-0 mt-2 sm:mt-4">
+            <AlertDialogCancel 
+              onClick={() => {
+                setMessage("");
+                setIsConnectModalOpen(false);
+              }}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleSendRequest(selectedTargetUid)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               {loading ? "Sending..." : "Send Request"}
             </AlertDialogAction>
