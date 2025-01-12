@@ -1,97 +1,86 @@
-"use client";
-
-import {
- Modal,
- ModalContent,
- ModalHeader,
- ModalBody,
- ModalFooter,
- Button,
-} from "@nextui-org/react";
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 interface ModalPopupProps {
- isOpen: boolean;
- title?: string;
- content?: string | JSX.Element;
- confirmLabel?: string;
- cancelLabel?: string;
- onConfirm?: () => void | Promise<void>; 
- onCancel?: () => void;
- confirmColor?: "primary" | "success" | "warning" | "danger";
- cancelColor?: "default" | "secondary" | "danger";
- showCancelButton?: boolean;
- isLoading?: boolean;
+  isOpen: boolean;
+  title: string;
+  content: string | React.ReactNode;
+  confirmLabel: string;
+  cancelLabel?: string;
+  confirmColor?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
+  cancelColor?: 'primary' | 'secondary' | 'danger';
+  onConfirm: () => void;
+  onCancel: () => void;
+  showCancelButton?: boolean;
 }
 
-export default function ModalPopup({
- isOpen,
- title = "Modal Title",
- content = "Default content goes here.",
- confirmLabel = "Confirm", 
- cancelLabel = "Cancel",
- onConfirm,
- onCancel,
- confirmColor = "primary",
- cancelColor = "default",
- showCancelButton = false,
- isLoading = false
-}: ModalPopupProps) {
- return (
-   <Modal
-     backdrop="opaque"
-     isOpen={isOpen} 
-     onOpenChange={(open) => {
-       if (!open) onCancel?.();
-     }}
-     motionProps={{
-       variants: {
-         enter: {
-           y: 0,
-           opacity: 1,
-           transition: {
-             duration: 0.3,
-             ease: "easeOut",
-           },
-         },
-         exit: {
-           y: -20,
-           opacity: 0,
-           transition: {
-             duration: 0.2,
-             ease: "easeIn",
-           },
-         },
-       },
-     }}
-   >
-     <ModalContent>
-       <>
-         <ModalHeader className="flex flex-col gap-1 text-center">{title}</ModalHeader>
-         <ModalBody>
-           {typeof content === "string" ? <p>{content}</p> : content}
-         </ModalBody>
-         <ModalFooter>
-           {showCancelButton && (
-             <Button
-               color={cancelColor}
-               variant="light"
-               onPress={onCancel}
-             >
-               {cancelLabel}
-             </Button>
-           )}
-           {confirmLabel && (
-             <Button
-               color={confirmColor}
-               onPress={onConfirm}
-               isLoading={isLoading}
-             >
-               {confirmLabel}
-             </Button>
-           )}
-         </ModalFooter>
-       </>
-     </ModalContent>
-   </Modal>
- );
-}
+const ModalPopup: React.FC<ModalPopupProps> = ({
+  isOpen,
+  title,
+  content,
+  confirmLabel,
+  cancelLabel = 'Cancel',
+  confirmColor = 'primary',
+  cancelColor = 'secondary',
+  onConfirm,
+  onCancel,
+  showCancelButton = true,
+}) => {
+  const getButtonColorClasses = (color: string) => {
+    switch (color) {
+      case 'primary':
+        return 'bg-blue-600 hover:bg-blue-700 text-white';
+      case 'secondary':
+        return 'bg-gray-500 hover:bg-gray-600 text-white';
+      case 'danger':
+        return 'bg-red-600 hover:bg-red-700 text-white';
+      case 'success':
+        return 'bg-green-600 hover:bg-green-700 text-white';
+      case 'warning':
+        return 'bg-yellow-500 hover:bg-yellow-600 text-white';
+      default:
+        return 'bg-blue-600 hover:bg-blue-700 text-white';
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={() => onCancel()}>
+      <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:max-w-md md:max-w-lg lg:max-w-xl rounded-lg">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold flex items-center justify-between">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="p-4 text-gray-600">
+          {typeof content === 'string' ? (
+            <p className="text-base sm:text-lg">{content}</p>
+          ) : (
+            content
+          )}
+        </div>
+
+        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 p-4 mt-4 border-t">
+          {showCancelButton && (
+            <Button
+              onClick={onCancel}
+              className={`w-full sm:w-auto ${getButtonColorClasses(cancelColor)}`}
+            >
+              {cancelLabel}
+            </Button>
+          )}
+          <Button
+            onClick={onConfirm}
+            className={`w-full sm:w-auto ${getButtonColorClasses(confirmColor)}`}
+          >
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ModalPopup;

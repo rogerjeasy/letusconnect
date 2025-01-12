@@ -168,7 +168,12 @@ export default function UserProfileCard() {
         content={modalProps.content}
         confirmLabel="Close"
         onConfirm={modalProps.onConfirm}
+        onCancel={() => setModalProps(prev => ({ ...prev, isOpen: false }))}
         isOpen={modalProps.isOpen}
+        showCancelButton={false}
+        confirmColor="primary"
+        cancelColor="secondary"
+        cancelLabel="Cancel"
       />
 
       <Card className="max-w-[800px] mx-auto">

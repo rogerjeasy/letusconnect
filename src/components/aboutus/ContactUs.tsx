@@ -227,7 +227,11 @@ export default function ContactUsForm() {
             content={modalContent}
             confirmLabel={modalConfirmLabel}
             onConfirm={() => setIsModalOpen(false)}
+            onCancel={() => setIsModalOpen(false)}
             showCancelButton={false}
+            confirmColor="primary"
+            cancelColor="secondary"
+            cancelLabel="Cancel"
           />
         </Card>
       </div>

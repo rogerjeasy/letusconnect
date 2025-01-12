@@ -25,6 +25,7 @@ import ModalPopup from "../../forms/ModalPopup";
 import { collaborationTypes, industries, skills, statuses } from "../../../store/project";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import { API_CONFIG } from "@/config/api.config";
+import { ModalProps } from "@/store/modalpopup";
 
 const ProjectCreationForm = () => {
   const { user, isAuthenticated } = useUserStore();
@@ -40,11 +41,14 @@ const ProjectCreationForm = () => {
     tasks: [] as Task[],
   });
 
-  const [modalProps, setModalProps] = useState({
+  const [modalProps, setModalProps] = useState<ModalProps>({
     isOpen: false,
     title: "",
     content: "",
     onConfirm: () => {},
+    onCancel: () => {
+      setModalProps(prev => ({ ...prev, isOpen: false }))
+    }
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showTaskCard, setShowTaskCard] = useState(false);
@@ -96,7 +100,8 @@ const ProjectCreationForm = () => {
         isOpen: true,
         title: "Success",
         content: `${response.data.message}`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps(prev => ({ ...prev, isOpen: false })),
+        onCancel: () => setModalProps(prev => ({ ...prev, isOpen: false }))
       });
       handleReset();
     } catch (err) {
@@ -114,7 +119,8 @@ const ProjectCreationForm = () => {
             isOpen: true,
             title: "Oops!",
             content: `Failed to save project. Please try again. ${errorMessage}`,
-            onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+            onConfirm: () => setModalProps(prev => ({ ...prev, isOpen: false })),
+            onCancel: () => setModalProps(prev => ({ ...prev, isOpen: false }))
           });
         }
       } finally {
@@ -150,11 +156,13 @@ const ProjectCreationForm = () => {
     <div className="p-6 max-w-5xl mx-auto pt-28">
         <Card className="p-6 shadow-lg max-w-5xl mx-auto">
         <ModalPopup
-            title={modalProps.title}
-            content={modalProps.content}
-            confirmLabel="Close"
-            onConfirm={modalProps.onConfirm}
-            isOpen={modalProps.isOpen}
+          title={modalProps.title}
+          content={modalProps.content}
+          confirmLabel="Close"
+          onConfirm={modalProps.onConfirm}
+          onCancel={modalProps.onCancel}
+          isOpen={modalProps.isOpen}
+          showCancelButton={false}
         />
         <CardHeader className="text-2xl font-bold flex items-center gap-2 mb-4">
             <FaProjectDiagram /> Create a New Project

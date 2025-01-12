@@ -250,7 +250,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
         confirmLabel="Delete"
         cancelLabel="Cancel"
         confirmColor="danger"
-        cancelColor="default"
+        cancelColor="secondary"
         onConfirm={confirmDelete}
         onCancel={() => setIsDeleteModalOpen(false)}
         showCancelButton={true}
@@ -263,6 +263,8 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
         confirmLabel={joinModalProps.confirmLabel}
         confirmColor={joinModalProps.confirmColor}
         onConfirm={() => setIsJoinModalOpen(false)}
+        onCancel={() => setIsJoinModalOpen(false)}
+        showCancelButton={false}
       />
 
       <ModalPopup

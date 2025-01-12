@@ -124,15 +124,13 @@ const NewsLetter: React.FC = () => {
       {/* Modal Popup */}
       <ModalPopup
         isOpen={isModalOpen}
-        title={
-          status === "success"
-            ? "🎉 Subscription Successful!"
-            : "❌ Subscription Failed"
-        }
+        title={status === 'success' ? '🎉 Subscription Successful!' : '❌ Subscription Failed'}
         content={message}
         confirmLabel="Close"
         onConfirm={() => setIsModalOpen(false)}
-        confirmColor={status === "success" ? "success" : "danger"}
+        onCancel={() => setIsModalOpen(false)}
+        confirmColor={status === 'success' ? 'success' : 'danger'}
+        showCancelButton={false}
       />
     </section>
   );
