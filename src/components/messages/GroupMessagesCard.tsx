@@ -26,7 +26,6 @@ import { useParticipantsStore } from "@/store/participantsStore";
 import { ChatEntity, useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { getPusherInstance } from "@/helpers/pusher";
 import { Send } from "lucide-react";
-import { uniqBy } from 'lodash';
 
 type Message = BaseMessage | DirectMessage;
 
@@ -38,6 +37,14 @@ interface GroupMessagesCardProps {
   pinnedMessages: string[];
   selectedEntity?: ChatEntity;
   updatePinnedMessages: (groupChatId: string, messageId: string, isUnpin?: boolean) => void;
+}
+
+interface ModalData {
+  isOpen: boolean;
+  title: string;
+  content: string;
+  confirmLabel: string;
+  onConfirm: () => void;
 }
 
 const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
@@ -78,7 +85,7 @@ const GroupMessagesCard: React.FC<GroupMessagesCardProps> = ({
     title: "",
     content: "",
     confirmLabel: "",
-    onConfirm: undefined as (() => void) | undefined,
+    onConfirm: () => {},
   });
 
   const isAdmin = chatParticipants.some(

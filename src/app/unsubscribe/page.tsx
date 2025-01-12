@@ -50,8 +50,12 @@ const UnsubscribePageContent: React.FC = () => {
     }
   };
 
-  const handleGoToContactUs = () => {
-    router.push("/contact-us"); // Redirect to the contact-us page
+  const handleModalCancel = () => {
+    if (status === "error") {
+      router.push("/contact-us");
+    } else {
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -101,7 +105,7 @@ const UnsubscribePageContent: React.FC = () => {
         confirmColor={status === "success" ? "success" : "danger"}
         showCancelButton={status === "error"}
         cancelLabel="Contact Us"
-        onCancel={status === "error" ? handleGoToContactUs : undefined}
+        onCancel={handleModalCancel}
         cancelColor="secondary"
       />
     </div>

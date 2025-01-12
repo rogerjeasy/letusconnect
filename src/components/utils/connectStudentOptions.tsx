@@ -69,7 +69,7 @@ export const connectAuthComponents: ConnectOption[] = [
   
   {
     title: "My Connections",
-    href: "/connections",
+    href: "/connections?status=active",
     description: "View and manage your connections with students and alumni.",
     icon: <FaHandshake className="text-green-500" />,
   },

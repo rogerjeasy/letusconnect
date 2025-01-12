@@ -187,7 +187,7 @@ export default function FAQsAdmin() {
           confirmLabel="Delete"
           cancelLabel="Cancel"
           confirmColor="danger"
-          cancelColor="default"
+          cancelColor="secondary"
           showCancelButton={true}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}

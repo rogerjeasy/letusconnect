@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { getUserConnections } from "@/services/connection.service";
 import SendRequestComponent from "./SendRequestComponent";
 import { SentRequest } from "@/store/userConnections";
-import { Users2, UsersIcon } from "lucide-react";
+import { Users2 } from "lucide-react";
 
 interface UserCardProps {
   user: User;
@@ -124,7 +124,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onConnect, onViewProfile }) =
           isConnected ? user.username + " is your connection" : 
           hasPendingRequest ? "Request Pending - Click to review" : 
           hasSentRequest ? "Request Sent - Click to check status" : 
-          "Connect"
+          "Click to connect with " + user.username
         }>
           <Button
             color={

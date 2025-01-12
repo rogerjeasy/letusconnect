@@ -12,6 +12,7 @@ import ModalPopup from "../../forms/ModalPopup";
 import ProjectTaskFormDetails from "../ProjectTaskFormDetails";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import { useUserStore } from "@/store/userStore";
+import { ModalProps } from "@/store/modalpopup";
 
 interface UpdateProjectProps {
   project: Project;
@@ -33,11 +34,12 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
   const user = useUserStore((state) => state.user);
   const { isAuthenticated } = useUserStore();
   const [loading, setLoading] = useState(false);
-  const [modalProps, setModalProps] = useState({
+  const [modalProps, setModalProps] = useState<ModalProps>({
     isOpen: false,
     title: "",
     content: "",
     onConfirm: () => {},
+    onCancel: () => setModalProps(prev => ({ ...prev, isOpen: false }))
   });
 
   const handleSubmit = async () => {
@@ -54,7 +56,8 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
         isOpen: true,
         title: "Success",
         content: `${response.data.message}. Project updated successfully.`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps(prev => ({ ...prev, isOpen: false })),
+        onCancel: () => setModalProps(prev => ({ ...prev, isOpen: false }))
       });
     } catch (err) {
       const errorMessage = handleError(err);
@@ -62,7 +65,8 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
         isOpen: true,
         title: "Error",
         content: `Failed to update project. ${errorMessage}`,
-        onConfirm: () => setModalProps({ ...modalProps, isOpen: false }),
+        onConfirm: () => setModalProps(prev => ({ ...prev, isOpen: false })),
+        onCancel: () => setModalProps(prev => ({ ...prev, isOpen: false }))
       });
     } finally {
       setLoading(false);
@@ -90,7 +94,15 @@ const UpdateProject = ({ project }: UpdateProjectProps) => {
   return (
     <div className="p-6 max-w-5xl mx-auto pt-28">
       <Card className="p-6 shadow-lg">
-        <ModalPopup {...modalProps} />
+        <ModalPopup
+          isOpen={modalProps.isOpen}
+          title={modalProps.title}
+          content={modalProps.content}
+          confirmLabel="Close"
+          onConfirm={modalProps.onConfirm}
+          onCancel={modalProps.onCancel}
+          showCancelButton={false}
+        />
         <CardHeader className="text-2xl font-bold mb-4">Update Project</CardHeader>
 
         <ProjectDetailsForm 

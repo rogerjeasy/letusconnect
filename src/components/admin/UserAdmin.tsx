@@ -204,7 +204,7 @@ export default function UserAdmin() {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         confirmColor="danger"
-        cancelColor="default"
+        cancelColor='secondary'
         showCancelButton={true}
         onConfirm={handleDeleteUser}
         onCancel={() => setIsDeleteModalOpen(false)}
