@@ -128,12 +128,16 @@ export const cancelSentRequest = async (toUID: string): Promise<ConnectionAction
  * Function to get the count of connections for a user
  * @param uid - The UID of the user
  * @returns A promise that resolves to the user connections count
- * @throws An error if the request fails
+ * @throws An error if the request fails or if uid is invalid
  */
 export const getUserConnectionsCount = async (uid: string): Promise<UserConnectionsCount> => {
+  if (!uid || uid.trim() === '') {
+    throw new Error('Invalid user ID provided');
+  }
+
   try {
     const response = await api.get<UserConnectionsCount>(
-      API_CONFIG.ENDPOINTS.CONNECTIONS.COUNT(uid)
+      API_CONFIG.ENDPOINTS.CONNECTIONS.COUNT(uid.trim())
     );
     return response.data;
   } catch (error) {

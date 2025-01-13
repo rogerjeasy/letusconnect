@@ -24,6 +24,15 @@ export const useUserConnections = ({
   });
 
   const fetchConnectionCount = useCallback(async (retryCount = 0) => {
+    if (!userId || userId.trim() === '') {
+        setConnectionState({
+          count: 0,
+          loading: false,
+          error: null
+        });
+        return;
+    }
+
     setConnectionState(prev => ({ ...prev, loading: true, error: null }));
     
     try {

@@ -6,22 +6,55 @@ import { FaUsers, FaComments, FaBriefcase, FaCalendarAlt } from "react-icons/fa"
 import clsx from "clsx";
 import { useUserStore } from "@/store/userStore";
 import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
+import { useRouter } from 'next/navigation';
+import CustomizedTooltip from "../forms/CustomizedTooltip";
+
+type StatAction = {
+  buttonText: string;
+  tooltipContent: string;
+  onClick: () => void;
+  buttonColor: "primary" | "secondary" | "success" | "warning" | "danger" | "default";
+};
+
+type Stat = {
+  title: string;
+  value: string;
+  description: string;
+  icon: React.ReactNode;
+  bgColor: string;
+  actions: StatAction[];
+};
 
 const QuickStatsDashboard: React.FC = () => {
   const currentUser = useUserStore((state) => state.user);
+  const router = useRouter();
   
   const { count: connectionCount, loading: connectionsLoading } = useUserConnections({
     userId: currentUser?.uid || '',
     maxRetries: 3
   });
 
-  const stats = [
+  const stats: Stat[] = [
     {
       title: "Connections",
       value: connectionsLoading ? "..." : connectionCount.toString(),
       description: "connections made",
       icon: <FaUsers className="text-blue-600" size={40} />,
       bgColor: "bg-blue-50",
+      actions: [
+        {
+          buttonText: "View",
+          tooltipContent: "Browse and manage your professional network connections",
+          onClick: () => router.push('/connections?status=active'),
+          buttonColor: "default"
+        },
+        {
+          buttonText: "Send Request",
+          tooltipContent: "Connect with fellow alumni and expand your professional network",
+          onClick: () => router.push('/users-directory'),
+          buttonColor: "default"
+        }
+      ]
     },
     {
       title: "Messages",
@@ -29,6 +62,14 @@ const QuickStatsDashboard: React.FC = () => {
       description: "unread messages",
       icon: <FaComments className="text-green-600" size={40} />,
       bgColor: "bg-green-50",
+      actions: [
+        {
+          buttonText: "View",
+          tooltipContent: "Check your messages",
+          onClick: () => router.push('/messages'),
+          buttonColor: "default"
+        }
+      ]
     },
     {
       title: "Opportunities",
@@ -36,6 +77,14 @@ const QuickStatsDashboard: React.FC = () => {
       description: "new job postings",
       icon: <FaBriefcase className="text-yellow-600" size={40} />,
       bgColor: "bg-yellow-50",
+      actions: [
+        {
+          buttonText: "View",
+          tooltipContent: "Explore career opportunities tailored to your profile",
+          onClick: () => router.push('/jobs'),
+          buttonColor: "default"
+        }
+      ]
     },
     {
       title: "Events",
@@ -43,6 +92,14 @@ const QuickStatsDashboard: React.FC = () => {
       description: "events this week",
       icon: <FaCalendarAlt className="text-teal-600" size={40} />,
       bgColor: "bg-teal-50",
+      actions: [
+        {
+          buttonText: "View",
+          tooltipContent: "Discover upcoming networking events and professional development opportunities",
+          onClick: () => router.push('/events'),
+          buttonColor: "default"
+        }
+      ]
     },
   ];
 
@@ -72,6 +129,18 @@ const QuickStatsDashboard: React.FC = () => {
               <p className="text-lg text-gray-600 mt-2">
                 {stat.description}
               </p>
+              <div className="flex flex-row gap-2 mt-4 justify-center items-center w-full">
+                {stat.actions.map((action, actionIndex) => (
+                  <CustomizedTooltip
+                    key={actionIndex}
+                    tooltipContent={action.tooltipContent}
+                    buttonText={action.buttonText}
+                    onClick={action.onClick}
+                    buttonColor={action.buttonColor}
+                    placement="bottom"
+                  />
+                ))}
+              </div>
             </CardBody>
           </Card>
         ))}
