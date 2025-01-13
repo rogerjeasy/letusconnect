@@ -45,13 +45,13 @@ const QuickStatsDashboard: React.FC = () => {
         {
           buttonText: "View",
           tooltipContent: "Browse and manage your professional network connections",
-          onClick: () => router.push('/connections?status=active'),
+          onClick: async () => router.push('/connections?status=active'),
           buttonColor: "default"
         },
         {
           buttonText: "Send Request",
           tooltipContent: "Connect with fellow alumni and expand your professional network",
-          onClick: () => router.push('/users-directory'),
+          onClick: async () => router.push('/users-directory'),
           buttonColor: "default"
         }
       ]
@@ -66,7 +66,7 @@ const QuickStatsDashboard: React.FC = () => {
         {
           buttonText: "View",
           tooltipContent: "Check your messages",
-          onClick: () => router.push('/messages'),
+          onClick: async () => router.push('/messages'),
           buttonColor: "default"
         }
       ]
