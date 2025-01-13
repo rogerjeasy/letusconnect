@@ -4,39 +4,52 @@ import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
 import { FaUsers, FaComments, FaBriefcase, FaCalendarAlt } from "react-icons/fa";
 import clsx from "clsx";
+import { useUserStore } from "@/store/userStore";
+import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
 
-const stats = [
-  {
-    title: "Connections",
-    value: "100",
-    description: "connections made",
-    icon: <FaUsers className="text-blue-600" size={40} />,
-    bgColor: "bg-blue-50",
-  },
-  {
-    title: "Messages",
-    value: "2",
-    description: "unread messages",
-    icon: <FaComments className="text-green-600" size={40} />,
-    bgColor: "bg-green-50",
-  },
-  {
-    title: "Opportunities",
-    value: "5",
-    description: "new job postings",
-    icon: <FaBriefcase className="text-yellow-600" size={40} />,
-    bgColor: "bg-yellow-50",
-  },
-  {
-    title: "Events",
-    value: "3",
-    description: "events this week",
-    icon: <FaCalendarAlt className="text-teal-600" size={40} />,
-    bgColor: "bg-teal-50",
-  },
-];
+const QuickStatsDashboard: React.FC = () => {
+  const currentUser = useUserStore((state) => state.user);
+  
+  const { count: connectionCount, loading: connectionsLoading } = useUserConnections({
+    userId: currentUser?.uid || '',
+    maxRetries: 3
+  });
 
-export default function QuickStatsDashboard() {
+  const stats = [
+    {
+      title: "Connections",
+      value: connectionsLoading ? "..." : connectionCount.toString(),
+      description: "connections made",
+      icon: <FaUsers className="text-blue-600" size={40} />,
+      bgColor: "bg-blue-50",
+    },
+    {
+      title: "Messages",
+      value: "2",
+      description: "unread messages",
+      icon: <FaComments className="text-green-600" size={40} />,
+      bgColor: "bg-green-50",
+    },
+    {
+      title: "Opportunities",
+      value: "5",
+      description: "new job postings",
+      icon: <FaBriefcase className="text-yellow-600" size={40} />,
+      bgColor: "bg-yellow-50",
+    },
+    {
+      title: "Events",
+      value: "3",
+      description: "events this week",
+      icon: <FaCalendarAlt className="text-teal-600" size={40} />,
+      bgColor: "bg-teal-50",
+    },
+  ];
+
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <section className="container mx-auto px-6 lg:px-20 py-12">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
@@ -65,4 +78,6 @@ export default function QuickStatsDashboard() {
       </div>
     </section>
   );
-}
+};
+
+export default QuickStatsDashboard;

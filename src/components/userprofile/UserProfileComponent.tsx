@@ -9,95 +9,51 @@ import { ExpertiseSkill } from "@/store/areaOfExpertise";
 import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
 import { Tooltip } from '@nextui-org/react';
-import { getUserConnectionsCount } from '@/services/connection.service';
+import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
 
 interface UserProfileProps {
   user: User;
 }
 
-interface ConnectionState {
-  count: number;
-  loading: boolean;
-  error: string | null;
-}
-
 const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   const userWorkExperience = useUserStore((state) => state.workExperience);
   const router = useRouter();
-  const [connectionState, setConnectionState] = useState<ConnectionState>({
-    count: 0,
-    loading: true,
-    error: null
+  const { count, loading, error, refetch } = useUserConnections({
+    userId: user.uid,
+    maxRetries: 3,
+    retryDelay: 1000
   });
 
-  const fetchConnectionCount = useCallback(async (retryCount = 0) => {
-    setConnectionState(prev => ({ ...prev, loading: true, error: null }));
-    
-    try {
-      const response = await getUserConnectionsCount(user.uid);
-      setConnectionState({
-        count: response.count,
-        loading: false,
-        error: null
-      });
-    } catch (error) {
-      if (retryCount < 3) {
-        setTimeout(() => {
-          fetchConnectionCount(retryCount + 1);
-        }, Math.pow(2, retryCount) * 1000);
-      } else {
-        setConnectionState({
-          count: 0,
-          loading: false,
-          error: error instanceof Error ? error.message : 'Failed to fetch connections'
-        });
-      }
-    }
-  }, [user.uid]);
 
-  useEffect(() => {
-    let isActive = true;
-    
-    const fetch = async () => {
-      if (!isActive) return;
-      await fetchConnectionCount();
-    };
-    
-    fetch();
-    
-    return () => {
-      isActive = false;
-    };
-  }, [user.uid, fetchConnectionCount]);
 
   const renderConnectionBadge = () => {
-    const content = connectionState.loading ? (
+    const content = loading ? (
       <span className="flex items-center gap-1">
         <RefreshCcw className="h-4 w-4 animate-spin" />
         Loading...
       </span>
-    ) : connectionState.error ? (
-      <span className="flex items-center gap-1 cursor-pointer" onClick={() => fetchConnectionCount()}>
+    ) : error ? (
+      <span className="flex items-center gap-1 cursor-pointer" onClick={refetch}>
         <RefreshCcw className="h-4 w-4" />
         Retry
       </span>
     ) : (
       <span className="flex items-center gap-1">
         <Users className="h-4 w-4" />
-        {connectionState.count} {connectionState.count <= 1 ? 'Connection' : 'Connections'}
+        {count} {count <= 1 ? 'Connection' : 'Connections'}
       </span>
     );
 
     return (
       <Tooltip 
-        content={connectionState.error || "Click to see connections"} 
+        content={error || "Click to see connections"} 
         placement="top"
       >
         <Badge
           variant="outline"
-          className={`flex gap-1 ${!connectionState.error && 'cursor-pointer'}`}
+          className={`flex gap-1 ${!error && 'cursor-pointer'}`}
           onClick={() => {
-            if (!connectionState.error && !connectionState.loading) {
+            if (!error && !loading) {
               router.push(`/connections/${user.uid}`);
             }
           }}
