@@ -82,7 +82,7 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
                 Connection Request Pending
               </p>
               <p className="text-gray-600 text-sm">
-                You've already sent a connection request to {username}. Please wait for their response.
+                You&apos;ve already sent a connection request to {username}. Please wait for their response.
               </p>
             </div>
             <div>
