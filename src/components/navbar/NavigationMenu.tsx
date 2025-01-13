@@ -53,7 +53,7 @@ interface MessageBadgeProps {
   handleMessagesClick: () => void;
 }
 
-const NotificationBadge = React.memo(({ handleNavigation }: NotificationBadgeProps) => {
+export const NotificationBadge = React.memo(({ handleNavigation }: NotificationBadgeProps) => {
   const { unreadCount, isLoading } = useNotificationCount();
 
   return (
@@ -92,8 +92,9 @@ const NotificationBadge = React.memo(({ handleNavigation }: NotificationBadgePro
     </Tooltip>
   );
 });
+NotificationBadge.displayName = 'NotificationBadge';
 
-const MessageBadge = React.memo(({ unreadCountMsg, handleMessagesClick }: MessageBadgeProps) => {
+export const MessageBadge = React.memo(({ unreadCountMsg, handleMessagesClick }: MessageBadgeProps) => {
   return (
     <Tooltip
       content={
@@ -127,6 +128,7 @@ const MessageBadge = React.memo(({ unreadCountMsg, handleMessagesClick }: Messag
     </Tooltip>
   );
 });
+MessageBadge.displayName = 'MessageBadge';
 
 const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile = false }: NavigationMenuProps) => {
   const router = useRouter();
@@ -252,7 +254,7 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
                 closeMenu={closeMenu}
               />
             )}
-            
+
             {/* Messages button */}
             <MessageBadge 
               unreadCountMsg={unreadCountMsg}
@@ -303,5 +305,6 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
     </div>
   );
 });
+NavigationMenu.displayName = 'NavigationMenu';
 
 export default NavigationMenu;
