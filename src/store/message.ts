@@ -20,7 +20,7 @@ export interface Messages {
 }
 
 export interface MarkReadRequest {
-  messageIds: string[];
+  senderId: string;
 }
 
 export interface TypingStatusRequest {

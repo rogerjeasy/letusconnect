@@ -50,6 +50,7 @@ const ArchivedChatsIcon = (props: SVGProps<SVGSVGElement>) => (
 export default function ChatManagement() {
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
   const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
+  const [isUserConnectionsModalOpen, setIsUserConnectionsModalOpen] = useState(false);
   const { addParticipant } = useParticipantsStore();
   const { addEntity } = useChatEntitiesStore();
   const [users, setUsers] = useState<User[]>([]); 
@@ -112,7 +113,7 @@ export default function ChatManagement() {
               description="Start a new group conversation"
               shortcut="⌘G"
               startContent={<CreateGroupChatIcon />}
-              onClick={() => setIsCreateGroupModalOpen(true)}
+              onPress={() => setIsCreateGroupModalOpen(true)}
             >
               Create a Group Chat
             </DropdownItem>
@@ -121,6 +122,7 @@ export default function ChatManagement() {
               description="Message someone in your connections"
               shortcut="⌘M"
               startContent={<MessageConnectionIcon />}
+              onPress = {() => setIsUserConnectionsModalOpen(true)}
             >
               Message Your Connection
             </DropdownItem>
@@ -129,7 +131,7 @@ export default function ChatManagement() {
               description="Find and connect with other users"
               shortcut="⌘B"
               startContent={<BrowseUsersIcon />}
-              onClick={() => setIsUsersModalOpen(true)}
+              onPress={() => setIsUsersModalOpen(true)}
             >
               Browse All Users
             </DropdownItem>

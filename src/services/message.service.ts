@@ -7,6 +7,7 @@ import { DirectMessage, MarkReadRequest, Messages, SendMessageRequest, TypingSta
 import { toast } from "react-toastify";
 import { useUserStore } from "@/store/userStore";
 import { BaseMessage } from "@/store/groupChat";
+import axios from "axios";
 
 interface UnreadCountResponse {
   unreadCount: number;
@@ -114,18 +115,29 @@ export const updateTypingStatus = async (typingData: TypingStatusRequest): Promi
 
 /**
  * Mark messages as read
- * @param messageIds - Array of message IDs to mark as read
+ * @param senderId - ID of the sender whose messages to mark as read
+ * @returns A promise that resolves when the operation is complete
  */
-export const markMessagesAsRead = async (messageIds: string[]): Promise<void> => {
+export const markMessagesAsRead = async (senderId: string): Promise<void> => {
   try {
-    const data: MarkReadRequest = { messageIds };
-    await api.post(API_CONFIG.ENDPOINTS.MESSAGES.MARK_READ, data);
+    const data: MarkReadRequest = { senderId };
+    const response = await api.patch(API_CONFIG.ENDPOINTS.MESSAGES.MARK_READ, data);
+
+    console.log(response.data);
+    
+    if (response.data?.success?.includes("No unread messages to mark as read.")) {
+      return;
+    }
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return;
+    }
+    
     const errorMessage = handleError(error);
+    toast.error("Failed to mark messages as read. " + errorMessage);
     throw new Error(errorMessage || "Failed to mark messages as read");
   }
 };
-
 /**
  * Process and organize direct messages by user
  * @param messages - Array of Messages objects
