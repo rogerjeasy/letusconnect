@@ -22,8 +22,8 @@ import UsersSelection from "./UsersSelection";
 import { handleAddParticipants, handleRemoveParticipantsFromGroup } from "./HandleGroupActions";
 import { useParticipantsStore } from "@/store/participantsStore";
 import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
-import { tr } from "framer-motion/client";
 import { getAllUsers } from "@/services/users.services";
+import { API_CONFIG } from "@/config/api.config";
 
 export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -84,9 +84,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
         description,
         participants: selectedUsers,
       };
-      const response = await api.post("/api/group-chats", groupData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.BASE, groupData);
       const groupChatId = response.data.groupChatId;
       addEntity({
         id: groupChatId,
@@ -185,13 +183,13 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
           </div>
         </ModalBody>
         <ModalFooter className="flex justify-end gap-4">
-          <Button variant="light" color="danger" onClick={onClose}>
+          <Button variant="light" color="danger" onPress={onClose}>
             Cancel
           </Button>
           <Button
             variant="solid"
             color="primary"
-            onClick={handleCreateGroup}
+            onPress={handleCreateGroup}
             disabled={!name}
           >
             Create Group

@@ -1,15 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { Users, UserPlus, UserCheck, Network } from "lucide-react";
-import { User } from "@/store/userStore";
+import { Users, UserPlus, UserCheck, Network, Clock } from "lucide-react";
+import { User, useUserStore } from "@/store/userStore";
 import SendRequestComponent from './SendRequestComponent';
 
 import { toast } from "react-toastify";
-import { SentRequest } from "@/store/userConnections";
+import { ConnectionRequestResponse, SentRequest } from "@/store/userConnections";
+import { getConnectionRequests } from "@/services/connection.service";
+import { handleError } from "@/helpers/api";
 
 interface UserWithNoConnectionsPageProps {
   user: User | null | undefined;
@@ -24,10 +26,40 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const username = user?.username || "This user";
   const profileUrl = user?.uid ? `/profile/${user.uid}` : "/users-directory";
+  const currentUser = useUserStore((state) => state.user);
+  const [sentRequestIDs, setSentRequestIDs] = useState<string[]>([]);
+  const myUid = currentUser?.uid;
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
   const handleRequestSent = (request: SentRequest) => {
-    toast.success(`Connection request sent to ${username}!`);
+    // toast.success(`Connection request sent to ${username}!`);
   };
+
+  const fetchMyConnections = useCallback(async () => {
+    if (!myUid) return;
+    try {
+      const response = await getConnectionRequests(myUid);
+      const userConnections: ConnectionRequestResponse = response;
+      const sentRequestKeys = Object.keys(userConnections.sentRequests);
+      setSentRequestIDs(sentRequestKeys);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [myUid]);
+
+  useEffect(() => {
+    if (!myUid) {
+      return;
+    }
+    fetchMyConnections();
+  }, [myUid, fetchMyConnections]);
+
+  useEffect(() => {
+    if (user?.uid && sentRequestIDs.length > 0) {
+      const hasRequest = sentRequestIDs.includes(user.uid);
+      setHasPendingRequest(hasRequest);
+    }
+  }, [user?.uid, sentRequestIDs]);
 
   const handleConnectClick = () => {
     if (!user?.uid) {
@@ -35,6 +67,70 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
       return;
     }
     setIsRequestModalOpen(true);
+  };
+
+  const renderConnectionStatus = () => {
+    if (hasPendingRequest || (user?.uid && sentRequestIDs.includes(user.uid))) {
+      return (
+        <div className="bg-yellow-50 rounded-xl p-6 text-center border border-yellow-100">
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-3 bg-yellow-100/50 rounded-full">
+              <Clock className="h-6 w-6 text-yellow-600" />
+            </div>
+            <div>
+              <p className="text-gray-700 font-medium mb-2">
+                Connection Request Pending
+              </p>
+              <p className="text-gray-600 text-sm">
+                You&apos;ve already sent a connection request to {username}. Please wait for their response.
+              </p>
+            </div>
+            <div>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-medium
+                          hover:from-yellow-600 hover:to-yellow-500 transform hover:scale-[1.02] transition-all
+                          shadow-lg hover:shadow-xl"
+                onPress={() => router.push("/connections?status=sent")}
+              >
+                {/* <Clock className="h-5 w-5 mr-2" /> */}
+                View Sent Requests
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 text-center border border-blue-100">
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-3 bg-blue-100/50 rounded-full">
+            <Network className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-gray-700 font-medium mb-2">
+              Be the First to Connect!
+            </p>
+            <p className="text-gray-600 text-sm">
+              Want to be one of {username}&apos;s first connections?
+            </p>
+          </div>
+          {user?.uid && (
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium
+                        hover:from-blue-700 hover:to-blue-600 transform hover:scale-[1.02] transition-all
+                        shadow-lg hover:shadow-xl w-full sm:w-auto"
+              onPress={handleConnectClick}
+            >
+              <UserCheck className="h-5 w-5 mr-2" />
+              Send Connection Request
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -61,33 +157,7 @@ const UserWithNoConnectionsPage: React.FC<UserWithNoConnectionsPageProps> = ({
           </CardHeader>
           <CardContent className="px-6 pb-8">
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 text-center border border-blue-100">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="p-3 bg-blue-100/50 rounded-full">
-                    <Network className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-gray-700 font-medium mb-2">
-                      Be the First to Connect!
-                    </p>
-                    <p className="text-gray-600 text-sm">
-                      Want to be one of {username}&apos;s first connections?
-                    </p>
-                  </div>
-                  {user?.uid && (
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium
-                                hover:from-blue-700 hover:to-blue-600 transform hover:scale-[1.02] transition-all
-                                shadow-lg hover:shadow-xl w-full sm:w-auto"
-                      onPress={handleConnectClick}
-                    >
-                      <UserCheck className="h-5 w-5 mr-2" />
-                      Send Connection Request
-                    </Button>
-                  )}
-                </div>
-              </div>
+              {renderConnectionStatus()}
               
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">

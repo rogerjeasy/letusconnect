@@ -50,7 +50,7 @@ const AIAssistant: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
-  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [isInitializing, setIsInitializing] = useState<boolean>(false);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
@@ -60,40 +60,42 @@ const AIAssistant: React.FC = () => {
 
   const initializeChat = async () => {
     setIsInitializing(true);
-    if (currentUser) {
-      try {
-        const conversations = await getConversations();
-        if (conversations && conversations.length > 0) {
-          const latestConversation = conversations[conversations.length - 1];
-          setCurrentConversationId(latestConversation.id);
-          
-          const mappedMessages: Message[] = latestConversation.messages.flatMap(msg => [
-            {
-              id: msg.id,
-              createdAt: msg.createdAt,
-              message: msg.message,
-              response: '',
-              role: 'user' as const 
-            },
-            {
-              id: msg.id + '_response',
-              createdAt: msg.createdAt,
-              message: '',
-              response: msg.response,
-              role: 'assistant' as const
-            }
-          ]);
-          
-          setMessages(mappedMessages);
-        } else {
-          resetToInitialMessage(true);
-        }
-      } catch (error) {
-        console.error('Failed to fetch conversations:', error);
+    if (!currentUser) {
+      resetToInitialMessage(false);
+      setIsInitializing(false);
+      return;
+    }
+    
+    try {
+      const conversations = await getConversations();
+      if (conversations && conversations.length > 0) {
+        const latestConversation = conversations[conversations.length - 1];
+        setCurrentConversationId(latestConversation.id);
+        
+        const mappedMessages: Message[] = latestConversation.messages.flatMap(msg => [
+          {
+            id: msg.id,
+            createdAt: msg.createdAt,
+            message: msg.message,
+            response: '',
+            role: 'user' as const 
+          },
+          {
+            id: msg.id + '_response',
+            createdAt: msg.createdAt,
+            message: '',
+            response: msg.response,
+            role: 'assistant' as const
+          }
+        ]);
+        
+        setMessages(mappedMessages);
+      } else {
         resetToInitialMessage(true);
       }
-    } else {
-      resetToInitialMessage(false);
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error);
+      resetToInitialMessage(true);
     }
     setIsInitializing(false);
   };
@@ -115,7 +117,11 @@ const AIAssistant: React.FC = () => {
 
   // Watch for changes in currentUser
   useEffect(() => {
-    initializeChat();
+    if (currentUser) {
+      initializeChat();
+    } else {
+      resetToInitialMessage(false);
+    }
   }, [currentUser]);
 
   useEffect(() => {
