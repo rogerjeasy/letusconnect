@@ -15,7 +15,7 @@ interface CookiePreferences {
 type PreferenceKey = keyof CookiePreferences;
 
 const CookieBanner = () => {
-  const [showBanner, setShowBanner] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedPreferences, setSelectedPreferences] = useState<CookiePreferences>({
     essential: true,
@@ -26,10 +26,16 @@ const CookieBanner = () => {
   useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     const savedPreferences = localStorage.getItem('cookiePreferences');
-    if (consent) {
-      setShowBanner(false);
-      if (savedPreferences) {
+
+    if (!consent) {
+      setShowBanner(true);
+    }
+
+    if (savedPreferences) {
+      try {
         setSelectedPreferences(JSON.parse(savedPreferences));
+      } catch (error) {
+        console.error('Error parsing saved preferences:', error);
       }
     }
   }, []);
