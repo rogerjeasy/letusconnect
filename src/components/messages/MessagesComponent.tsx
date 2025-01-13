@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { handleError } from "@/helpers/api";
 import { User, useUserStore } from "@/store/userStore";
 import { Avatar, Spinner, Card, Badge, Button, CardHeader, Tooltip, CardBody } from "@nextui-org/react";
-import handleMessagesClick from "@/components/messages/handleMessagesClick";
+// import handleMessagesClick from "@/components/messages/handleMessagesClick";
 import { getPusherInstance } from "@/helpers/pusher";
 import { Participants } from "@/store/project";
 import GroupMessagesCard from "@/components/messages/GroupMessagesCard";
@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { getAllUsers } from "@/services/users.services";
 import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
 import { getGroupUnreadCount, getMyGroupChats, markGroupMessagesAsRead, processGroupChats } from "@/services/groupchat.service";
+import { markMessagesAsRead } from "@/services/message.service";
 import { getUnreadMessageCount } from "@/services/message.service";
 import SortedChatList from "@/components/messages/SortedChatList";
 import { useRouter } from "next/navigation";
@@ -166,24 +167,24 @@ const MessagesComponent = ({ current = "" }) => {
     }
   };
 
-  const markMessagesAsRead = async (groupChatId: string) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("You must be logged in to perform this action.");
-      return;
-    }
+//   const markMessagesAsRead = async (groupChatId: string) => {
+//     const token = localStorage.getItem("token");
+//     if (!token) {
+//       toast.error("You must be logged in to perform this action.");
+//       return;
+//     }
   
-    try {
-      await handleMarkMessagesAsRead(groupChatId, token);
-      // Optionally update local state or UI
-      setUnreadCounts((prevCounts) => ({
-        ...prevCounts,
-        [groupChatId]: 0,
-      }));
-    } catch (error) {
-      console.error("Error marking messages as read:", error);
-    }
-  };  
+//     try {
+//       await handleMarkMessagesAsRead(groupChatId, token);
+//       // Optionally update local state or UI
+//       setUnreadCounts((prevCounts) => ({
+//         ...prevCounts,
+//         [groupChatId]: 0,
+//       }));
+//     } catch (error) {
+//       console.error("Error marking messages as read:", error);
+//     }
+//   };  
        
 
   useEffect(() => {
@@ -236,7 +237,7 @@ const MessagesComponent = ({ current = "" }) => {
     if (entity.type === "group") {
       await markGroupMessagesAsRead(entity.id);
     } else if (entity.type === "user") {
-      await handleMessagesClick(entity.id, setTotalUnreadCount);
+      await markMessagesAsRead(entity.id);
     }
 
     setUnreadCounts((prevCounts) => {
