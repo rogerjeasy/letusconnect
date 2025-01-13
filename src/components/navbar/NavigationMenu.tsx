@@ -5,7 +5,7 @@ import DropDownWithIcon from "../forms/DropDownWithIcon";
 import { SearchIcon } from "./SearchIcon";
 import { useRouter } from "next/navigation";
 import { FaComments } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
 import { NotificationIcon } from "../icons/NotificationIcon";
@@ -22,6 +22,7 @@ import { groupsAuthComponents, groupsNonAuthComponents } from "@/components/util
 import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/components/utils/testimonialOptions"
 import { adminComponents } from "@/components/utils/adminOptions"
 import { useNotificationCount } from "../notifications/ManagingNotifications";
+import React from "react";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -43,7 +44,91 @@ interface MenuSection {
   visibilityCondition: (isAuth: boolean) => boolean;
 }
 
-const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: NavigationMenuProps) => {
+interface NotificationBadgeProps {
+  handleNavigation: (path: string) => void;
+}
+
+interface MessageBadgeProps {
+  unreadCountMsg: number;
+  handleMessagesClick: () => void;
+}
+
+const NotificationBadge = React.memo(({ handleNavigation }: NotificationBadgeProps) => {
+  const { unreadCount, isLoading } = useNotificationCount();
+
+  return (
+    <Tooltip
+      content={unreadCount ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "No new notifications 😊"}
+      placement="bottom"
+    >
+      <Button
+        size="md"
+        variant="light"
+        className="font-bold text-white"
+        onPress={() => handleNavigation("/notifications")}
+      >
+        <div className="relative flex items-center">
+          {isLoading ? (
+            <Spinner size="sm" color="success" />
+          ) : (
+            <>
+              {unreadCount > 0 && (
+                <Badge
+                  color="danger"
+                  content={unreadCount > 99 ? "99+" : unreadCount}
+                  isInvisible={false}
+                  shape="circle"
+                  size="sm"
+                >
+                  <NotificationIcon className="fill-current" size={20} />
+                </Badge>
+              )}
+              {unreadCount === 0 && <NotificationIcon className="fill-current" size={20} />}
+            </>
+          )}
+          <span className="ml-2">Notification</span>
+        </div>
+      </Button>
+    </Tooltip>
+  );
+});
+
+const MessageBadge = React.memo(({ unreadCountMsg, handleMessagesClick }: MessageBadgeProps) => {
+  return (
+    <Tooltip
+      content={
+        unreadCountMsg
+          ? `You have ${unreadCountMsg} new message${unreadCountMsg > 1 ? "s" : ""}`
+          : "No new messages 😊"
+      }
+    >
+      <Button
+        size="sm"
+        variant="light"
+        className="font-bold text-white"
+        onPress={handleMessagesClick}
+      >
+        <div className="relative flex items-center">
+          {unreadCountMsg > 0 && (
+            <Badge
+              color="danger"
+              content={unreadCountMsg > 99 ? "99+" : unreadCountMsg}
+              isInvisible={false}
+              shape="circle"
+              size="sm"
+            >
+              <FaComments className="text-green-500" size={20} />
+            </Badge>
+          )}
+          {unreadCountMsg === 0 && <FaComments className="text-green-500" size={20} />}
+          <span className="ml-2">My Chats & Messages</span>
+        </div>
+      </Button>
+    </Tooltip>
+  );
+});
+
+const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile = false }: NavigationMenuProps) => {
   const router = useRouter();
   const [unreadCountMsg, setUnreadCountMsg] = useState<number>(0);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -117,94 +202,15 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: Na
     };
   }, [user?.uid]);
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = useCallback((path: string) => {
     closeMenu();
     router.push(path);
-  };
+  }, [closeMenu, router]);
 
-  const handleMessagesClick = () => {
-    // setUnreadCount(0);
+  const handleMessagesClick = useCallback(() => {
     closeMenu();
     router.push("/messages");
-  };
-
-  const NotificationBadge = () => {
-    const { unreadCount, isLoading } = useNotificationCount();
-  
-    return (
-      <Tooltip
-        content={unreadCount ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}` : "No new notifications 😊"}
-        placement="bottom"
-      >
-        <Button
-          size="md"
-          variant="light"
-          className="font-bold text-white"
-          onPress={() => handleNavigation("/notifications")}
-        >
-          <div className="relative flex items-center">
-            {isLoading ? (
-              <Spinner size="sm" color="success" />
-            ) : (
-              <>
-                {unreadCount > 0 && (
-                  <Badge
-                    color="danger"
-                    content={unreadCount > 99 ? "99+" : unreadCount}
-                    isInvisible={false}
-                    shape="circle"
-                    size="sm"
-                  >
-                    <NotificationIcon className="fill-current" size={20} />
-                  </Badge>
-                )}
-                {unreadCount === 0 && <NotificationIcon className="fill-current" size={20} />}
-              </>
-            )}
-            <span className="ml-2">Notification</span>
-          </div>
-        </Button>
-      </Tooltip>
-    );
-  };
-
-  const MessageBadge = () => {
-    return (
-      <Tooltip
-        content={
-        unreadCountMsg
-        ? `You have ${unreadCountMsg} new message${unreadCountMsg > 1 ? "s" : ""}`
-          : "No new messages 😊"
-        }
-        // isDisabled={unreadCount === 0}
-        >
-        <Button
-          size="sm"
-          variant="light"
-          className="font-bold text-white"
-          onPress={handleMessagesClick}
-        >
-        <div className="relative flex items-center">
-                  
-          {unreadCountMsg > 0 && (
-          <Badge
-            color="danger"
-            content={unreadCountMsg > 99 ? "99+" : unreadCountMsg}
-            isInvisible={false}
-            shape="circle"
-            size="sm"
-          >
-          <FaComments className="text-green-500"  size={20}/>
-            </Badge>
-                  
-          )}
-          {unreadCountMsg === 0 && <FaComments className="text-green-500" size={20} />}
-            <span className="ml-2">My Chats & Messages</span>
-          </div>
-            </Button>
-      </Tooltip>
-    );
-  }
+  }, [closeMenu, router]);
 
   const renderMenuSections = () => {
     return menuSections
@@ -246,13 +252,14 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: Na
                 closeMenu={closeMenu}
               />
             )}
-
             
             {/* Messages button */}
-            <MessageBadge />
-
+            <MessageBadge 
+              unreadCountMsg={unreadCountMsg}
+              handleMessagesClick={handleMessagesClick}
+            />
             {/* Notification */}
-            <NotificationBadge />
+            <NotificationBadge handleNavigation={handleNavigation} />
           </>
         ):null}
       {renderMenuSections()}
@@ -295,6 +302,6 @@ const NavigationMenu = ({ isAuthenticated, user, closeMenu, isMobile=false }: Na
       </div>
     </div>
   );
-};
+});
 
 export default NavigationMenu;
