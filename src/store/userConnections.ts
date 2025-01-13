@@ -1,6 +1,12 @@
 "use client";
 import { Time } from "@internationalized/date";
 
+export interface ConnectionState {
+  count: number;
+  loading: boolean;
+  error: string | null;
+}
+
 export interface ConnectionsResponse {
     pendingRequests: Record<string, ConnectionRequest>;
     sentRequests: Record<string, SentRequest>;
