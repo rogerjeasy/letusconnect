@@ -121,6 +121,7 @@ export const API_CONFIG = {
         MESSAGES: '/group-chats/messages',
         MARK_READ: (groupChatId: string) => `/group-chats/${groupChatId}/mark-messages-read`,
         UNREAD_COUNT: '/group-chats/unread-messages/count',
+        TOTAL_UNREAD_FOR_USER: "/group-chats/unread/total",
         REMOVE_PARTICIPANTS: (groupChatId: string) => `/group-chats/${groupChatId}/remove-participants`,
         REPLY: '/group-chats/reply-message',
         ATTACH_FILES: '/group-chats/attach-files',

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardBody } from "@nextui-org/react";
 import { FaUsers, FaComments, FaBriefcase, FaCalendarAlt } from "react-icons/fa";
 import clsx from "clsx";
@@ -8,6 +8,7 @@ import { useUserStore } from "@/store/userStore";
 import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
 import { useRouter } from 'next/navigation';
 import CustomizedTooltip from "../forms/CustomizedTooltip";
+import { GetGroupAndDirectUnreadMessages, useUnreadMessages } from '@/components/messages/GetGroupAndDirectUnreadMessages';
 
 type StatAction = {
   buttonText: string;
@@ -18,7 +19,7 @@ type StatAction = {
 
 type Stat = {
   title: string;
-  value: string;
+  value: React.ReactNode;
   description: string;
   icon: React.ReactNode;
   bgColor: string;
@@ -30,6 +31,11 @@ const QuickStatsDashboard: React.FC = () => {
   const router = useRouter();
   
   const { count: connectionCount, loading: connectionsLoading } = useUserConnections({
+    userId: currentUser?.uid || '',
+    maxRetries: 3
+  });
+
+  const { totalCount: unreadMessagesCount, loading: messagesLoading } = useUnreadMessages({
     userId: currentUser?.uid || '',
     maxRetries: 3
   });
@@ -58,14 +64,14 @@ const QuickStatsDashboard: React.FC = () => {
     },
     {
       title: "Messages",
-      value: "2",
-      description: "unread messages",
+      value: messagesLoading ? "..." : unreadMessagesCount.toString(),
+      description: `unread message${unreadMessagesCount !== 1 ? 's' : ''}`,
       icon: <FaComments className="text-green-600" size={40} />,
       bgColor: "bg-green-50",
       actions: [
         {
           buttonText: "View",
-          tooltipContent: "Check your messages",
+          tooltipContent:  "Check your messages",
           onClick: async () => router.push('/messages'),
           buttonColor: "default"
         }

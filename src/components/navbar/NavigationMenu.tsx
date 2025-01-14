@@ -9,7 +9,6 @@ import { useCallback, useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
 import { NotificationIcon } from "../icons/NotificationIcon";
-import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 import { getUnreadMessageCount } from "@/services/message.service";
 
 import { aboutComponents } from "@/components/utils/aboutusmenu"
