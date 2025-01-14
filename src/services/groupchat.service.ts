@@ -145,6 +145,33 @@ export const getGroupUnreadCount = async (
   };
 
 /**
+ * Get total unread messages count across all group chats for current user
+ * @param setTotalUnreadCount Optional function to set the total unread count
+ * @returns Promise with the total unread count
+ */
+export const getAllUnreadGroupMessagesForUser = async (
+  setTotalUnreadCount?: (count: number) => void
+): Promise<number> => {
+  try {
+    const response = await api.get<{ unreadCount: number }>(
+      API_CONFIG.ENDPOINTS.GROUP_CHATS.TOTAL_UNREAD_FOR_USER
+    );
+    
+    const totalUnreadCount = response.data.unreadCount;
+    
+    // Update state if setter function is provided
+    if (setTotalUnreadCount) {
+      setTotalUnreadCount(totalUnreadCount);
+    }
+    
+    return totalUnreadCount;
+  } catch (error) {
+    const errorMessage = handleError(error);
+    throw new Error(errorMessage || "Failed to fetch total unread group messages count");
+  }
+};
+
+/**
  * Pin a message in a group chat
  * @param pinData Data containing group ID and message ID
  */

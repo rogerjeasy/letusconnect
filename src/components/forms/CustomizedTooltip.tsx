@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from 'react';
 import { Tooltip, Button, TooltipProps, Spinner } from "@nextui-org/react";
 
@@ -69,7 +68,15 @@ const CustomizedTooltip: React.FC<CustomizedTooltipProps> = ({
       closeDelay={0}
       content={
         <div className="px-1 py-2">
-          <div className="text-small text-foreground">{tooltipContent}</div>
+          <div className="text-small text-foreground max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[500px] overflow-auto">
+            {typeof tooltipContent === 'string' ? (
+              <p className="text-sm sm:text-base md:text-lg lg:text-lg whitespace-pre-wrap break-words">
+                {tooltipContent}
+              </p>
+            ) : (
+              tooltipContent
+            )}
+          </div>
         </div>
       }
       classNames={{
@@ -77,7 +84,7 @@ const CustomizedTooltip: React.FC<CustomizedTooltipProps> = ({
           "before:bg-neutral-400 dark:before:bg-white",
         ],
         content: [
-          "py-2 px-4 shadow-xl",
+          "py-3 px-5 shadow-xl",
           "text-black bg-gradient-to-br from-white to-neutral-200"
         ],
       }}
