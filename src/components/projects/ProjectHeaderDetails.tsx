@@ -50,7 +50,7 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
             color="primary"
             variant="ghost"
             startContent={<FaTasks />}
-            onClick={handleOpenGroupChat}
+            onPress={handleOpenGroupChat}
             isDisabled={loadingChat}
             >
             {loadingChat ? "Loading..." : "Discussion"}
@@ -73,7 +73,7 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
               variant="ghost"
               startContent={<FaUserPlus />}
               className={project.joinRequests.length > 0 ? "text-red-500 border-red-500" : ""}
-              onClick={() => setShowJoinRequests(true)}
+              onPress={() => setShowJoinRequests(true)}
             >
               Join Requests: {project.joinRequests.length}
             </Button>
@@ -85,7 +85,7 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
               color="primary"
               variant="ghost"
               startContent={<FaUserFriends />}
-              onClick={() => setShowInvitedUsers(true)}
+              onPress={() => setShowInvitedUsers(true)}
             >
               Invite New Participants: {project.invitedUsers?.length || 0}
             </Button>
@@ -109,7 +109,7 @@ const ProjectHeaderDetails: React.FC<ProjectHeaderDetailsProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button color="primary" variant="ghost" startContent={<FaUsers />} onClick={() => setShowParticipants(true)}>
+        <Button color="primary" variant="ghost" startContent={<FaUsers />} onPress={() => setShowParticipants(true)}>
           Participants: {Array.isArray(project.participants) ? project.participants.length : 0}
         </Button>
         <Divider orientation="vertical" className="hidden md:block h-6" />

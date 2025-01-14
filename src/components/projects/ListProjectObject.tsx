@@ -207,7 +207,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
                 text-white font-semibold px-8 py-4 rounded-xl shadow-lg transform transition-all 
                 hover:scale-105 hover:shadow-xl flex items-center gap-3"
-                onClick={() => router.push("/projects/create")}
+                onPress={() => router.push("/projects/create")}
               >
                 <div className="relative bg-blue-400/20 p-2 rounded-lg">
                   <Rocket className="w-5 h-5" />
@@ -227,7 +227,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
           <Button
             color="primary"
             className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition-transform hover:scale-105"
-            onClick={() => setDisplayCount((prev) => prev + ITEMS_PER_LOAD)}
+            onPress={() => setDisplayCount((prev) => prev + ITEMS_PER_LOAD)}
           >
             See More
           </Button>
@@ -236,7 +236,7 @@ const ProjectListingObject = ({ projects=[], title }: ProjectListingsSectionProp
           <Button
             color="danger"
             className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition-transform hover:scale-105"
-            onClick={() => setDisplayCount(INITIAL_DISPLAY_COUNT)}
+            onPress={() => setDisplayCount(INITIAL_DISPLAY_COUNT)}
           >
             See Less
           </Button>

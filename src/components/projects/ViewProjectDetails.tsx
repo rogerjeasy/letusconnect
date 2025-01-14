@@ -257,7 +257,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
 
         {/* Buttons Section */}
         <div className="flex justify-center gap-4 mt-6">
-          <Button color="primary" startContent={<FaArrowLeft />} onClick={() => router.back()}>
+          <Button color="primary" startContent={<FaArrowLeft />} onPress={() => router.back()}>
             Go Back
           </Button>
           {!isOwner && !isParticipant && (
@@ -266,7 +266,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
                 Waiting Approval
               </Button>
             ) : (
-              <Button color="secondary" onClick={handleJoinProject}>
+              <Button color="secondary" onPress={handleJoinProject}>
                 Join Now
               </Button>
             )
@@ -280,7 +280,7 @@ const ViewProjectDetails = ({ project }: ViewProjectDetailsProps) => {
               <AssignedToComponent users={formData.participants} onlyView={true} />
             </ModalBody>
             <ModalFooter>
-              <Button color="primary" onClick={() => setShowParticipants(false)}>
+              <Button color="primary" onPress={() => setShowParticipants(false)}>
                 Close
               </Button>
             </ModalFooter>

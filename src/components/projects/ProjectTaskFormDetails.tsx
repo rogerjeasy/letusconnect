@@ -81,7 +81,7 @@ const ProjectTaskFormDetails = ({
           <FaTasks /> Tasks
         </div>
         {Array.isArray(tasks) && tasks.length > 0 && isOwner && !isEditing && (
-          <Button color="primary" size="sm" onClick={() => setIsEditing(true)}>
+          <Button color="primary" size="sm" onPress={() => setIsEditing(true)}>
             <FaEdit className="mr-2" /> Edit
           </Button>
         )}
@@ -94,7 +94,7 @@ const ProjectTaskFormDetails = ({
               color="primary"
               size="sm"
               className="w-36 bg-blue-500 hover:bg-blue-600"
-              onClick={() => {
+              onPress={() => {
                 setCurrentTask({
                   id: "",
                   title: "",
@@ -143,7 +143,7 @@ const ProjectTaskFormDetails = ({
             color="primary"
             size="sm"
             className="w-36 bg-blue-500 hover:bg-blue-600"
-            onClick={() => {
+            onPress={() => {
               setCurrentTask({
                 id: "",
                 title: "",
@@ -164,10 +164,10 @@ const ProjectTaskFormDetails = ({
 
       {isEditing && (
         <CardFooter className="flex justify-end gap-4">
-          <Button color="success" onClick={handleSave} className="w-24">
+          <Button color="success" onPress={handleSave} className="w-24">
             <FaSave className="mr-2" /> Save
           </Button>
-          <Button color="danger" variant="bordered" onClick={handleCancel} className="w-24">
+          <Button color="danger" variant="bordered" onPress={handleCancel} className="w-24">
             <FaTimes className="mr-2" /> Cancel
           </Button>
         </CardFooter>

@@ -119,7 +119,7 @@ const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClo
                         color="success"
                         size="sm"
                         startContent={<FaCheck />}
-                        onClick={() => {
+                        onPress={() => {
                         setSelectedRequest(request);
                         setShowRoleModal(true);
                         }}
@@ -130,7 +130,7 @@ const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClo
                         color="danger"
                         size="sm"
                         startContent={<FaTimes />}
-                        onClick={() => {
+                        onPress={() => {
                         setSelectedRequest(request);
                         setShowRejectModal(true);
                         }}
@@ -169,10 +169,10 @@ const JoinedRequestManagement = ({ joinRequests = [], projectId, onUpdate, onClo
             </Select>
           </ModalBody>
           <ModalFooter>
-            <Button variant="light" onClick={() => setShowRoleModal(false)}>
+            <Button variant="light" onPress={() => setShowRoleModal(false)}>
               Cancel
             </Button>
-            <Button color="success" onClick={handleAccept} isLoading={loading}>
+            <Button color="success" onPress={handleAccept} isLoading={loading}>
               Confirm
             </Button>
           </ModalFooter>

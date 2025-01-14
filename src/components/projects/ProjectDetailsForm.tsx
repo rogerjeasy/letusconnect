@@ -83,7 +83,7 @@ const ProjectDetailsForm = ({
       <CardHeader className="text-lg font-semibold flex items-center gap-2 justify-between">
         Project Details
         {isEditable && (
-        <Button color="primary" size="sm" onClick={() => setIsEditing(true)}>
+        <Button color="primary" size="sm" onPress={() => setIsEditing(true)}>
             <FaEdit className="mr-2" /> {isEditing ? "Editing..." : "Edit"}
         </Button>
         )}
@@ -208,10 +208,10 @@ const ProjectDetailsForm = ({
       {/* Save and Cancel Buttons */}
       {isEditing && (
         <CardFooter className="flex justify-end gap-4">
-          <Button color="success" onClick={handleSave} className="w-24">
+          <Button color="success" onPress={handleSave} className="w-24">
             <FaSave className="mr-2" /> Save
           </Button>
-          <Button color="danger" variant="bordered" onClick={handleCancel} className="w-24">
+          <Button color="danger" variant="bordered" onPress={handleCancel} className="w-24">
             <FaTimes className="mr-2" /> Cancel
           </Button>
         </CardFooter>
