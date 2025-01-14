@@ -47,7 +47,11 @@ export const API_CONFIG = {
 
       FAQ: {
         BASE: '/faqs',
+        GET_ALL: '/faqs',
+        CREATE: '/faqs',
         BY_ID: (id: string) => `/faqs/${id}`,
+        UPDATE: (id: string) => `/faqs/${id}`,
+        DELETE: (id: string) => `/faqs/${id}`,
       },
 
       PROJECTS: {

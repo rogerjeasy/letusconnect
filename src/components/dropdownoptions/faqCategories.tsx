@@ -9,3 +9,8 @@ export const faqCategories = [
     { key: "technical_support", label: "Technical Support" },
     { key: "general", label: "General Inquiries" },
   ];  
+
+export const getCategoryLabel = (categoryKey: string): string => {
+  const category = faqCategories.find(cat => cat.key === categoryKey);
+  return category?.label || categoryKey; 
+};
