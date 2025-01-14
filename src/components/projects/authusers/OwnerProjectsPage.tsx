@@ -61,7 +61,7 @@ const OwnerProjectsPage = () => {
 
       {!loading && error && (
         <div className="text-center mt-4">
-          <Button color="primary" onClick={() => router.push("/login")}>
+          <Button color="primary" onPress={() => router.push("/login")}>
             Go to Login
           </Button>
         </div>

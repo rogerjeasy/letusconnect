@@ -348,7 +348,7 @@ const ProjectCreationForm = () => {
                     color="primary"
                     size="sm"
                     className="w-36 bg-blue-500 hover:bg-blue-600"
-                    onClick={() => {
+                    onPress={() => {
                     setCurrentTask({
                         id: "",
                         title: "",
@@ -371,10 +371,10 @@ const ProjectCreationForm = () => {
 
         {/* Buttons Section */}
         <CardFooter className="flex justify-center gap-8 mt-4">
-          <Button color="success" onClick={handleSubmit} className="w-32" disabled={loading}>
+          <Button color="success" onPress={handleSubmit} className="w-32" disabled={loading}>
             {loading ? <Spinner size="sm" color="white" /> : <><FaPlus className="mr-2" /> Create</>}
           </Button>
-          <Button color="danger" variant="bordered" onClick={handleReset} className="w-32" disabled={loading}>
+          <Button color="danger" variant="bordered" onPress={handleReset} className="w-32" disabled={loading}>
             <FaUndo className="mr-2" /> Reset
           </Button>
         </CardFooter>

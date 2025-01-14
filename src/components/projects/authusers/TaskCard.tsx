@@ -153,23 +153,23 @@ const TaskCard = ({
       <CardFooter className="flex justify-end gap-4">
         {creatingProject ? (
           <>
-            <Button color="success" onClick={handleSave}>
+            <Button color="success" onPress={handleSave}>
               <FaSave className="mr-2" /> Add To My Tasks
             </Button>
             {/* <Button color="secondary" variant="ghost" onClick={handleSave}>
               <FaPencilAlt className="mr-2" /> Save Draft
             </Button> */}
-            <Button color="danger" variant="bordered" onClick={onCancel}>
+            <Button color="danger" variant="bordered" onPress={onCancel}>
               <FaTimes className="mr-2" /> Cancel
             </Button>
           </>
         ) : (
           manageTask && (
             <>
-              <Button color="success" onClick={handleSave}>
+              <Button color="success" onPress={handleSave}>
                 <FaSave className="mr-2" /> Save
               </Button>
-              <Button color="danger" variant="bordered" onClick={onCancel}>
+              <Button color="danger" variant="bordered" onPress={onCancel}>
                 <FaTimes className="mr-2" /> Cancel
               </Button>
             </>

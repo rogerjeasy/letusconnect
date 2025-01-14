@@ -3,7 +3,6 @@ import Link from "next/link";
 import ProjectHeaderSection from "./ProjectHeaderSection"
 import ProjectSearchFilterSection from "./ProjectSearchFilterSection";
 import PublicProjectsPage from "./PubicProjects";
-import { Button } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 
 const ExploreProjects = () => {
