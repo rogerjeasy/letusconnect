@@ -9,6 +9,7 @@ export interface FAQ {
     updatedAt: string;
     category: string;
     username: string;
+    status: string;
 }
   
 export interface FAQResponse {

@@ -38,18 +38,21 @@ import {
 import { useUserStore } from "../../store/userStore";
 import AccessDenied from "@/components/accessdenied/AccessDenied";
 import { extractDateAndTime } from "../utils/dateUtils";
-import { faqCategories } from "../dropdownoptions/faqCategories";
+import { faqCategories, faqStatuses } from "../dropdownoptions/faqCategories";
 import ModalPopup from "../forms/ModalPopup";
 import { createFAQ, deleteFAQ, getAllFAQs, updateFAQ } from "@/services/faq.service";
 import { toast } from "react-toastify";
 import { handleError } from "@/helpers/api";
-import { getCategoryLabel } from "../dropdownoptions/faqCategories";
+import { getLabel } from "../dropdownoptions/faqCategories";
 import { FAQ } from "@/store/faq";
+import { truncateText } from "../utils/truncateText";
+import { stat } from "fs";
 
 interface FormErrors {
   category?: string;
   question?: string;
   response?: string;
+  status?: string;
 }
 
 export default function FAQsAdmin() {
@@ -59,7 +62,7 @@ export default function FAQsAdmin() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newFAQ, setNewFAQ] = useState({ question: "", response: "", category: "" });
+  const [newFAQ, setNewFAQ] = useState({ question: "", response: "", category: "", status: "" });
   const { user, isAuthenticated } = useUserStore();
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -116,6 +119,10 @@ export default function FAQsAdmin() {
       errors.response = "Response is required";
     }
 
+    if (!newFAQ.status) {
+      errors.status = "Status is required";
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -133,11 +140,12 @@ export default function FAQsAdmin() {
       const faqData = {
         question: newFAQ.question.trim(),
         response: newFAQ.response.trim(),
-        category: newFAQ.category
+        category: newFAQ.category,
+        status: newFAQ.status
       };
       await createFAQ(faqData);
       setIsModalOpen(false);
-      setNewFAQ({ question: "", response: "", category: "" });
+      setNewFAQ({ question: "", response: "", category: "", status: "" });
       setFormErrors({});
       await fetchFAQs();
       toast.success("FAQ created successfully");
@@ -161,7 +169,8 @@ export default function FAQsAdmin() {
       const updateData = {
         question: editingFAQ.question.trim(),
         response: editingFAQ.response.trim(),
-        category: editingFAQ.category
+        category: editingFAQ.category,
+        status: editingFAQ.status
       };
 
       await updateFAQ(editingFAQ.id, updateData);
@@ -268,7 +277,7 @@ export default function FAQsAdmin() {
           setIsModalOpen(open);
           if (!open) {
             setFormErrors({});
-            setNewFAQ({ question: "", response: "", category: "" });
+            setNewFAQ({ question: "", response: "", category: "", status: "" });
           }
         }}
         className="max-w-2xl"
@@ -279,29 +288,52 @@ export default function FAQsAdmin() {
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-col gap-4">
-            <Select 
-              label="Category"
-              placeholder="Select a category"
-              className="max-w-full"
-              selectedKeys={newFAQ.category ? [newFAQ.category] : []}
-              onSelectionChange={(keys) => {
-                // Since we're using single selection, we can get the first (and only) key
-                const selectedKey = Array.from(keys)[0] as string;
-                setNewFAQ({ ...newFAQ, category: selectedKey });
-                if (formErrors.category) {
-                  setFormErrors({ ...formErrors, category: undefined });
-                }
-              }}
-              isRequired
-              errorMessage={formErrors.category}
-              isInvalid={!!formErrors.category}
-            >
-              {faqCategories.map((category) => (
-                <SelectItem key={category.key} value={category.key}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </Select>
+              <Select 
+                label="Category"
+                placeholder="Select a category"
+                className="max-w-full"
+                selectedKeys={newFAQ.category ? [newFAQ.category] : []}
+                onSelectionChange={(keys) => {
+                  // Since we're using single selection, we can get the first (and only) key
+                  const selectedKey = Array.from(keys)[0] as string;
+                  setNewFAQ({ ...newFAQ, category: selectedKey });
+                  if (formErrors.category) {
+                    setFormErrors({ ...formErrors, category: undefined });
+                  }
+                }}
+                isRequired
+                errorMessage={formErrors.category}
+                isInvalid={!!formErrors.category}
+              >
+                {faqCategories.map((category) => (
+                  <SelectItem key={category.key} value={category.key}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Select 
+                label="Status"
+                placeholder="Select a status"
+                className="max-w-full"
+                selectedKeys={newFAQ.status ? [newFAQ.status] : []}
+                onSelectionChange={(keys) => {
+                  // Since we're using single selection, we can get the first (and only) key
+                  const selectedKey = Array.from(keys)[0] as string;
+                  setNewFAQ({ ...newFAQ, status: selectedKey });
+                  if (formErrors.status) {
+                    setFormErrors({ ...formErrors, status: undefined });
+                  }
+                }}
+                isRequired
+                errorMessage={formErrors.status}
+                isInvalid={!!formErrors.status}
+              >
+                {faqStatuses.map((status) => (
+                  <SelectItem key={status.key} value={status.key}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </Select>
               <Input
                 isRequired
                 label="Question"
@@ -340,7 +372,7 @@ export default function FAQsAdmin() {
               onPress={() => {
                 setIsModalOpen(false);
                 setFormErrors({});
-                setNewFAQ({ question: "", response: "", category: "" });
+                setNewFAQ({ question: "", response: "", category: "", status: "" });
               }}
             >
               Cancel
@@ -384,6 +416,24 @@ export default function FAQsAdmin() {
                 {faqCategories.map((category) => (
                   <SelectItem key={category.key} value={category.key}>
                     {category.label}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Select 
+                label="Status"
+                placeholder="Select a status"
+                className="max-w-full"
+                selectedKeys={editingFAQ?.status ? [editingFAQ.status] : []}
+                onSelectionChange={(keys) => {
+                  const selectedKey = Array.from(keys)[0] as string;
+                  if (editingFAQ) {
+                    setEditingFAQ({ ...editingFAQ, status: selectedKey });
+                  }
+                }}
+              >
+                {faqStatuses.map((status) => (
+                  <SelectItem key={status.key} value={status.key}>
+                    {status.label}
                   </SelectItem>
                 ))}
               </Select>
@@ -439,11 +489,13 @@ export default function FAQsAdmin() {
               <TableColumn>Response</TableColumn>
               <TableColumn>Created At</TableColumn>
               <TableColumn>Last Update</TableColumn>
+              <TableColumn>Status</TableColumn>
               <TableColumn>Action</TableColumn>
             </TableHeader>
             <TableBody>
             {paginatedFaqs.length === 0 ? (
                 <TableRow>
+                  <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
@@ -461,9 +513,9 @@ export default function FAQsAdmin() {
                 paginatedFaqs.map((faq) => (
                   <TableRow key={faq.id}>
                     <TableCell>{faq.username}</TableCell>
-                    <TableCell>{getCategoryLabel(faq.category)}</TableCell>
-                    <TableCell>{faq.question}</TableCell>
-                    <TableCell>{faq.response}</TableCell>
+                    <TableCell>{getLabel(faqCategories, faq.category)}</TableCell>
+                    <TableCell>{truncateText(faq.question)}</TableCell>
+                    <TableCell>{truncateText(faq.response)}</TableCell>
                     <TableCell className="w-40">
                       {faq.createdAt ? (
                         (() => {
@@ -490,6 +542,7 @@ export default function FAQsAdmin() {
                         })()
                       ) : "Unknown"}
                     </TableCell>
+                    <TableCell>{getLabel(faqStatuses, faq.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Tooltip content="Edit FAQ">
@@ -538,7 +591,7 @@ export default function FAQsAdmin() {
                   <CardBody className="flex items-center gap-4">
                     <FaTags className="text-4xl text-blue-500" />
                     <div>
-                      <h4 className="text-lg font-semibold">{getCategoryLabel(category)}</h4>
+                      <h4 className="text-lg font-semibold">{getLabel(faqCategories, category)}</h4>
                       <p className="text-gray-500">FAQs: {count}</p>
                     </div>
                   </CardBody>
