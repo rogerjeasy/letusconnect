@@ -22,6 +22,7 @@ import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/com
 import { adminComponents } from "@/components/utils/adminOptions"
 import { useNotificationCount } from "../notifications/ManagingNotifications";
 import React from "react";
+import { useUnreadMessages } from "../messages/GetGroupAndDirectUnreadMessages";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -132,7 +133,10 @@ MessageBadge.displayName = 'MessageBadge';
 const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile = false }: NavigationMenuProps) => {
   const router = useRouter();
   const [unreadCountMsg, setUnreadCountMsg] = useState<number>(0);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const { totalCount: unreadMessagesCount, loading: messagesLoading, error: messagesError } = useUnreadMessages({
+    userId: user?.uid ?? '',
+    maxRetries: 3
+  });
 
   const menuSections: MenuSection[] = [
     {
@@ -256,7 +260,7 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
 
             {/* Messages button */}
             <MessageBadge 
-              unreadCountMsg={unreadCountMsg}
+              unreadCountMsg={unreadMessagesCount}
               handleMessagesClick={handleMessagesClick}
             />
             {/* Notification */}

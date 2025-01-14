@@ -19,7 +19,7 @@ type StatAction = {
 
 type Stat = {
   title: string;
-  value: React.ReactNode;
+  value: string;
   description: string;
   icon: React.ReactNode;
   bgColor: string;
@@ -35,8 +35,8 @@ const QuickStatsDashboard: React.FC = () => {
     maxRetries: 3
   });
 
-  const { totalCount: unreadMessagesCount, loading: messagesLoading } = useUnreadMessages({
-    userId: currentUser?.uid || '',
+  const { totalCount: unreadMessagesCount, loading: messagesLoading, error: messagesError } = useUnreadMessages({
+    userId: currentUser?.uid ?? '',
     maxRetries: 3
   });
 
@@ -64,7 +64,11 @@ const QuickStatsDashboard: React.FC = () => {
     },
     {
       title: "Messages",
-      value: messagesLoading ? "..." : unreadMessagesCount.toString(),
+      value: messagesLoading 
+        ? "..." 
+        : messagesError 
+        ? "!" 
+        : unreadMessagesCount.toString(),
       description: `unread message${unreadMessagesCount !== 1 ? 's' : ''}`,
       icon: <FaComments className="text-green-600" size={40} />,
       bgColor: "bg-green-50",

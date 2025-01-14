@@ -48,7 +48,7 @@ export const useUnreadMessages = ({
 
     try {
       const [directCount, groupCount] = await Promise.all([
-        getUnreadMessageCount(undefined, undefined, userId),
+        getUnreadMessageCount(undefined, undefined, undefined),
         getAllUnreadGroupMessagesForUser()
       ]);
 

@@ -119,16 +119,16 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
       </CardBody>
 
       <CardFooter className="flex gap-2">
-        <Button color="primary" size="sm" className="w-1/2" onClick={() => onViewDetails && onViewDetails(project)}>
+        <Button color="primary" size="sm" className="w-1/2" onPress={() => onViewDetails && onViewDetails(project)}>
           <FaEye className="mr-2" /> View Details
         </Button>
 
         {isOwner ? (
           <>
-            <Button color="warning" size="sm" className="w-1/3" onClick={() => onUpdateProject && onUpdateProject(project)}>
+            <Button color="warning" size="sm" className="w-1/3" onPress={() => onUpdateProject && onUpdateProject(project)}>
               <FaEdit className="mr-2" /> Update
             </Button>
-            <Button color="danger" size="sm" className="w-1/3" onClick={() => onDeleteProject && onDeleteProject(project.id)}>
+            <Button color="danger" size="sm" className="w-1/3" onPress={() => onDeleteProject && onDeleteProject(project.id)}>
               <FaTrash className="mr-2" /> Delete
             </Button>
           </>
@@ -146,7 +146,7 @@ const ProjectCard = ({ project, onViewDetails, onUpdateProject, onDeleteProject,
             size="sm" 
             className="w-1/2"
             isDisabled={isLoading}
-            onClick={() => onJoinProject && onJoinProject(project.id)}
+            onPress={() => onJoinProject && onJoinProject(project.id)}
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
