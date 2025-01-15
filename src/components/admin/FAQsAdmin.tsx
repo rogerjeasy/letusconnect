@@ -47,6 +47,9 @@ import { getLabel } from "../dropdownoptions/faqCategories";
 import { FAQ } from "@/store/faq";
 import { truncateText } from "../utils/truncateText";
 import { stat } from "fs";
+import ViewFAQDetails from "./ViewFAQDetails";
+import CreateFAQModal from "./CreateFAQModal";
+import { CreateFAQData } from "@/schemas/faqSchema";
 
 interface FormErrors {
   category?: string;
@@ -58,8 +61,6 @@ interface FormErrors {
 export default function FAQsAdmin() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [filteredFaqs, setFilteredFaqs] = useState<FAQ[]>([]);
-  const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newFAQ, setNewFAQ] = useState({ question: "", response: "", category: "", status: "" });
@@ -67,6 +68,8 @@ export default function FAQsAdmin() {
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedFAQ, setSelectedFAQ] = useState<FAQ | null>(null);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [faqToDelete, setFaqToDelete] = useState<string | null>(null);
@@ -127,60 +130,46 @@ export default function FAQsAdmin() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleCreateFAQ = async () => {
-    setIsSubmitting(true);
-    
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
-    }
-
+  const handleCreateFAQ = async (faqData: CreateFAQData) => {
     try {
       setLoading(true);
-      const faqData = {
-        question: newFAQ.question.trim(),
-        response: newFAQ.response.trim(),
-        category: newFAQ.category,
-        status: newFAQ.status
-      };
       await createFAQ(faqData);
       setIsModalOpen(false);
-      setNewFAQ({ question: "", response: "", category: "", status: "" });
-      setFormErrors({});
       await fetchFAQs();
       toast.success("FAQ created successfully");
     } catch (error) {
       toast.error("Error creating FAQ:", handleError(error));
     } finally {
       setLoading(false);
-      setIsSubmitting(false);
     }
   };
 
-  const openEditModal = (faq: FAQ) => {
-    setEditingFAQ(faq);
-    setIsEditModalOpen(true);
+  const handleManageFAQ = (faq: FAQ) => {
+    setSelectedFAQ(faq);
+    setIsViewModalOpen(true);
   };
 
-  const handleUpdateFAQ = async () => {
-    if (!editingFAQ?.id) return;
+  const handleUpdateFAQ = async (updatedFAQ: FAQ) => {
     try {
       setLoading(true);
       const updateData = {
-        question: editingFAQ.question.trim(),
-        response: editingFAQ.response.trim(),
-        category: editingFAQ.category,
-        status: editingFAQ.status
+        question: updatedFAQ.question.trim(),
+        response: updatedFAQ.response.trim(),
+        category: updatedFAQ.category,
+        status: updatedFAQ.status
       };
-
-      await updateFAQ(editingFAQ.id, updateData);
-
-      setIsEditModalOpen(false);
-      setEditingFAQ(null);
+  
+      await updateFAQ(updatedFAQ.id, updateData);
+  
+      setIsViewModalOpen(false);
+      
+      setSelectedFAQ(null);
+      
       await fetchFAQs();
       toast.success("FAQ updated successfully");
     } catch (error) {
       console.error("Error updating FAQ:", error);
+      toast.error("Failed to update FAQ");
     } finally {
       setLoading(false);
     }
@@ -197,11 +186,6 @@ export default function FAQsAdmin() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const openDeleteModal = (id: string) => {
-    setFaqToDelete(id);
-    setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -270,205 +254,14 @@ export default function FAQsAdmin() {
         </Button>
       </div>
 
-      {/* Create FAQ Modal */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onOpenChange={(open) => {
-          setIsModalOpen(open);
-          if (!open) {
-            setFormErrors({});
-            setNewFAQ({ question: "", response: "", category: "", status: "" });
-          }
-        }}
-        className="max-w-2xl"
-      >
-        <ModalContent>
-          <ModalHeader className="text-center w-full justify-center">
-            Create New FAQ
-          </ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <Select 
-                label="Category"
-                placeholder="Select a category"
-                className="max-w-full"
-                selectedKeys={newFAQ.category ? [newFAQ.category] : []}
-                onSelectionChange={(keys) => {
-                  // Since we're using single selection, we can get the first (and only) key
-                  const selectedKey = Array.from(keys)[0] as string;
-                  setNewFAQ({ ...newFAQ, category: selectedKey });
-                  if (formErrors.category) {
-                    setFormErrors({ ...formErrors, category: undefined });
-                  }
-                }}
-                isRequired
-                errorMessage={formErrors.category}
-                isInvalid={!!formErrors.category}
-              >
-                {faqCategories.map((category) => (
-                  <SelectItem key={category.key} value={category.key}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Select 
-                label="Status"
-                placeholder="Select a status"
-                className="max-w-full"
-                selectedKeys={newFAQ.status ? [newFAQ.status] : []}
-                onSelectionChange={(keys) => {
-                  // Since we're using single selection, we can get the first (and only) key
-                  const selectedKey = Array.from(keys)[0] as string;
-                  setNewFAQ({ ...newFAQ, status: selectedKey });
-                  if (formErrors.status) {
-                    setFormErrors({ ...formErrors, status: undefined });
-                  }
-                }}
-                isRequired
-                errorMessage={formErrors.status}
-                isInvalid={!!formErrors.status}
-              >
-                {faqStatuses.map((status) => (
-                  <SelectItem key={status.key} value={status.key}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Input
-                isRequired
-                label="Question"
-                placeholder="Enter the question"
-                value={newFAQ.question}
-                onChange={(e) => {
-                  setNewFAQ({ ...newFAQ, question: e.target.value });
-                  if (formErrors.question) {
-                    setFormErrors({ ...formErrors, question: undefined });
-                  }
-                }}
-                errorMessage={formErrors.question}
-                isInvalid={!!formErrors.question}
-                fullWidth
-              />
-              <Textarea
-                isRequired
-                label="Response"
-                placeholder="Enter the response"
-                value={newFAQ.response}
-                onChange={(e) => {
-                  setNewFAQ({ ...newFAQ, response: e.target.value });
-                  if (formErrors.response) {
-                    setFormErrors({ ...formErrors, response: undefined });
-                  }
-                }}
-                errorMessage={formErrors.response}
-                isInvalid={!!formErrors.response}
-                fullWidth
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter className="flex justify-center gap-4">
-            <Button 
-              color="danger" 
-              onPress={() => {
-                setIsModalOpen(false);
-                setFormErrors({});
-                setNewFAQ({ question: "", response: "", category: "", status: "" });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              color="primary" 
-              onPress={handleCreateFAQ} 
-              isLoading={loading || isSubmitting}
-              isDisabled={isSubmitting}
-            >
-              Create
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Edit FAQ Modal */}
-      <Modal 
-        isOpen={isEditModalOpen} 
-        onOpenChange={() => setIsEditModalOpen(false)}
-        className="max-w-2xl"
-      >
-        <ModalContent>
-          <ModalHeader className="text-center w-full justify-center">
-            Edit FAQ
-          </ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <Select 
-                label="Category"
-                placeholder="Select a category"
-                className="max-w-full"
-                selectedKeys={editingFAQ?.category ? [editingFAQ.category] : []}
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] as string;
-                  if (editingFAQ) {
-                    setEditingFAQ({ ...editingFAQ, category: selectedKey });
-                  }
-                }}
-              >
-                {faqCategories.map((category) => (
-                  <SelectItem key={category.key} value={category.key}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Select 
-                label="Status"
-                placeholder="Select a status"
-                className="max-w-full"
-                selectedKeys={editingFAQ?.status ? [editingFAQ.status] : []}
-                onSelectionChange={(keys) => {
-                  const selectedKey = Array.from(keys)[0] as string;
-                  if (editingFAQ) {
-                    setEditingFAQ({ ...editingFAQ, status: selectedKey });
-                  }
-                }}
-              >
-                {faqStatuses.map((status) => (
-                  <SelectItem key={status.key} value={status.key}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </Select>
-              <Input
-                isRequired
-                label="Question"
-                placeholder="Enter the question"
-                value={editingFAQ?.question || ""}
-                onChange={(e) => 
-                  setEditingFAQ(editingFAQ ? { ...editingFAQ, question: e.target.value } : null)
-                }
-                fullWidth
-              />
-              <Textarea
-                isRequired
-                label="Response"
-                placeholder="Enter the response"
-                value={editingFAQ?.response || ""}
-                onChange={(e) => 
-                  setEditingFAQ(editingFAQ ? { ...editingFAQ, response: e.target.value } : null)
-                }
-                fullWidth
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter className="flex justify-center gap-4">
-            <Button color="danger" onPress={() => setIsEditModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button color="primary" onPress={handleUpdateFAQ} isLoading={loading}>
-              Update
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <CreateFAQModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateFAQ={handleCreateFAQ}
+        categories={faqCategories}
+        statuses={faqStatuses}
+        isSubmitting={isSubmitting}
+      />
 
       <div className="my-6 flex justify-center">
         <div className="w-full max-w-md">
@@ -487,7 +280,6 @@ export default function FAQsAdmin() {
               <TableColumn>Category</TableColumn>
               <TableColumn>Question</TableColumn>
               <TableColumn>Response</TableColumn>
-              <TableColumn>Created At</TableColumn>
               <TableColumn>Last Update</TableColumn>
               <TableColumn>Status</TableColumn>
               <TableColumn>Action</TableColumn>
@@ -507,7 +299,6 @@ export default function FAQsAdmin() {
                   </TableCell>
                   <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
                 </TableRow>
               ) : (
                 paginatedFaqs.map((faq) => (
@@ -515,20 +306,7 @@ export default function FAQsAdmin() {
                     <TableCell>{faq.username}</TableCell>
                     <TableCell>{getLabel(faqCategories, faq.category)}</TableCell>
                     <TableCell>{truncateText(faq.question)}</TableCell>
-                    <TableCell>{truncateText(faq.response)}</TableCell>
-                    <TableCell className="w-40">
-                      {faq.createdAt ? (
-                        (() => {
-                          const { date, time } = extractDateAndTime(faq.createdAt);
-                          return (
-                            <div>
-                              <div>{date}</div>
-                              <div className="text-xs text-gray-500">{time}</div>
-                            </div>
-                          );
-                        })()
-                      ) : "Unknown"}
-                    </TableCell>
+                    <TableCell>{truncateText(faq.response, 10)}</TableCell>
                     <TableCell className="w-40">
                       {faq.updatedAt ? (
                         (() => {
@@ -544,34 +322,34 @@ export default function FAQsAdmin() {
                     </TableCell>
                     <TableCell>{getLabel(faqStatuses, faq.status)}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Tooltip content="Edit FAQ">
-                          <Button 
-                            isIconOnly 
-                            color="warning" 
-                            variant="light"
-                            onClick={() => openEditModal(faq)}
-                          >
-                            <FaEdit />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content="Delete FAQ">
-                          <Button
-                            isIconOnly
-                            color="danger"
-                            variant="light"
-                            onClick={() => openDeleteModal(faq.id)}
-                          >
-                            <FaTrash />
-                          </Button>
-                        </Tooltip>
+                      <div className="flex justify-center">
+                        <Button
+                          color="primary"
+                          variant="flat"
+                          onClick={() => handleManageFAQ(faq)}
+                          startContent={<FaEdit className="text-sm" />}
+                        >
+                          Manage FAQ
+                        </Button>
                       </div>
-                    </TableCell>
+                  </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
+
+          {selectedFAQ && (
+            <ViewFAQDetails 
+              faq={selectedFAQ}
+              isOpen={isViewModalOpen}
+              onClose={() => setIsViewModalOpen(false)}
+              onUpdate={handleUpdateFAQ}
+              onDelete={handleDeleteFAQ}
+              categories={faqCategories}
+              statuses={faqStatuses}
+            />
+          )}
 
           <div className="flex justify-center mt-6">
             <Pagination
