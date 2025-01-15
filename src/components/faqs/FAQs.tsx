@@ -134,7 +134,7 @@ const FAQComponent = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-emerald-500 dark:text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
-              <CardTitle className="text-emerald-700 dark:text-emerald-300">Can't Find Answer?</CardTitle>
+              <CardTitle className="text-emerald-700 dark:text-emerald-300">Cannot Find Answer?</CardTitle>
             </div>
             <CardDescription className="text-emerald-600/80 dark:text-emerald-300/80">
               Contact our support team for additional assistance
