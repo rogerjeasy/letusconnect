@@ -1,91 +1,80 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, AlertCircle, ArrowRight, Mail, Bot, MessageSquare, ArrowUp, Clock, HeadphonesIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import React, { useState, useMemo } from "react";
+import { Search, Filter, AlertCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { FAQ  } from '@/store/faq';
-import { faqCategories, faqStatuses, getLabel } from "../dropdownoptions/faqCategories";
-import { getAllFAQs } from '@/services/faq.service';
-import { NoFAQResult } from './NoFAQResult';
-import Link from 'next/link';
+} from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FAQ } from "@/store/faq";
+import { faqCategories, getLabel } from "../dropdownoptions/faqCategories";
+import { getAllFAQs } from "@/services/faq.service";
+import { NoFAQResult } from "./NoFAQResult";
+import Link from "next/link";
 
 const FAQComponent = () => {
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [displayCount, setDisplayCount] = useState<number>(10);
-  
+
   const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    const fetchFAQs = async () => {
-      try {
-        const data = await getAllFAQs();
-        setFaqs(data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load FAQs. Please try again later.');
-        setLoading(false);
-      }
-    };
-    fetchFAQs();
-  }, []);
+  // Correct useQuery hook with proper typing
+  const { data: faqs = [], isLoading, error } = useQuery<FAQ[], Error>({
+    queryKey: ["faqs"],
+    queryFn: getAllFAQs,
+    staleTime: 5 * 60 * 1000, // Data is fresh for 5 minutes
+    refetchOnWindowFocus: false, // Disable refetching on window focus
+  });
 
+  // Function to highlight text based on search query
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text;
-    
-    const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return parts.map((part, index) => 
-      part.toLowerCase() === query.toLowerCase() ? 
-        <span key={index} className="bg-yellow-200 dark:bg-yellow-800">{part}</span> : 
+
+    const parts = text.split(new RegExp(`(${query})`, "gi"));
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} className="bg-yellow-200 dark:bg-yellow-800">
+          {part}
+        </span>
+      ) : (
         part
+      )
     );
   };
 
+  // Clear all filters
   const handleClearFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('all');
+    setSearchQuery("");
+    setSelectedCategory("all");
   };
 
+  // Filter FAQs based on search query and category
   const filteredFAQs = useMemo(() => {
-    return faqs.filter(faq => {
-      const matchesSearch = searchQuery.trim() === '' ||
+    return faqs.filter((faq: FAQ) => {
+      const matchesSearch =
+        searchQuery.trim() === "" ||
         faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         faq.response.toLowerCase().includes(searchQuery.toLowerCase());
-        
-      const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
-      
+
+      const matchesCategory = selectedCategory === "all" || faq.category === selectedCategory;
+
       return matchesSearch && matchesCategory;
     });
   }, [faqs, searchQuery, selectedCategory]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -98,13 +87,14 @@ const FAQComponent = () => {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{error.message}</AlertDescription>
       </Alert>
     );
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* Rest of the component remains the same */}
       <div className="text-center space-y-4">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
           Frequently Asked Questions
@@ -115,6 +105,7 @@ const FAQComponent = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+        {/* Cards section remains the same */}
         <Card className="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -143,7 +134,7 @@ const FAQComponent = () => {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-emerald-500 dark:text-emerald-400 transition-transform duration-300 group-hover:scale-110" />
-              <CardTitle className="text-emerald-700 dark:text-emerald-300">Cannot Find Answer?</CardTitle>
+              <CardTitle className="text-emerald-700 dark:text-emerald-300">Can't Find Answer?</CardTitle>
             </div>
             <CardDescription className="text-emerald-600/80 dark:text-emerald-300/80">
               Contact our support team for additional assistance
