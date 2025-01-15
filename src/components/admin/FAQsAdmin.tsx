@@ -11,25 +11,14 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Spinner,
-  Tooltip,
-  Textarea,
   Card,
   Pagination,
   CardBody,
-  Select,
-  SelectItem,
 } from "@nextui-org/react";
 import {
   FaPlus,
   FaSearch,
   FaEdit,
-  FaTrash,
   FaExclamationCircle,
   FaBoxOpen,
   FaTags,
@@ -46,7 +35,6 @@ import { handleError } from "@/helpers/api";
 import { getLabel } from "../dropdownoptions/faqCategories";
 import { FAQ } from "@/store/faq";
 import { truncateText } from "../utils/truncateText";
-import { stat } from "fs";
 import ViewFAQDetails from "./ViewFAQDetails";
 import CreateFAQModal from "./CreateFAQModal";
 import { CreateFAQData } from "@/schemas/faqSchema";
@@ -326,7 +314,7 @@ export default function FAQsAdmin() {
                         <Button
                           color="primary"
                           variant="flat"
-                          onClick={() => handleManageFAQ(faq)}
+                          onPress={() => handleManageFAQ(faq)}
                           startContent={<FaEdit className="text-sm" />}
                         >
                           Manage FAQ
