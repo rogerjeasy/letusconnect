@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { api, handleError } from "@/helpers/api";
+import { handleError } from "@/helpers/api";
 import ModalPopup from "@/components/forms/ModalPopup";
 import { Button, Card, CardBody, CardFooter, CardHeader } from "@nextui-org/react";
 import { unsubscribeFromNewsletter } from "@/services/newsletter.service";
