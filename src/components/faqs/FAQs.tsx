@@ -22,11 +22,18 @@ import { faqCategories, getLabel } from "../dropdownoptions/faqCategories";
 import { getAllFAQs } from "@/services/faq.service";
 import { NoFAQResult } from "./NoFAQResult";
 import Link from "next/link";
+import AIAssistant from "../aiassistant/ChatGPT";
 
 const FAQComponent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [displayCount, setDisplayCount] = useState<number>(10);
+
+  const [isChatBotOpen, setIsChatBotOpen] = useState(false);
+
+  const toggleChatBot = () => {
+    setIsChatBotOpen((prev) => !prev);
+  };
 
   const ITEMS_PER_PAGE = 10;
 
@@ -179,7 +186,10 @@ const FAQComponent = () => {
       </div>
 
       {filteredFAQs.length === 0 ? (
-        <NoFAQResult onClearFilters={handleClearFilters} />
+        <>
+          <NoFAQResult onClearFilters={() => {}} onToggleChatBot={toggleChatBot} />
+        </>
+        
       ) : (
         <ScrollArea className="h-[700px] rounded-md border p-4">
           <Accordion type="single" collapsible className="space-y-4">
