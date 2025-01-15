@@ -65,7 +65,7 @@ const QuickStatsDashboard: React.FC = () => {
     {
       title: "Messages",
       value: messagesLoading 
-        ? "..." 
+        ? "0" 
         : messagesError 
         ? "!" 
         : unreadMessagesCount.toString(),

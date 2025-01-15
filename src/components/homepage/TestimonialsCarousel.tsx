@@ -1,9 +1,7 @@
 "use client";
-
-import * as React from "react";
-import Link from "next/link";
-import Autoplay from "embla-carousel-autoplay";
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Carousel,
   CarouselContent,
@@ -11,7 +9,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import ImageZoom from "../forms/ImageZoom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Autoplay from 'embla-carousel-autoplay';
 
 interface Testimonial {
   name: string;
@@ -20,164 +19,174 @@ interface Testimonial {
   photo: string;
 }
 
-const testimonials: Testimonial[] = [
-  {
-    name: "Alice Johnson",
-    title: "Data Scientist at TechCorp",
-    quote: "This platform helped me connect with amazing mentors who guided me through my career journey.",
-    photo: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    name: "Mark Smith",
-    title: "AI Researcher at InnovateLab",
-    quote: "I found incredible collaboration opportunities here that led to my first successful research project.",
-    photo: "https://randomuser.me/api/portraits/men/34.jpg",
-  },
-  {
-    name: "Sophia Lee",
-    title: "Product Manager at StartupHub",
-    quote: "The networking features allowed me to meet like-minded alumni and advance my career.",
-    photo: "https://randomuser.me/api/portraits/women/68.jpg",
-  },
-  {
-    name: "James Carter",
-    title: "Current Master's Student",
-    quote: "The collaborative projects helped me apply my skills in real-world scenarios and learn from alumni.",
-    photo: "https://randomuser.me/api/portraits/men/12.jpg",
-  },
-  {
-    name: "Emily Davis",
-    title: "Alumnus, Data Analyst at FinTechPro",
-    quote: "The mentorship program gave me the confidence and skills to secure my dream job.",
-    photo: "https://randomuser.me/api/portraits/women/19.jpg",
-  },
-  {
-    name: "Dr. Robert Williams",
-    title: "Industry Expert & Mentor",
-    quote: "I enjoy giving back to the community and helping students grow into successful professionals.",
-    photo: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    name: "Laura Martinez",
-    title: "Entrepreneur & Startup Founder",
-    quote: "This platform connected me with brilliant minds who became co-founders of my startup.",
-    photo: "https://randomuser.me/api/portraits/women/25.jpg",
-  },
-  {
-    name: "Daniel Kim",
-    title: "Software Engineer at DevSolutions",
-    quote: "The job board and career resources made my job search easy and efficient.",
-    photo: "https://randomuser.me/api/portraits/men/28.jpg",
-  },
-  {
-    name: "Amara Patel",
-    title: "UX Designer at CreateSpace",
-    quote: "I found design collaboration opportunities that helped me build an impressive portfolio.",
-    photo: "https://randomuser.me/api/portraits/women/31.jpg",
-  },
-  {
-    name: "William Thompson",
-    title: "Marketing Consultant",
-    quote: "The platform’s events and webinars helped me stay updated with industry trends and expand my network.",
-    photo: "https://randomuser.me/api/portraits/men/22.jpg",
-  },
-]; 
-
 export default function TestimonialsCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const testimonials: Testimonial[] = [
+    {
+      name: "Alice Johnson",
+      title: "Data Scientist at TechCorp",
+      quote: "This platform helped me connect with amazing mentors who guided me through my career journey.",
+      photo: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+      name: "Mark Smith",
+      title: "AI Researcher at InnovateLab",
+      quote: "I found incredible collaboration opportunities here that led to my first successful research project.",
+      photo: "https://randomuser.me/api/portraits/men/34.jpg",
+    },
+    {
+      name: "Sophia Lee",
+      title: "Product Manager at StartupHub",
+      quote: "The networking features allowed me to meet like-minded alumni and advance my career.",
+      photo: "https://randomuser.me/api/portraits/women/68.jpg",
+    },
+    {
+      name: "James Carter",
+      title: "Current Master's Student",
+      quote: "The collaborative projects helped me apply my skills in real-world scenarios and learn from alumni.",
+      photo: "https://randomuser.me/api/portraits/men/12.jpg",
+    },
+    {
+      name: "Emily Davis",
+      title: "Alumnus, Data Analyst at FinTechPro",
+      quote: "The mentorship program gave me the confidence and skills to secure my dream job.",
+      photo: "https://randomuser.me/api/portraits/women/19.jpg",
+    },
+    {
+      name: "Dr. Robert Williams",
+      title: "Industry Expert & Mentor",
+      quote: "I enjoy giving back to the community and helping students grow into successful professionals.",
+      photo: "https://randomuser.me/api/portraits/men/45.jpg",
+    },
+    {
+      name: "Laura Martinez",
+      title: "Entrepreneur & Startup Founder",
+      quote: "This platform connected me with brilliant minds who became co-founders of my startup.",
+      photo: "https://randomuser.me/api/portraits/women/25.jpg",
+    },
+    {
+      name: "Daniel Kim",
+      title: "Software Engineer at DevSolutions",
+      quote: "The job board and career resources made my job search easy and efficient.",
+      photo: "https://randomuser.me/api/portraits/men/28.jpg",
+    },
+    {
+      name: "Amara Patel",
+      title: "UX Designer at CreateSpace",
+      quote: "I found design collaboration opportunities that helped me build an impressive portfolio.",
+      photo: "https://randomuser.me/api/portraits/women/31.jpg",
+    },
+    {
+      name: "William Thompson",
+      title: "Marketing Consultant",
+      quote: "The platform's events and webinars helped me stay updated with industry trends and expand my network.",
+      photo: "https://randomuser.me/api/portraits/men/22.jpg",
+    },
+  ]; 
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
+
+  const next = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex + 1 >= testimonials.length ? 0 : prevIndex + 1
+    );
+  };
+
   const plugin = React.useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
 
-  // Add breakpoint detection
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Check initially
-    checkMobile();
-
-    // Add resize listener
-    window.addEventListener('resize', checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   return (
-    <section className="py-6 md:py-12 bg-gray-50">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-8 leading-tight">
-          Success Stories from Our Community
-        </h2>
-
-        <Carousel
-          plugins={[plugin.current]}
-          className="w-full max-w-6xl mx-auto"
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
-          opts={{
-            align: "start",
-            loop: true,
-            skipSnaps: false,
-            slidesToScroll: 1,
-          }}
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {testimonials.map((testimonial, index) => (
-              <CarouselItem 
-                key={index} 
-                className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3"
-              >
-                <div className="p-1">
-                  <Card className="h-full">
-                    <CardContent className="flex flex-col items-center p-4 md:p-6 h-full">
-                      <div className="w-16 h-16 md:w-24 md:h-24 mb-3 md:mb-4 flex-shrink-0">
-                        <ImageZoom
-                          src={testimonial.photo}
-                          alt={testimonial.name}
-                          className="rounded-full w-full h-full object-cover"
-                        />
-                      </div>
-
-                      <div className="flex-grow flex flex-col justify-between w-full">
-                        <p className="text-sm md:text-base italic mb-3 md:mb-4 line-clamp-3">
-                          &ldquo;{testimonial.quote}&rdquo;
-                        </p>
-
+    <div className="w-full max-w-6xl mx-auto px-4 py-8">
+      <div className="relative">
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-4">What Our Community Says</h2>
+          <p className="text-lg text-gray-600 mb-6">Discover how our platform empowers students, alumni, and industry experts to connect, collaborate, and grow together in the field of Applied Information and Data Science.</p>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+              <span>10+ Success Stories</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
+              <span>Global Network</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-purple-500 mr-2"></div>
+              <span>Diverse Expertise</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            plugins={[plugin.current]}
+            className="w-full"
+          >
+            <CarouselContent className="gap-4">
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem 
+                  key={index} 
+                  className={isMobile ? "basis-full" : "basis-1/3"}
+                >
+                  <Card className="transform transition-transform duration-500 ease-in-out">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={testimonial.photo} alt={testimonial.name} />
+                          <AvatarFallback>{testimonial.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <blockquote className="text-lg italic">&ldquo;{testimonial.quote}&rdquo;</blockquote>
                         <div>
-                          <h3 className="text-sm md:text-lg font-bold">
-                            {testimonial.name}
-                          </h3>
-                          <p className="text-xs md:text-sm text-gray-500">
-                            {testimonial.title}
-                          </p>
+                          <h3 className="font-semibold">{testimonial.name}</h3>
+                          <p className="text-sm text-gray-600">{testimonial.title}</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {!isMobile && (
-            <>
-              <CarouselPrevious className="hidden md:flex" />
-              <CarouselNext className="hidden md:flex" />
-            </>
-          )}
-        </Carousel>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="absolute top-1/2 transform -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none">
+              <CarouselPrevious className="relative pointer-events-auto h-12 w-12 rounded-full bg-white shadow-lg border-2 border-gray-200 opacity-90 hover:opacity-100" >
+                <ChevronLeft className="h-8 w-8" />
+              </CarouselPrevious>
+              <CarouselNext className="relative pointer-events-auto h-12 w-12 rounded-full bg-white shadow-lg border-2 border-gray-200 opacity-90 hover:opacity-100">
+                <ChevronRight className="h-8 w-8" />
+              </CarouselNext>
+            </div>
+          </Carousel>
+        </div>
 
-        <div className="mt-6 md:mt-8">
-          <Link href="/testimonials">
-            <button className="bg-teal-500 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg font-bold hover:bg-teal-600 transition">
-              Read More Stories
-            </button>
-          </Link>
+        <div className="mt-6 flex justify-center gap-2">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              className={`h-2 w-2 rounded-full transition-colors duration-300 ${
+                index === currentIndex ? 'bg-primary' : 'bg-gray-300'
+              }`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

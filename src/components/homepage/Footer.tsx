@@ -177,6 +177,7 @@ const Footer: React.FC = () => {
     title: "Quick Links",
     titleColor: "text-purple-400",
     links: [
+      { text: "FAQs", href: "/faqs", icon: <FaQuestion className="w-5 h-5" /> },
       { text: "Find Alumni", href: "/search/alumni", icon: <FaSearch className="w-5 h-5" /> },
       { text: "Events Calendar", href: "/events", icon: <FaCalendarAlt className="w-5 h-5" />, badge: 3 },
       { text: "Resources", href: "/resources", icon: <FaLightbulb className="w-5 h-5" /> },

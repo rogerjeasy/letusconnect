@@ -31,7 +31,8 @@ const NewsLetter: React.FC = () => {
       const count = await getNewsletterSubscriberCount();
       setTotalSubscribers(count);
     } catch (error) {
-      console.error("Failed to fetch total subscribers:", error);
+      const errorMessage = handleError(error);
+      console.error("Failed to fetch total subscribers:", errorMessage);
     }
   };
 

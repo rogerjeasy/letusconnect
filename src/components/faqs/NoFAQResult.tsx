@@ -9,17 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '../ui/button';
 
 interface NoFAQResultProps {
-  onClearFilters: () => void;
-}
-
-export const NoFAQResult: React.FC<NoFAQResultProps> = ({ 
-  onClearFilters 
-}) => {
-  const handleScrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    onClearFilters: () => void;
+    onToggleChatBot: () => void;
+  }
+  
+  export const NoFAQResult: React.FC<NoFAQResultProps> = ({ onClearFilters, onToggleChatBot }) => {
+    const handleScrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
   return (
     <Card className="w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 border-2">
@@ -49,13 +49,13 @@ export const NoFAQResult: React.FC<NoFAQResultProps> = ({
             <p className="text-sm text-blue-600/80 dark:text-blue-300/80">
               Get instant answers from our AI-powered assistant
             </p>
-            <Link 
-              href="/ai-assistant"
+            <Button
+              onClick={onToggleChatBot}
               className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-9 px-4 py-2 w-full sm:w-auto transition-colors"
             >
               <MessageSquare className="h-4 w-4" />
               Chat with AI Assistant
-            </Link>
+            </Button>
           </div>
 
           {/* Support Team Option */}
