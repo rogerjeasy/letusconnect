@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import UserProfile from "@/components/userprofile/UserProfileComponent";
-import { api, handleError } from "@/helpers/api";
+import { handleError } from "@/helpers/api";
 import { useEffect, useState } from "react";
 import { User } from "@/store/userStore";
 import UserProfileWhileLoading from "@/components/userprofile/UserProfileWhileLoading";
