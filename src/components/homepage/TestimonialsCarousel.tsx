@@ -112,8 +112,23 @@ export default function TestimonialsCarousel() {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-8">
       <div className="relative">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">What Our Users Say</h2>
+        <div className="text-center max-w-3xl mx-auto mb-12">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-4">What Our Community Says</h2>
+          <p className="text-lg text-gray-600 mb-6">Discover how our platform empowers students, alumni, and industry experts to connect, collaborate, and grow together in the field of Applied Information and Data Science.</p>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+              <span>10+ Success Stories</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
+              <span>Global Network</span>
+            </div>
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-purple-500 mr-2"></div>
+              <span>Diverse Expertise</span>
+            </div>
+          </div>
         </div>
         
         <div className="relative">
@@ -138,7 +153,7 @@ export default function TestimonialsCarousel() {
                           <AvatarImage src={testimonial.photo} alt={testimonial.name} />
                           <AvatarFallback>{testimonial.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                        <blockquote className="text-lg italic">"{testimonial.quote}"</blockquote>
+                        <blockquote className="text-lg italic">&ldquo;{testimonial.quote}&rdquo;</blockquote>
                         <div>
                           <h3 className="font-semibold">{testimonial.name}</h3>
                           <p className="text-sm text-gray-600">{testimonial.title}</p>
