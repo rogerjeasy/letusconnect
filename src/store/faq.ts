@@ -7,8 +7,10 @@ export interface FAQ {
     createdBy: string;
     createdAt: string;
     updatedAt: string;
+    updatedBy: string;
     category: string;
     username: string;
+    status: string;
 }
   
 export interface FAQResponse {

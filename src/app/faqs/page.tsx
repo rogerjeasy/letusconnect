@@ -1,11 +1,11 @@
 "use client"
 
-import FAQs from "@/components/faqs/FAQs"
+import FAQComponent from "@/components/faqs/FAQs"
 
 export default function FAQsPage() {
   return (
-    <div>
-      <FAQs />
+    <div className="mt-16">
+      <FAQComponent />
     </div>
   )
 }
