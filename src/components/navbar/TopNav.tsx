@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useUserStore } from "../../store/userStore";
 import ProfileDropDown from "./ProfileDropDown";
 import NavigationMenu from "./NavigationMenu";
-import NavigationMenuCombined from "./NavMenuFromShadUI";
 import { useState } from "react";
 
 const Navbar = () => {
@@ -13,9 +12,8 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-800 text-white w-full z-50 shadow fixed top-0 left-0 right-0">
-      <div className="w-full px-2 md:px-4 lg:px-6 py-2 md:py-3 lg:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4">
-        
+    <nav className="bg-gray-800 text-white w-full z-50 shadow h-full">
+      <div className="w-full px-2 md:px-4 lg:px-6 py-2 md:py-3 lg:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 h-full">
         {/* Logo Section */}
         <div className="text-2xl font-bold flex-shrink-0">
           <Link href={isAuthenticated ? "/dashboard" : "/"}>
@@ -34,10 +32,6 @@ const Navbar = () => {
           </svg>
         </button>
 
-        {/* Navigation Menu */}
-        {/* <div className={`w-full md:w-auto ${isMenuOpen ? "block" : "hidden"} md:flex flex-col md:flex-row md:items-center`}>
-          <NavigationMenuCombined isAuthenticated={isAuthenticated} user={user} closeMenu={() => setIsMenuOpen(false)} />
-        </div> */}
         <div className={`w-full md:w-auto ${isMenuOpen ? "block" : "hidden"} md:flex flex-col md:flex-row md:items-center`}>
           <NavigationMenu isAuthenticated={isAuthenticated} user={user} closeMenu={() => setIsMenuOpen(false)} />
         </div>

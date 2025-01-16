@@ -27,7 +27,7 @@ const ConnectionsPageContent = () => {
   }
 
   return (
-    <div className="mt-16">
+    <div>
       <ManageUserConnections initialStatus={status} />
     </div>
   );

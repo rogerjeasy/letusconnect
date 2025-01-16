@@ -28,7 +28,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="pt-24 md:pt-28 px-4 md:px-8">
+    <div>
       <HeroSectionDashboard />
       <QuickStatsDashboard />
       <RecommendationDashboard />

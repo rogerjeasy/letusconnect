@@ -13,6 +13,8 @@ import ErrorBoundary from "@/components/loadingfallback/ErrorBoundary";
 import LoadingFallback from "@/components/loadingfallback/LoadingFallback";
 import QueryClientWrapper from "@/components/QueryClientWrapper";
 import React from "react";
+import NewNavbar from "@/components/navbar/NewNavBar";
+import NewNavBar from "@/components/navbar/NewNavBar";
 
 // Lazy load the AI Assistant component
 const AIAssistant = React.lazy(() => import("@/components/aiassistant/ChatGPT"));
@@ -51,18 +53,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <NotificationProvider>
                   <AuthWrapper>
                     <div className="relative flex min-h-screen flex-col">
-                      <TopNav />
-                      <main className="flex-1 pt-16 md:pt-20 lg:pt-16">
+                      {/* <div className="h-[10vh]"> */}
+                        <NewNavBar />
+                      {/* </div> */}
+                      <main className="flex-1 overflow-y-auto">
                         <ErrorBoundary>
-                          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                          <div className="w-full outline h-full">
                             {children}
                           </div>
                         </ErrorBoundary>
+                        <Suspense fallback={<LoadingFallback />}>
+                          <AIAssistant />
+                        </Suspense>
+                        <Footer />
                       </main>
-                      <Suspense fallback={<LoadingFallback />}>
-                        <AIAssistant />
-                      </Suspense>
-                      <Footer />
                     </div>
                   </AuthWrapper>
                 </NotificationProvider>

@@ -5,11 +5,10 @@ import Link from "next/link";
 
 export default function AboutHeroSection() {
   return (
-    <div className="pt-15 md:pt-25"> {/* Added top padding to avoid navbar overlap */}
       <Card
         isFooterBlurred
         radius="none"
-        className="relative w-screen max-w-full h-[400px] md:h-[350px] border-none overflow-hidden bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white"
+        className="relative w-screen max-w-full h-[450px] md:h-[650px] border-none overflow-hidden bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white"
       >
         {/* Background Image Slider */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
@@ -93,6 +92,5 @@ export default function AboutHeroSection() {
           }
         `}</style>
       </Card>
-    </div>
   );
 }
