@@ -7,7 +7,7 @@ import { User } from "@/store/userStore";
 import { RegisterData } from "@/models/RegisterData";
 
 interface LoginData {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 

@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic';
 import LoginFormSkeleton from '@/components/auth/LoginFormSkeleton';
 
-const LoginForm = dynamic(() => import("@/components/auth/LoginForm"), {
+const LoginForm = dynamic(() => import("@/components/auth/Login"), {
   ssr: false,
   loading: () => <LoginFormSkeleton />
 });
