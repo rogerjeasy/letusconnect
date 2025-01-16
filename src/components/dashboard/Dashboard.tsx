@@ -11,7 +11,6 @@ import RecommendationDashboard from "./RecommendationDashboard";
 import ActivityFeedDashboard from "./ActivityFeedDashboard";
 import PersonalizedResourcesDashboard from "./PersonalizedResourcesDashboard";
 import HighlightedGroupsDashboard from "./HighlightedGroupsDashboard";
-import { useStore } from "zustand";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useUserStore();

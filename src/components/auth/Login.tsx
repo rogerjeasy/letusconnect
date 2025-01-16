@@ -256,7 +256,7 @@ const LoginPageComponent = () => {
           </div>
 
           <SocialAuthButtons mode="login" className="mt-6" />
-          
+
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">

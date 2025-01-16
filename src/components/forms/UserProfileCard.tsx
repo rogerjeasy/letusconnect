@@ -30,6 +30,7 @@ import SkillSelector from "./SkillsSelector";
 import { Skill } from "@/store/skills";
 import MentorshipPreferences from "../mentoring/MentorshipPreferences";
 import InterestsSelector from "./InterestsComponent";
+import { API_CONFIG } from "@/config/api.config";
 
 interface ModalProps {
   isOpen: boolean;
@@ -82,9 +83,7 @@ export default function UserProfileCard() {
   const handleSave = async () => {
     setIsUpdating(true);
     try {
-      const response = await api.put(`/api/users/${user?.uid}`, profile, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.put(API_CONFIG.ENDPOINTS.USERS.BY_UID(user?.uid || ""), profile);
       if (response.status === 200) {
         setUser(response.data.user, token || "");
         setOriginalProfile(response.data.user);
