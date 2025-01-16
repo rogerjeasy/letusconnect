@@ -34,6 +34,8 @@ import { useUserStore } from '@/store/userStore';
 import { setAuthToken } from '@/helpers/tokenManagement';
 import { ProgramCombobox } from '../utils/StudyProgram';
 import SocialAuthButtons from './SocialAuthButtons';
+import { cn } from '@/lib/utils';
+import { u } from 'framer-motion/client';
 
 const RegistrationComponent = () => {
   const [loading, setLoading] = useState(false);
@@ -48,9 +50,18 @@ const RegistrationComponent = () => {
       username: '',
       password: '',
       confirmPassword: '',
-      program: '',
+      program: undefined,
     },
+    mode: "onChange",
   });
+
+  const password = form.watch("password");
+  const confirmPassword = form.watch("confirmPassword");
+
+  const passwordsMatch = React.useMemo(() => {
+    if (!confirmPassword) return true;
+    return password === confirmPassword;
+  }, [password, confirmPassword]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     if (loading) return;
@@ -138,65 +149,79 @@ const RegistrationComponent = () => {
                 />
 
                 <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
+                control={form.control}
+                name="password"
+                render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
                         <div className="relative">
-                          <Input
+                        <Input
                             placeholder="Create a password"
                             type={showPassword ? 'text' : 'password'}
                             {...field}
-                          />
-                          <button
+                        />
+                        <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
+                        >
                             {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
+                            <EyeOff className="h-4 w-4" />
                             ) : (
-                              <Eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                             )}
-                          </button>
+                        </button>
                         </div>
-                      </FormControl>
-                      <FormMessage />
+                    </FormControl>
+                    <FormMessage />
                     </FormItem>
-                  )}
+                )}
                 />
 
                 <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
                         <div className="relative">
-                          <Input
+                        <Input
                             placeholder="Confirm your password"
                             type={showConfirmPassword ? 'text' : 'password'}
+                            className={cn(
+                            confirmPassword && !passwordsMatch ? "border-red-500 focus-visible:ring-red-500" : "",
+                            confirmPassword && passwordsMatch ? "border-green-500 focus-visible:ring-green-500" : ""
+                            )}
                             {...field}
-                          />
-                          <button
+                        />
+                        <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
+                        >
                             {showConfirmPassword ? (
-                              <EyeOff className="h-4 w-4" />
+                            <EyeOff className="h-4 w-4" />
                             ) : (
-                              <Eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                             )}
-                          </button>
+                        </button>
                         </div>
-                      </FormControl>
-                      <FormMessage />
+                    </FormControl>
+                    {confirmPassword && !passwordsMatch && (
+                        <p className="text-sm font-medium text-red-500">
+                        Passwords don't match
+                        </p>
+                    )}
+                    {confirmPassword && passwordsMatch && (
+                        <p className="text-sm font-medium text-green-500">
+                        Passwords match
+                        </p>
+                    )}
+                    <FormMessage />
                     </FormItem>
-                  )}
+                )}
                 />
 
                 <FormField
@@ -218,7 +243,7 @@ const RegistrationComponent = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <Spinner size="sm" /> : "Register"}
+                {loading ? <Spinner size="sm" color="white" /> : "Register"}
               </Button>
             </form>
           </Form>

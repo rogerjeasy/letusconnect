@@ -18,10 +18,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { studyPrograms } from "@/schemas/registerSchema"
+import type { RegisterFormValues } from "@/schemas/registerSchema"
 
 interface ProgramComboboxProps {
-  value: string
-  onChange: (value: string) => void
+  value: RegisterFormValues['program']
+  onChange: (value: RegisterFormValues['program']) => void
 }
 
 export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
@@ -36,9 +37,7 @@ export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value
-            ? studyPrograms.find((program) => program.value === value)?.label
-            : "Select program..."}
+          {value || "Select program..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -51,9 +50,9 @@ export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
               {studyPrograms.map((program) => (
                 <CommandItem
                   key={program.value}
-                  value={program.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                  value={program.label}
+                  onSelect={() => {
+                    onChange(program.label as RegisterFormValues['program'])
                     setOpen(false)
                   }}
                 >
@@ -61,7 +60,7 @@ export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === program.value ? "opacity-100" : "opacity-0"
+                      value === program.label ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
