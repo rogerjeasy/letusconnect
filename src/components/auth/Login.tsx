@@ -55,6 +55,8 @@ const LoginPageComponent = () => {
       emailOrUsername: '',
       password: '',
     },
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
 
   const emailOrUsernameValue = watch('emailOrUsername');
@@ -76,11 +78,10 @@ const LoginPageComponent = () => {
   };
 
   const onSubmit = async (data: LoginFormValues) => {
-    if (loading) return; 
+    if (loading) return;
     
     setLoading(true);
     setSubmissionError(null);
-    clearErrors();
 
     try {
       const { user, token } = await login(data);
@@ -106,10 +107,10 @@ const LoginPageComponent = () => {
         localStorage.removeItem("user");
       }
       delete api.defaults.headers.common['Authorization'];
-      
-      return false;
     } finally {
-      setLoading(false);
+        setTimeout(() => {
+            setLoading(false);
+          }, 5000); 
     }
   };
 
