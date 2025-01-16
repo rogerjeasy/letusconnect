@@ -40,6 +40,7 @@ import { groupsAuthComponents, groupsNonAuthComponents } from "@/components/util
 import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/components/utils/testimonialOptions";
 import { adminComponents } from "@/components/utils/adminOptions";
 import { UserProfileDropdown } from "./UserProfileDropdown";
+import { MobileMenu } from "./MobileMenuComponent";
 
 interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
     title: string;
@@ -234,7 +235,7 @@ const NewNavbar = () => {
         </NavigationMenuItem>
 
         {/* Add Jobs Navigation Menu */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger className="text-black">Jobs</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-3 p-4 lg:w-[500px] lg:grid-cols-2">
@@ -249,10 +250,10 @@ const NewNavbar = () => {
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
             
         {/* Add Testimonials Navigation Menu */}
-        <NavigationMenuItem>
+        {/* <NavigationMenuItem>
           <NavigationMenuTrigger className="text-black">Testimonials</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-3 p-4 lg:w-[500px] lg:grid-cols-2">
@@ -267,58 +268,35 @@ const NewNavbar = () => {
               ))}
             </ul>
           </NavigationMenuContent>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
       </NavigationMenuList>
     </NavigationMenu>
   );
 
-  const MobileMenu = () => (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" className="md:hidden">
-          <Menu className="h-6 w-6" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-        <SheetHeader>
-          <SheetTitle>Menu</SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-col space-y-4 mt-4">
-          {/* Mobile menu content will be added here */}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
+//   const MobileMenu = () => (
+//     <Sheet>
+//       <SheetTrigger asChild>
+//         <Button variant="ghost" className="md:hidden">
+//           <Menu className="h-6 w-6" />
+//         </Button>
+//       </SheetTrigger>
+//       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+//         <SheetHeader>
+//           <SheetTitle>Menu</SheetTitle>
+//         </SheetHeader>
+//         <div className="flex flex-col space-y-4 mt-4">
+//           {/* Mobile menu content will be added here */}
+//         </div>
+//       </SheetContent>
+//     </Sheet>
+//   );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
         <div className="flex items-center space-x-4 flex-shrink-0">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" className="lg:hidden" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 flex flex-col space-y-2">
-                <MobileMenuItem title="About" items={aboutComponents} />
-                <MobileMenuItem
-                  title="Connect"
-                  items={isAuthenticated ? connectAuthComponents : connectNonAuthComponents}
-                />
-                <MobileMenuItem
-                  title="Events"
-                  items={isAuthenticated ? eventsAuthComponents : eventsNonAuthComponents}
-                />
-                {/* Add other mobile menu items */}
-              </div>
-            </SheetContent>
-          </Sheet>
+            <MobileMenu />
           <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center space-x-2 flex-shrink-0">
             <Image
               src="/favicon.ico"
