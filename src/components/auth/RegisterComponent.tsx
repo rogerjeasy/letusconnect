@@ -79,7 +79,7 @@ const RegistrationComponent = () => {
       // Then update localStorage
       setAuthToken(token);
       toast.success("Registration successful. Welcome to Let's Connect!");
-      router.push('/dashboard');
+      router.push('/welcome');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed');
     } finally {

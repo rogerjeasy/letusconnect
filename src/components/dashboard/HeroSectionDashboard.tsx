@@ -4,9 +4,6 @@ import { FaUserFriends, FaProjectDiagram, FaBriefcase } from "react-icons/fa";
 import { useUserStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { handleProfileCompletion } from "../apihandling/HandleDashboardAPIs";
-import { api } from "@/helpers/api";
-import { API_CONFIG } from "@/config/api.config";
 import { getProfileCompletion } from "@/services/users.services";
 
 interface ProfileCompletion {
@@ -133,21 +130,21 @@ export default function HeroSectionDashboard() {
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
                 size="lg"
-                onClick={() => router.push("/users-directory")}
+                onPress={() => router.push("/users-directory")}
               >
                 <FaUserFriends className="mr-2" /> Find Connections
               </Button>
               <Button
                 className="bg-green-600 text-white hover:bg-green-700 font-bold"
                 size="lg"
-                onClick={() => router.push("/projects/explore")}
+                onPress={() => router.push("/projects/explore")}
               >
                 <FaProjectDiagram className="mr-2" /> Explore Projects
               </Button>
               <Button
                 className="bg-teal-600 text-white hover:bg-teal-700 font-bold"
                 size="lg"
-                onClick={() => router.push("/jobs")}
+                onPress={() => router.push("/jobs")}
               >
                 <FaBriefcase className="mr-2" /> Browse Jobs
               </Button>
