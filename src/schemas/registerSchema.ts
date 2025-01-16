@@ -79,7 +79,7 @@ export const registerSchema = z.object({
     .regex(/.*[A-Z].*/, "Password must contain at least one uppercase letter")
     .regex(/.*[a-z].*/, "Password must contain at least one lowercase letter")
     .regex(/.*\d.*/, "Password must contain at least one number")
-    .regex(/.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?].*/, "Password must contain at least one special character"),
+    .regex(/.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?].*/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
   program: programLabels
 }).refine((data) => data.password === data.confirmPassword, {

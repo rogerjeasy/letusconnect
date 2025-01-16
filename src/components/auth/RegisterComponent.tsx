@@ -35,7 +35,6 @@ import { setAuthToken } from '@/helpers/tokenManagement';
 import { ProgramCombobox } from '../utils/StudyProgram';
 import SocialAuthButtons from './SocialAuthButtons';
 import { cn } from '@/lib/utils';
-import { u } from 'framer-motion/client';
 
 const RegistrationComponent = () => {
   const [loading, setLoading] = useState(false);
@@ -211,7 +210,7 @@ const RegistrationComponent = () => {
                     </FormControl>
                     {confirmPassword && !passwordsMatch && (
                         <p className="text-sm font-medium text-red-500">
-                        Passwords don't match
+                        Passwords don&apos;t match
                         </p>
                     )}
                     {confirmPassword && passwordsMatch && (
