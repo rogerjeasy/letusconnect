@@ -6,7 +6,10 @@ import { Separator } from "@/components/ui/separator";
 
 const RegistrationFormSkeleton = () => {
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center bg-cover bg-center p-4 overflow-y-auto">
+    <div
+      className="min-h-screen w-full flex flex-col justify-center items-center bg-cover bg-center p-4 overflow-y-auto"
+      style={{ backgroundImage: "url('https://images.pexels.com/photos/6146970/pexels-photo-6146970.jpeg')" }}
+    >
       <Card className="w-full max-w-xl">
         <CardHeader className="space-y-1">
           <div className="flex justify-center">
