@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { ReactNode, Suspense } from "react";
 import { ThemeProvider } from "next-themes";
 import Providers from "@/components/Providers";
-import TopNav from "@/components/navbar/TopNav";
 import AuthWrapper from "@/components/AuthWrapper";
 import Footer from "@/components/homepage/Footer";
 import { ToastContainer } from "react-toastify";
@@ -13,7 +12,6 @@ import ErrorBoundary from "@/components/loadingfallback/ErrorBoundary";
 import LoadingFallback from "@/components/loadingfallback/LoadingFallback";
 import QueryClientWrapper from "@/components/QueryClientWrapper";
 import React from "react";
-import NewNavbar from "@/components/navbar/NewNavBar";
 import NewNavBar from "@/components/navbar/NewNavBar";
 
 // Lazy load the AI Assistant component

@@ -16,7 +16,7 @@ import { setAuthToken } from "@/helpers/tokenManagement";
 
 // Zod Schema for Form Validation
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address."),
+  emailOrUsername: z.string().email("Invalid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
@@ -72,11 +72,6 @@ const LoginForm = () => {
         loading: false,
         hasChecked: true
       });
-
-        // const educationData = await handleGetUserEducation(token);
-        // if (educationData) {
-        //   setSchoolExperience(educationData);
-        // }
         
       toast.success("Login successful!");
   
@@ -129,15 +124,15 @@ const LoginForm = () => {
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
               <input
-                {...register("email")}
+                {...register("emailOrUsername")}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  errors.email ? "border-red-500" : ""
+                  errors.emailOrUsername ? "border-red-500" : ""
                 }`}
                 type="email"
                 placeholder="Your Email"
               />
-              {errors.email && (
-                <p className="text-red-500 text-xs italic mt-1">{errors.email.message}</p>
+              {errors.emailOrUsername && (
+                <p className="text-red-500 text-xs italic mt-1">{errors.emailOrUsername.message}</p>
               )}
             </div>
 

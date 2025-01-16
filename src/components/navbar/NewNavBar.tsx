@@ -79,30 +79,6 @@ const NewNavbar = () => {
   );
   ListItem.displayName = "ListItem";
 
-  const MobileMenuItem = ({ title, items }: { title: string; items: any[] }) => (
-    <div className="px-2 py-4">
-      <h3 className="mb-2 px-4 text-lg font-semibold">{title}</h3>
-      <div className="space-y-2">
-        {items.map((item) => (
-          <Link
-            key={item.title}
-            href={item.href}
-            className="flex items-center gap-3 rounded-lg px-4 py-2 hover:bg-accent"
-          >
-            {item.icon}
-            <div>
-              <div className="text-sm font-medium leading-none">{item.title}</div>
-              <p className="line-clamp-1 text-sm text-muted-foreground">
-                {item.description}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-
-
   const NavContent = () => (
     <NavigationMenu className="hidden lg:flex max-w-max">
       <NavigationMenuList className="gap-2">
@@ -273,24 +249,6 @@ const NewNavbar = () => {
       </NavigationMenuList>
     </NavigationMenu>
   );
-
-//   const MobileMenu = () => (
-//     <Sheet>
-//       <SheetTrigger asChild>
-//         <Button variant="ghost" className="md:hidden">
-//           <Menu className="h-6 w-6" />
-//         </Button>
-//       </SheetTrigger>
-//       <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-//         <SheetHeader>
-//           <SheetTitle>Menu</SheetTitle>
-//         </SheetHeader>
-//         <div className="flex flex-col space-y-4 mt-4">
-//           {/* Mobile menu content will be added here */}
-//         </div>
-//       </SheetContent>
-//     </Sheet>
-//   );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
