@@ -203,12 +203,7 @@ export const useUserStore = create<UserState>()((set, get) => ({
   logout: async () => {
     try {
       set({ loading: false, hasChecked: true });
-      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      await api.patch(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {}, {
-        headers: {
-          'Authorization': `Bearer ${storedToken || get().token}`
-        }
-      });
+      await api.patch(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       
       // Clear authorization header
       delete api.defaults.headers.common['Authorization'];

@@ -23,6 +23,7 @@ import { adminComponents } from "@/components/utils/adminOptions"
 import { useNotificationCount } from "../notifications/ManagingNotifications";
 import React from "react";
 import { useUnreadMessages } from "../messages/GetGroupAndDirectUnreadMessages";
+import SearchComponent from "./SearchComponent";
 
 interface NavigationMenuProps {
   isAuthenticated: boolean;
@@ -271,18 +272,7 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
 
       {/* Search and Auth Buttons */}
       <div className={`flex ${isMobile ? "flex-col w-full" : "items-center"} gap-2 mt-2 md:mt-0 ${isMobile ? "" : "md:ml-auto"}`}>
-        <Input
-          classNames={{
-            base: `max-w-full ${isMobile ? "" : "sm:max-w-[12rem]"} h-10 bg-gray-200 rounded-full`,
-            mainWrapper: "h-full",
-            input: "text-small",
-            inputWrapper: "h-full font-normal text-default-500 bg-gray-200",
-          }}
-          placeholder="Search..."
-          size="sm"
-          startContent={<SearchIcon size={18} />}
-          type="search"
-        />
+        <SearchComponent />
 
         {!isAuthenticated && (
           <div className={`flex ${isMobile ? "flex-col w-full" : ""} gap-1`}>
