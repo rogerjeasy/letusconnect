@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { AlertCircle, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@nextui-org/react";
 import {
@@ -37,7 +37,7 @@ export default function SkillSelector({
   maxSelections = 10
 }: SkillSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [activeCategory, setActiveCategory] = React.useState<SkillCategory>("TECHNICAL_SKILLS");
+  const [activeCategory, setActiveCategory] = React.useState<SkillCategory | null>(null);
 
   const handleSkillToggle = (skill: Skill) => {
     if (selectedSkills.includes(skill)) {
@@ -64,7 +64,7 @@ export default function SkillSelector({
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {SKILL_CATEGORIES[activeCategory].name}
+            {activeCategory ? SKILL_CATEGORIES[activeCategory].name : "Select Your Skills"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -99,31 +99,45 @@ export default function SkillSelector({
       </Popover>
 
       {/* Available Skills Display */}
-      <Card className="mt-4">
-        <CardHeader className="pb-3">
-          <h4 className="font-medium">Available Skills in {SKILL_CATEGORIES[activeCategory].name}</h4>
-        </CardHeader>
-        <CardBody>
-          <div className="flex flex-wrap gap-2">
-            {[...SKILL_CATEGORIES[activeCategory].skills].map((skill) => (
-              <Chip
-                key={skill}
-                variant="flat"
-                color={selectedSkills.includes(skill) ? "primary" : "default"}
-                className="cursor-pointer transition-colors"
-                onClick={() => handleSkillToggle(skill)}
-              >
-                {skill}
-                {selectedSkills.includes(skill) && (
-                  <Check className="ml-2 h-3 w-3" />
-                )}
-              </Chip>
-            ))}
-          </div>
-        </CardBody>
-      </Card>
+      {activeCategory && (
+        <Card className="mt-4">
+          <CardHeader className="pb-3">
+            <h4 className="font-medium">Available Skills in {SKILL_CATEGORIES[activeCategory].name}</h4>
+          </CardHeader>
+          <CardBody>
+            <div className="flex flex-wrap gap-2">
+              {[...SKILL_CATEGORIES[activeCategory].skills].map((skill) => (
+                <Chip
+                  key={skill}
+                  variant="flat"
+                  color={selectedSkills.includes(skill) ? "primary" : "default"}
+                  className="cursor-pointer transition-colors"
+                  onClick={() => handleSkillToggle(skill)}
+                >
+                  {skill}
+                  {selectedSkills.includes(skill) && (
+                    <Check className="ml-2 h-3 w-3" />
+                  )}
+                </Chip>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
-      {/* Selected Skills Display */}
+      {/* No Skills Selected Message */}
+      {selectedSkills.length === 0 && (
+        <Card className="mt-4">
+          <CardBody>
+            <div className="flex items-center gap-2 justify-center py-4">
+              <AlertCircle className="h-5 w-5 text-default-400" />
+              <p className="text-default-400">No skills selected yet. Choose a category to start selecting your skills.</p>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Selected Skills Display remains the same */}
       {selectedSkills.length > 0 && (
         <Card className="mt-4">
           <CardHeader className="pb-3">

@@ -293,6 +293,7 @@ const RegistrationComponent = () => {
                         <FormItem className="flex flex-col">
                         <FormControl>
                             <ProgramCombobox
+                            style={{ backgroundColor: "#faf6e9" }} 
                             value={field.value}
                             onChange={field.onChange}
                             />

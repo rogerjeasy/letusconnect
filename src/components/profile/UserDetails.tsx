@@ -28,43 +28,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
 import { User } from '@/store/userStore';
 import { 
-  SKILL_CATEGORIES, 
-  SkillCategory, 
   Skill, 
-  getAllCategories,
-  getSkillsByCategory,
-  getAllSkills 
+  isValidSkill
 } from '@/store/skills';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { DateValue } from '@nextui-org/react';
 import UserSelection from '../forms/SelectCountry';
+import SkillSelector from '../forms/SkillsSelector';
+import { ProgramCombobox } from '../utils/StudyProgram';
+import { RegisterFormValues, studyPrograms } from "@/schemas/registerSchema";
 
 interface UserDetailsProps {
   user: User | null;
   onUpdate: (data: Partial<User>) => Promise<void>;
 }
-
-const languages = [""
-] as const;
 
 const userDetailsSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -74,16 +56,18 @@ const userDetailsSchema = z.object({
   phoneCode: z.string(),
   bio: z.string().max(500, "Bio must not exceed 500 characters"),
   currentJobTitle: z.string(),
-  program: z.string().min(2, "Program is required"),
+  program: z.enum(studyPrograms.map(p => p.label) as [string, ...string[]]),
   lookingForMentor: z.boolean(),
   willingToMentor: z.boolean(),
   graduationYear: z.number().min(1900).max(new Date().getFullYear() + 10),
   interests: z.array(z.string()),
-  languages: z.array(z.enum([...languages])),
-  skills: z.array(z.object({
-    name: z.string(),
-    level: z.enum(["Beginner", "Intermediate", "Advanced", "Expert"]),
-  })),
+  languages: z.array(z.string()),
+  skills: z.array(
+    z.object({
+      name: z.string(),
+      level: z.enum(["Beginner", "Intermediate", "Advanced", "Expert"]),
+    })
+  ),  
   certifications: z.array(z.string()),
   projects: z.array(z.string()),
   dateOfBirth: z.string().nullable(),
@@ -96,8 +80,6 @@ const UserDetails: React.FC<UserDetailsProps> = ({
   onUpdate,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [skillSearchOpen, setSkillSearchOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(userDetailsSchema),
@@ -109,12 +91,12 @@ const UserDetails: React.FC<UserDetailsProps> = ({
       phoneCode: user?.phoneCode || "",
       bio: user?.bio || "",
       currentJobTitle: user?.currentJobTitle || "",
-      program: user?.program || "",
+      program: (user?.program || "") as RegisterFormValues['program'],
       lookingForMentor: user?.lookingForMentor || false,
       willingToMentor: user?.willingToMentor || false,
       graduationYear: user?.graduationYear || new Date().getFullYear(),
       interests: user?.interests || [],
-      languages: (user?.languages || []) as typeof languages[number][],
+      languages: (user?.languages || []),
       skills: user?.skills?.map(skill => {
         if (typeof skill === 'string') {
           return { name: skill, level: 'Beginner' };
@@ -132,6 +114,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({
   });
 
   const onSubmit = async (data: FormValues) => {
+    console.log("data from the form: ", data);
     try {
       setIsLoading(true);
       await onUpdate({
@@ -139,29 +122,12 @@ const UserDetails: React.FC<UserDetailsProps> = ({
         dateOfBirth: data.dateOfBirth 
           ? new Date(data.dateOfBirth) as unknown as DateValue
           : null,
-        skills: data.skills.map(skill => skill.name) as Skill[],
+          skills: data.skills.map((skill) => skill.name) as Skill[],
       });
     } catch (error) {
       console.error('Error updating user details:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const allCategories = getAllCategories();
-  const selectedSkills = form.watch("skills");
-
-  const toggleSkill = (skillName: string, category: SkillCategory) => {
-    const currentSkills = form.getValues("skills");
-    const skillExists = currentSkills.find(s => s.name === skillName);
-    
-    if (skillExists) {
-      form.setValue("skills", currentSkills.filter(s => s.name !== skillName));
-    } else {
-      form.setValue("skills", [
-        ...currentSkills,
-        { name: skillName, level: "Beginner" }
-      ]);
     }
   };
 
@@ -243,37 +209,24 @@ const UserDetails: React.FC<UserDetailsProps> = ({
                 )}
               />
 
-              <FormField
+                <FormField
                 control={form.control}
                 name="program"
-                render={({ field: fieldProps }) => (
-                  <FormItem>
-                    <FormLabel>Program</FormLabel>
-                    <Select 
-                      onValueChange={fieldProps.onChange} 
-                      defaultValue={fieldProps.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your program" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Applied Information and Data Science">
-                          Applied Information and Data Science
-                        </SelectItem>
-                        <SelectItem value="Information and Cyber Security">
-                          Information and Cyber Security
-                        </SelectItem>
-                        <SelectItem value="Digital Business">
-                          Digital Business
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                    <FormLabel>Study Program</FormLabel>
+                    <FormControl>
+                        <ProgramCombobox
+                        value={field.value as RegisterFormValues['program']}
+                        onChange={(value) => {
+                            field.onChange(value);
+                        }}
+                        />
+                    </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
+                />
 
               <FormField
                 control={form.control}
@@ -364,89 +317,27 @@ const UserDetails: React.FC<UserDetailsProps> = ({
             />
 
             {/* Skills Section */}
-            <div className="space-y-4">
-              <FormLabel>Skills</FormLabel>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Select onValueChange={(value) => setSelectedCategory(value as SkillCategory)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allCategories.map((category) => (
-                        <SelectItem key={category.key} value={category.key}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <FormField
+                control={form.control}
+                name="skills"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Areas of Expertise</FormLabel>
+                    <SkillSelector
+                        selectedSkills={
+                        field.value.map((skill) => skill.name).filter(isValidSkill) as Skill[]
+                        } // Ensure only valid skills are passed
+                        onChange={(skills) =>
+                        field.onChange(
+                            skills.map((name) => ({ name, level: "Beginner" }))
+                        )
+                        }
+                    />
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
-                <Popover open={skillSearchOpen} onOpenChange={setSkillSearchOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={skillSearchOpen}
-                      className="justify-between"
-                    >
-                      Select skills
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search skills..." />
-                      <CommandEmpty>No skill found.</CommandEmpty>
-                      {selectedCategory && (
-                        <CommandGroup>
-                          {getSkillsByCategory(selectedCategory).map((skill) => {
-                            const isSelected = selectedSkills.some(s => s.name === skill);
-                            return (
-                              <CommandItem
-                                key={skill}
-                                onSelect={() => toggleSkill(skill, selectedCategory)}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    isSelected ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                {skill}
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      )}
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {selectedSkills.map((skill, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {skill.name}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-4 w-4 p-0 hover:bg-transparent"
-                      onClick={() => {
-                        const newSkills = selectedSkills.filter((_, i) => i !== index);
-                        form.setValue("skills", newSkills);
-                      }}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
 
             {/* Languages */}
             <FormField

@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast"
 import { Briefcase, Camera, GraduationCap, Loader2, MapPin, Users } from "lucide-react";
 import type { User, UserSchoolExperience, UserWorkExperience, UserAddress } from '@/store/userStore';
 import UserSchoolExperiences from './UserSchoolExperience';
@@ -14,11 +13,12 @@ import UserDetails from './UserDetails';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { AvatarFallback, AvatarImage, Avatar } from '../ui/avatar';
+import { updateUserPersonalInformation } from '@/services/users.services';
+import { toast } from 'react-toastify';
 
 const UserProfileComponent = () => {
-  const { user, loading: isUserLoading } = useUserStore();
+  const { user, loading: isUserLoading, setUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("personal");
-  const { toast } = useToast();
 
   // Track loading state for each section
   const [loadingStates, setLoadingStates] = useState({
@@ -39,20 +39,14 @@ const UserProfileComponent = () => {
   const handlePersonalUpdate = async (data: Partial<User>) => {
     try {
       setTabLoading('personal', true);
-      // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      const { user, token } = await updateUserPersonalInformation(data);
+      setUser(user, token);
+      console.log('response:', { user, token });
       
-      toast({
-        title: "Success",
-        description: "Personal information updated successfully",
-      });
+      toast.success("Personal information updated successfully");
     } catch (error) {
       console.error('Error updating personal information:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update personal information",
-        variant: "destructive",
-      });
+      toast.error("Failed to update personal information");
     } finally {
       setTabLoading('personal', false);
     }
@@ -64,17 +58,10 @@ const UserProfileComponent = () => {
       // Implement your API call here
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
       
-      toast({
-        title: "Success",
-        description: "Education history updated successfully",
-      });
+      toast.success("Education history updated successfully");
     } catch (error) {
       console.error('Error updating education history:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update education history",
-        variant: "destructive",
-      });
+      toast.error("Failed to update education history");
     } finally {
       setTabLoading('education', false);
     }
@@ -86,17 +73,10 @@ const UserProfileComponent = () => {
       // Implement your API call here
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
       
-      toast({
-        title: "Success",
-        description: "Work history updated successfully",
-      });
+      toast.success("Work history updated successfully")
     } catch (error) {
       console.error('Error updating work history:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update work history",
-        variant: "destructive",
-      });
+      toast.error("Failed to update work history")
     } finally {
       setTabLoading('work', false);
     }
@@ -108,17 +88,10 @@ const UserProfileComponent = () => {
       // Implement your API call here
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
       
-      toast({
-        title: "Success",
-        description: "Address updated successfully",
-      });
+      toast.success("Address updated successfully");
     } catch (error) {
       console.error('Error updating address:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update address",
-        variant: "destructive",
-      });
+      toast.error("Failed to update address");
     } finally {
       setTabLoading('address', false);
     }

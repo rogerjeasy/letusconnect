@@ -3,6 +3,7 @@
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
 import { User } from "@/store/userStore";
+import { to } from "@react-spring/web";
 
 interface ProfileCompletion {
   completionPercentage: number;
@@ -63,3 +64,32 @@ export const getAllUsers = async (): Promise<User[]> => {
       throw new Error(handleError(error) || `Failed to fetch user with UID: ${uid}`);
     }
   };
+
+interface ProfileUpdateResponse {
+  user: User;
+  token: string;
+}
+
+/**
+ * Function to update a user's personal information.
+ * @param userData - The user data to update.
+ * @returns A promise that resolves to the updated User object and token.
+ */
+export const updateUserPersonalInformation = async (
+  userData: Partial<User>
+): Promise<{ user: User; token: string }> => {
+  try {
+    const response = await api.put<ProfileUpdateResponse>(
+      API_CONFIG.ENDPOINTS.USERS.BASE,
+      userData
+    );
+    return {
+      user: response.data.user,
+      token: response.data.token || "",
+    };
+  } catch (error) {
+    throw new Error(
+      handleError(error) || `Failed to update user with UID: ${userData.uid}`
+    );
+  }
+};
