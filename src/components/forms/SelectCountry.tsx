@@ -260,21 +260,54 @@ export default function UserSelection({
             </div>
           );
 
-      case "phone":
-        return (
-          <Select
-            className="max-w-full"
-            label="Select Phone Code"
-            defaultSelectedKeys={typeof defaultValue === "string" ? [defaultValue] : undefined}
-            onSelectionChange={(keys) => handleSelect(keys as Set<string>, "phone")}
-          >
-            {phoneCodes.map((pc) => (
-              <SelectItem key={pc.code} value={pc.code}>
-                {`${pc.country} (${pc.code})`}
-              </SelectItem>
-            ))}
-          </Select>
-        );
+          case "phone":
+            return (
+              <div className="space-y-4">
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="solid"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between"
+                    >
+                      {defaultValue ? 
+                        phoneCodes.find(pc => pc.code === defaultValue)?.code || "Select Phone Code" 
+                        : "Select Phone Code"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search phone codes..." />
+                      <CommandList>
+                        <CommandEmpty>No phone code found.</CommandEmpty>
+                        <CommandGroup>
+                          {phoneCodes.map((pc) => (
+                            <CommandItem
+                              key={pc.code}
+                              value={pc.code}
+                              onSelect={() => {
+                                onChange?.(pc.code);
+                                setOpen(false);
+                              }}
+                            >
+                              {`${pc.country} (${pc.code})`}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  defaultValue === pc.code ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            );
     }
   };
 
