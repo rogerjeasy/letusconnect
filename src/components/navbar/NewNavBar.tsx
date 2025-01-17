@@ -12,23 +12,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Menu } from "lucide-react";
 import Image from "next/image";
 import { aboutComponents } from "@/components/utils/aboutusmenu";
 import { projectsNonAuthComponents, projectsAuthComponents } from "@/components/utils/projectsOptions";
@@ -52,7 +36,7 @@ interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
 
 const NewNavbar = () => {
   const { user, isAuthenticated } = useUserStore();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const searchUnderDevelopment = true;
 
   const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
     ({ className, title, description, href, icon, ...props }, ref) => {
@@ -251,17 +235,35 @@ const NewNavbar = () => {
     </NavigationMenu>
   );
 
-  const handleSearchButtonClick = () => {
-    return <DevelopmentModal 
-            buttonText={<FaSearch className="h-4 w-4" />}
-            buttonVariant="ghost"
-            buttonClassName="flex-shrink-0 h-9 w-9 p-0"
-            title="Search Feature Coming Soon"
-            description="We're working on an advanced search feature to help you find connections, projects, and resources more easily. Stay tuned for updates!"
-            icon="construction"
-          />
-  };
-
+  const renderSearchButton = () => {
+    if (searchUnderDevelopment) {
+      return (
+        <DevelopmentModal
+          buttonText={<FaSearch className="h-4 w-4" />}
+          buttonVariant="ghost"
+          buttonClassName="flex-shrink-0 h-9 w-9 p-0"
+          title={
+            <div className="flex items-center gap-2">
+              Search
+              <FaSearch className="h-5 w-5" />
+              Feature Coming Soon
+            </div>
+          }
+          description="We're working on an advanced search feature to help you find connections, projects, and resources more easily. Stay tuned for updates!"
+          icon="construction"
+        />
+      );
+    } else {
+        return (
+            <Button variant="ghost" className="flex-shrink-0 h-9 w-9 p-0"
+                onClick={() => alert("Search feature is under development")}
+            >
+                <FaSearch className="h-4 w-4" />
+            </Button>
+        );
+        }
+    };
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
@@ -286,20 +288,7 @@ const NewNavbar = () => {
         </div>
 
         <div className="flex items-center space-x-4 flex-shrink-0">
-            <DevelopmentModal 
-                buttonText={<FaSearch className="h-4 w-4" />}
-                buttonVariant="ghost"
-                buttonClassName="flex-shrink-0 h-9 w-9 p-0"
-                title={
-                    <div className="flex items-center gap-2">
-                        Search
-                        <FaSearch className="h-5 w-5" />
-                        Feature Coming Soon
-                    </div>
-                }
-                description="We're working on an advanced search feature to help you find connections, projects, and resources more easily. Stay tuned for updates!"
-                icon="construction"
-            />
+           {renderSearchButton()}
 
           {isAuthenticated ? (
             <div className="flex-shrink-0">
