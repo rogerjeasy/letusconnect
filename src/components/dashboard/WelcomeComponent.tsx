@@ -167,7 +167,7 @@ const WelcomeComponent = () => {
 
   return (
     <>
-    {showWelcomeAnimation && <WelcomeAnimation onClose={() => setShowWelcomeAnimation(false)} />}
+    {showWelcomeAnimation && <WelcomeAnimation username={user.username} onClose={() => setShowWelcomeAnimation(false)} />}
     <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-blue-50 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="space-y-8">
@@ -176,7 +176,7 @@ const WelcomeComponent = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-4xl md:text-6xl font-extrabold text-gray-800">
-                    Welcome to Let&apos;s Connect, {user.username}! 👋
+                    Quick Profile Overview, {user.username}! 👋
                   </CardTitle>
                   <CardDescription className="text-lg mt-2">
                     {profileStatus?.profileStatus === 'COMPLETE' 
