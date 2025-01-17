@@ -41,6 +41,7 @@ import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/com
 import { adminComponents } from "@/components/utils/adminOptions";
 import { UserProfileDropdown } from "./UserProfileDropdown";
 import { MobileMenu } from "./MobileMenuComponent";
+import DevelopmentModal from "../utils/DevelopmentModal";
 
 interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
     title: string;
@@ -250,6 +251,17 @@ const NewNavbar = () => {
     </NavigationMenu>
   );
 
+  const handleSearchButtonClick = () => {
+    return <DevelopmentModal 
+            buttonText={<FaSearch className="h-4 w-4" />}
+            buttonVariant="ghost"
+            buttonClassName="flex-shrink-0 h-9 w-9 p-0"
+            title="Search Feature Coming Soon"
+            description="We're working on an advanced search feature to help you find connections, projects, and resources more easily. Stay tuned for updates!"
+            icon="construction"
+          />
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
@@ -274,9 +286,20 @@ const NewNavbar = () => {
         </div>
 
         <div className="flex items-center space-x-4 flex-shrink-0">
-          <Button variant="ghost" size="icon" className="flex-shrink-0">
-            <FaSearch className="h-4 w-4" />
-          </Button>
+            <DevelopmentModal 
+                buttonText={<FaSearch className="h-4 w-4" />}
+                buttonVariant="ghost"
+                buttonClassName="flex-shrink-0 h-9 w-9 p-0"
+                title={
+                    <div className="flex items-center gap-2">
+                        Search
+                        <FaSearch className="h-5 w-5" />
+                        Feature Coming Soon
+                    </div>
+                }
+                description="We're working on an advanced search feature to help you find connections, projects, and resources more easily. Stay tuned for updates!"
+                icon="construction"
+            />
 
           {isAuthenticated ? (
             <div className="flex-shrink-0">

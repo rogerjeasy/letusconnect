@@ -14,10 +14,10 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, Construction } from 'lucide-react';
 
 interface DevelopmentModalProps {
-  buttonText: string;
+  buttonText: string | React.ReactNode;
   buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   buttonClassName?: string;
-  title?: string;
+  title?: string| React.ReactNode;
   description?: string;
   icon?: 'alert' | 'construction';
 }
