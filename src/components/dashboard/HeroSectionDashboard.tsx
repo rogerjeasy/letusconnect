@@ -130,7 +130,7 @@ export default function HeroSectionDashboard() {
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
                 size="lg"
-                onPress={() => router.push("/users-directory")}
+                onPress={() => router.push("/welcome")}
               >
                 <FaUserFriends className="mr-2" /> Find Connections
               </Button>
