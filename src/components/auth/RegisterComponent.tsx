@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { registerSchema, type RegisterFormValues } from "@/schemas/registerSchema";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Card,
   CardHeader,
@@ -22,7 +23,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
@@ -40,6 +40,10 @@ const RegistrationComponent = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false);
   const router = useRouter();
 
   const form = useForm<RegisterFormValues>({
@@ -56,6 +60,8 @@ const RegistrationComponent = () => {
 
   const password = form.watch("password");
   const confirmPassword = form.watch("confirmPassword");
+  const email = form.watch("email");
+  const username = form.watch("username");
 
   const passwordsMatch = React.useMemo(() => {
     if (!confirmPassword) return true;
@@ -112,123 +118,179 @@ const RegistrationComponent = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter your email"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Choose a username"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                        <div className="relative">
-                        <Input
-                            placeholder="Create a password"
-                            type={showPassword ? 'text' : 'password'}
-                            {...field}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                <div className="relative space-y-2">
+                    <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                        <Label 
+                            htmlFor="email"
+                            style={{ backgroundColor: "#faf6e9" }}
+                            className={`absolute left-3 transition-all duration-200 ${
+                                isEmailFocused || email
+                                ? '-top-2.5 text-xs bg-white px-1 text-primary z-10'
+                                : 'top-3 text-muted-foreground'
+                            }`}
                         >
-                            {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                            ) : (
-                            <Eye className="h-4 w-4" />
-                            )}
-                        </button>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-
-                <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                        <div className="relative">
-                        <Input
-                            placeholder="Confirm your password"
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            className={cn(
-                            confirmPassword && !passwordsMatch ? "border-red-500 focus-visible:ring-red-500" : "",
-                            confirmPassword && passwordsMatch ? "border-green-500 focus-visible:ring-green-500" : ""
-                            )}
+                            Email
+                        </Label>
+                        <FormControl>
+                            <Input
+                            id="email"
+                            placeholder={isEmailFocused || email ? "Enter your email" : ""}
+                            type="email"
                             {...field}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            onFocus={() => setIsEmailFocused(true)}
+                            onBlur={() => setIsEmailFocused(false)}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+
+                <div className="relative space-y-2">
+                    <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                        <FormItem>
+                        <Label 
+                            htmlFor="username"
+                            style={{ backgroundColor: "#faf6e9" }}
+                            className={`absolute left-3 transition-all duration-200 ${
+                                isUsernameFocused || username
+                                ? '-top-2.5 text-xs bg-white px-1 text-primary z-10'
+                                : 'top-3 text-muted-foreground'
+                            }`}
                         >
-                            {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                            ) : (
-                            <Eye className="h-4 w-4" />
-                            )}
-                        </button>
-                        </div>
-                    </FormControl>
-                    {confirmPassword && !passwordsMatch && (
-                        <p className="text-sm font-medium text-red-500">
-                        Passwords don&apos;t match
-                        </p>
+                            Username
+                        </Label>
+                        <FormControl>
+                            <Input
+                            placeholder={isUsernameFocused || username ? "Enter your username" : ""}
+                            {...field}
+                            onFocus={() => setIsUsernameFocused(true)}
+                            onBlur={() => setIsUsernameFocused(false)}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
                     )}
-                    {confirmPassword && passwordsMatch && (
-                        <p className="text-sm font-medium text-green-500">
-                        Passwords match
-                        </p>
+                    />
+                </div>
+
+                <div className="relative space-y-2">
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                            <Label
+                                htmlFor="password"
+                                style={{ backgroundColor: "#faf6e9" }}
+                                className={`absolute left-3 transition-all duration-200 ${
+                                isPasswordFocused || password
+                                    ? "-top-2.5 text-xs bg-white px-1 text-primary z-10"
+                                    : "top-3 text-muted-foreground"
+                                }`}
+                            >
+                                Password
+                            </Label>
+                            <FormControl>
+                                <div className="relative">
+                                <Input
+                                    placeholder={isPasswordFocused || password ? "Enter your password" : ""}
+                                    type={showPassword ? 'text' : 'password'}
+                                    {...field}
+                                    onFocus={() => setIsPasswordFocused(true)}
+                                    onBlur={() => setIsPasswordFocused(false)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                >
+                                    {showPassword ? (
+                                    <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                    <Eye className="h-4 w-4" />
+                                    )}
+                                </button>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="relative space-y-2">
+                    <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                        <FormItem>
+                        <Label
+                            htmlFor="confirmPassword"
+                            style={{ backgroundColor: "#faf6e9" }}
+                            className={`absolute left-3 transition-all duration-200 ${
+                            isConfirmPasswordFocused || confirmPassword
+                                ? "-top-2.5 text-xs bg-white px-1 text-primary z-10"
+                                : "top-3 text-muted-foreground"
+                            }`}
+                        >
+                            Confirm Password
+                        </Label>
+                        <FormControl>
+                            <div className="relative">
+                            <Input
+                                placeholder={isConfirmPasswordFocused || confirmPassword ? "Confirm your password" : ""}
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                className={cn(
+                                confirmPassword && !passwordsMatch ? "border-red-500 focus-visible:ring-red-500" : "",
+                                confirmPassword && passwordsMatch ? "border-green-500 focus-visible:ring-green-500" : ""
+                                )}
+                                {...field}
+                                onFocus={() => setIsConfirmPasswordFocused(true)}
+                                onBlur={() => setIsConfirmPasswordFocused(false)}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                                {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                                ) : (
+                                <Eye className="h-4 w-4" />
+                                )}
+                            </button>
+                            </div>
+                        </FormControl>
+                        {confirmPassword && !passwordsMatch && (
+                            <p className="text-sm font-medium text-red-500">
+                            Passwords don&apos;t match
+                            </p>
+                        )}
+                        {confirmPassword && passwordsMatch && (
+                            <p className="text-sm font-medium text-green-500">
+                            Passwords match
+                            </p>
+                        )}
+                        <FormMessage />
+                        </FormItem>
                     )}
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
+                    />
+                </div>
 
                 <FormField
                     control={form.control}
                     name="program"
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
-                        <FormLabel>Study Program</FormLabel>
                         <FormControl>
                             <ProgramCombobox
                             value={field.value}
