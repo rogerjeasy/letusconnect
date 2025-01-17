@@ -1,9 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Github } from 'lucide-react';
-import { getGoogleAuthUrl, getGithubAuthUrl } from '@/services/auth.service';
+import { toast } from 'react-toastify';
+import { handleGoogleAuth, handleGithubAuth } from '@/services/auth.service';
+import { useRouter } from 'next/navigation';
+import { setAuthToken } from '@/helpers/tokenManagement';
+import { useUserStore } from '@/store/userStore';
+import { api } from '@/helpers/api';
+import DevelopmentModal from '../utils/DevelopmentModal';
 
 interface SocialAuthButtonsProps {
   mode: 'login' | 'register';
@@ -11,38 +17,161 @@ interface SocialAuthButtonsProps {
 }
 
 const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({ mode, className }) => {
-  const handleGoogleAuth = () => {
-    const authUrl = getGoogleAuthUrl();
-    if (authUrl) window.location.href = authUrl;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<{ google: boolean; github: boolean }>({
+    google: false,
+    github: false
+  });
+
+  const googleUnderDevelopment = true;
+  const githubUnderDevelopment = true;
+
+  const handleNavigation = async (mode: 'login' | 'register') => {
+    try {
+      if (mode === 'login') {
+        router.push('/dashboard');
+      } else {
+        router.push('/welcome');
+      }
+      router.refresh();
+    } catch (error) {
+      console.error('Navigation error:', error);
+      toast.error('Error during navigation. Please try again.');
+    }
   };
 
-  const handleGithubAuth = () => {
-    const authUrl = getGithubAuthUrl();
-    if (authUrl) window.location.href = authUrl;
+  const handleGoogleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, google: true }));
+    
+    try {
+      const { user, token, isNewUser } = await handleGoogleAuth(mode);
+      if (!user || !token) {
+        throw new Error('Invalid authentication response');
+      }
+      setAuthToken(token);
+      useUserStore.setState({
+        user,
+        token,
+        isAuthenticated: true,
+        loading: false,
+        hasChecked: true
+      });
+      await handleNavigation(mode);
+
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Authentication cancelled') {
+          console.log('Google authentication was cancelled by the user');
+        } else {
+          toast.error(error.message);
+        }
+        
+        // Clear auth data on error
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        delete api.defaults.headers.common['Authorization'];
+      }
+    } finally {
+      setIsLoading(prev => ({ ...prev, google: false }));
+    }
+  };
+
+  const handleGithubClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLoading(prev => ({ ...prev, github: true }));
+    
+    try {
+      const { user, token, isNewUser } = await handleGithubAuth(mode);
+      if (!user || !token) {
+        throw new Error('Invalid authentication response');
+      }
+      setAuthToken(token);
+      useUserStore.setState({
+        user,
+        token,
+        isAuthenticated: true,
+        loading: false,
+        hasChecked: true
+      });
+
+      await handleNavigation(mode);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Authentication cancelled') {
+          console.log('GitHub authentication was cancelled by the user');
+        } else {
+          toast.error(error.message);
+        }
+        
+        // Clear auth data on error
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        }
+        delete api.defaults.headers.common['Authorization'];
+      }
+    } finally {
+      setIsLoading(prev => ({ ...prev, github: false }));
+    }
+  };
+
+  const handleButtonUnderDevelopment = (mode: 'login' | 'register', type: 'github' | 'google') => {
+    const action = mode === 'login' ? 'Sign in' : 'Sign up';
+    const provider = type.charAt(0).toUpperCase() + type.slice(1);
+    const modeText = mode === 'login' ? 'login' : 'registration';
+    
+    return (
+      <DevelopmentModal 
+        buttonText={`${action} with ${provider}`}
+        buttonVariant="outline"
+        buttonClassName={`w-full hover:bg-${type === 'github' ? '[#24292F]' : '[#4285F4]'}/90 hover:text-white transition-colors duration-200 group relative`}
+        title={`${provider} ${action} Coming Soon!`}
+        description={`${provider} ${modeText} is currently under development and will be available soon. We appreciate your patience! 🙂`}
+        icon="construction"
+      />
+    );
   };
 
   const buttonText = mode === 'login' ? 'Sign in with' : 'Sign up with';
 
-  return (
-    <div className={`grid grid-cols-2 gap-4 ${className}`}>
-      <Button 
+  const renderGithubButton = () => {
+    if (githubUnderDevelopment) {
+      return handleButtonUnderDevelopment(mode, 'github');
+    }
+
+    return (
+      <Button
         type="button"
-        variant="outline" 
+        variant="outline"
         className="w-full hover:bg-[#24292F]/90 hover:text-white transition-colors duration-200 group relative"
-        onClick={handleGithubAuth}
+        onClick={handleGithubClick}
+        disabled={isLoading.github}
       >
         <div className="flex items-center justify-center">
           <Github className="mr-2 h-4 w-4 text-[#24292F] group-hover:text-white transition-colors" />
           <span className="truncate">
-            {buttonText} Github
+            {isLoading.github ? 'Loading...' : `${buttonText} Github`}
           </span>
         </div>
       </Button>
-      <Button 
+    );
+  };
+
+  const renderGoogleButton = () => {
+    if (googleUnderDevelopment) {
+      return handleButtonUnderDevelopment(mode, 'google');
+    }
+
+    return (
+      <Button
         type="button"
-        variant="outline" 
+        variant="outline"
         className="w-full hover:bg-[#4285F4]/90 hover:text-white transition-colors duration-200 group relative"
-        onClick={handleGoogleAuth}
+        onClick={handleGoogleClick}
+        disabled={isLoading.google}
       >
         <div className="flex items-center justify-center">
           <div className="mr-2 bg-white rounded-sm p-0.5 group-hover:bg-[#4285F4]/90 transition-colors">
@@ -70,10 +199,17 @@ const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({ mode, className }
             </svg>
           </div>
           <span className="truncate">
-            {buttonText} Google
+            {isLoading.google ? 'Loading...' : `${buttonText} Google`}
           </span>
         </div>
       </Button>
+    );
+  };
+
+  return (
+    <div className={`grid grid-cols-2 gap-4 ${className}`}>
+      {renderGithubButton()}
+      {renderGoogleButton()}
     </div>
   );
 };

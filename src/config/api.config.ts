@@ -29,8 +29,6 @@ export const API_CONFIG = {
         REGISTER: '/auth/register',
         SESSION: '/auth/session',
         LOGOUT: '/auth/logout',
-        GOOGLE_CALLBACK: '/auth/google/callback',
-        GITHUB_CALLBACK: '/auth/github/callback',
       },
 
       USERS: {

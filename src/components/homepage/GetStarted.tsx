@@ -38,7 +38,7 @@ export default function GetStartedPage() {
   }
   
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-gray-50">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-blue-50 via-white to-blue-50 py-20">
         <div className="container mx-auto px-6 lg:px-20 flex flex-col-reverse md:flex-row items-center gap-16">

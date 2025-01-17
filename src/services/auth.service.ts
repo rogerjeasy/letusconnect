@@ -5,108 +5,226 @@ import { API_CONFIG } from "@/config/api.config";
 import type { LoginResponse } from "@/config/api.config";
 import { User } from "@/store/userStore";
 import { RegisterData } from "@/models/RegisterData";
+import { 
+  GoogleAuthProvider, 
+  GithubAuthProvider,
+  signInWithPopup,
+  fetchSignInMethodsForEmail,
+  AuthError,
+  UserCredential
+} from 'firebase/auth';
+import { toast } from 'react-toastify';
+import { auth } from '@/config/firebase';
+
 
 interface LoginData {
   emailOrUsername: string;
   password: string;
 }
 
-interface OAuthResponse {
-  token: string;
-  user: User;
+interface BaseOAuthData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  photoURL: string;
+  uid: string;
+  program: string;
+  accessToken?: string;
 }
 
-// OAuth URL generation functions
-export const getGoogleAuthUrl = (): string => {
-  const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const REDIRECT_URI = `${window.location.origin}/api/auth/google/callback`;
-  const STATE = generateRandomState();
-  
-  // Store state in sessionStorage for validation when the user returns
-  sessionStorage.setItem('oauthState', STATE);
-  
-  const params = new URLSearchParams({
-    client_id: GOOGLE_CLIENT_ID!,
-    redirect_uri: REDIRECT_URI,
-    response_type: 'code',
-    scope: 'email profile',
-    state: STATE,
-    prompt: 'select_account',
-    access_type: 'offline'
-  });
+interface GoogleOAuthData extends BaseOAuthData {
+  provider: 'google';
+  locale?: string;
+  displayName: string;
+}
 
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-};
+interface GitHubOAuthData extends BaseOAuthData {
+  provider: 'github';
+  login?: string;
+  html_url?: string;
+}
 
-export const getGithubAuthUrl = (): string => {
-  const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
-  const REDIRECT_URI = `${window.location.origin}/api/auth/github/callback`;
-  const STATE = generateRandomState();
-  
-  // Store state in sessionStorage for validation when the user returns
-  sessionStorage.setItem('oauthState', STATE);
-  
-  const params = new URLSearchParams({
-    client_id: GITHUB_CLIENT_ID!,
-    redirect_uri: REDIRECT_URI,
-    state: STATE,
-    scope: 'user:email'
-  });
+interface AuthResponse {
+  user: any;
+  token: string | undefined;
+  isNewUser: boolean;
+}
 
-  return `https://github.com/login/oauth/authorize?${params.toString()}`;
-};
-
-const generateRandomState = (): string => {
-  const array = new Uint8Array(32);
-  window.crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-};
-
-export const handleGoogleAuth = async (code: string, state: string): Promise<OAuthResponse> => {
+// Handle Google Authentication
+export const handleGoogleAuth = async (mode: 'login' | 'register', program="Other"): Promise<AuthResponse> => {
   try {
-    const storedState = sessionStorage.getItem('oauthState');
-    if (!storedState || storedState !== state) {
-      throw new Error('Invalid state parameter');
+    const provider = new GoogleAuthProvider();
+    
+    if (mode === 'register') {
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
     }
-    
-    const response = await api.post<OAuthResponse>(
-      API_CONFIG.ENDPOINTS.AUTH.GOOGLE_CALLBACK,
-      { code }
-    );
-    
-    if (!response.data.token || !response.data.user) {
-      throw new Error('Invalid response from server');
+
+    const result: UserCredential = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential?.accessToken;
+
+    const resultWithMetadata = result as UserCredential & {
+      _tokenResponse?: {
+        isNewUser?: boolean;
+        firstName?: string;
+        lastName?: string;
+        locale?: string;
+      };
+    };
+
+    const isNewUser = resultWithMetadata._tokenResponse?.isNewUser ?? false;
+
+    if (mode === 'login' && isNewUser) {
+      throw new Error('No account exists with this Google account. Please sign up first.');
     }
-    
-    return response.data;
+
+    if (mode === 'register' && !isNewUser) {
+      throw new Error('An account already exists with this Google account. Please sign in instead.');
+    }
+
+    // If this is a registration and we have the necessary data
+    if (mode === 'register' && isNewUser) {
+      if (!program) {
+        throw new Error('Program selection is required for registration');
+      }
+
+      if (!result.user.displayName) {
+        throw new Error('Display name is required for registration');
+      }
+
+      const nameParts = result.user.displayName.split(' ');
+      
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+      const firstName = nameParts.length > 1 
+        ? nameParts.slice(0, nameParts.length - 1).join(' ') 
+        : nameParts[0];
+
+
+      const registerData: GoogleOAuthData = {
+        email: result.user.email!,
+        displayName: result.user.displayName,
+        firstName: firstName,
+        lastName: lastName,
+        photoURL: result.user.photoURL || '',
+        uid: result.user.uid,
+        provider: 'google',
+        accessToken: token,
+        program,
+        locale: resultWithMetadata._tokenResponse?.locale
+      };
+
+      // Register with our backend
+      await api.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, registerData);
+    }
+    toast.success(`Successfully ${mode === 'login' ? 'signed in' : 'signed up'} with Google!`);
+    return { user: result.user, token, isNewUser };
   } catch (error) {
-    throw new Error(handleError(error) || 'Google authentication failed');
-  } finally {
-    sessionStorage.removeItem('oauthState');
+    console.error('Google auth error:', error);
+    
+    const authError = error as AuthError;
+    
+    if (authError.code === 'auth/popup-blocked') {
+      toast.error('Please allow popups for this website');
+    } else if (authError.code === 'auth/cancelled-popup-request') {
+      throw new Error('Authentication cancelled');
+    } else if (authError.code === 'auth/account-exists-with-different-credential') {
+      toast.error('An account already exists with the same email but different sign-in method');
+    } else if (error instanceof Error) {
+      toast.error(error.message);
+    } else {
+      toast.error(`Failed to ${mode === 'login' ? 'sign in' : 'sign up'} with Google`);
+    }
+    
+    throw error;
   }
 };
 
-export const handleGithubAuth = async (code: string, state: string): Promise<OAuthResponse> => {
+// Handle GitHub Authentication
+export const handleGithubAuth = async (mode: 'login' | 'register', program="Other"): Promise<AuthResponse> => {
   try {
-    const storedState = sessionStorage.getItem('oauthState');
-    if (!storedState || storedState !== state) {
-      throw new Error('Invalid state parameter');
+    const provider = new GithubAuthProvider();
+    provider.addScope('user:email');
+
+    const result: UserCredential = await signInWithPopup(auth, provider);
+    const credential = GithubAuthProvider.credentialFromResult(result);
+    const token = credential?.accessToken;
+
+    const resultWithMetadata = result as UserCredential & {
+      _tokenResponse?: {
+        isNewUser?: boolean;
+        screenName?: string;
+        firstName?: string;
+        lastName?: string;
+      };
+    };
+
+    const isNewUser = resultWithMetadata._tokenResponse?.isNewUser ?? false;
+
+    if (mode === 'login' && isNewUser) {
+      throw new Error('No account exists with this GitHub account. Please sign up first.');
     }
-    
-    const response = await api.post<OAuthResponse>(
-      API_CONFIG.ENDPOINTS.AUTH.GITHUB_CALLBACK,
-      { code }
-    );
-    
-    if (!response.data.token || !response.data.user) {
-      throw new Error('Invalid response from server');
+
+    if (mode === 'register' && !isNewUser) {
+      throw new Error('An account already exists with this GitHub account. Please sign in instead.');
     }
-    
-    return response.data;
+
+    // If this is a registration and we have the necessary data
+    if (mode === 'register' && isNewUser) {
+      if (!program) {
+        throw new Error('Program selection is required for registration');
+      }
+
+      const names = (result.user.displayName || '').split(' ');
+      const registerData: GitHubOAuthData = {
+        email: result.user.email!,
+        firstName: resultWithMetadata._tokenResponse?.firstName || names[0] || '',
+        lastName: resultWithMetadata._tokenResponse?.lastName || names.slice(1).join(' ') || '',
+        photoURL: result.user.photoURL || '',
+        uid: result.user.uid,
+        provider: 'github',
+        accessToken: token,
+        program,
+        login: resultWithMetadata._tokenResponse?.screenName,
+        html_url: `https://github.com/${resultWithMetadata._tokenResponse?.screenName}`
+      };
+
+      // Register with our backend
+      await api.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER, registerData);
+    }
+
+    toast.success(`Successfully ${mode === 'login' ? 'signed in' : 'signed up'} with GitHub!`);
+    return { user: result.user, token, isNewUser };
   } catch (error) {
-    throw new Error(handleError(error) || 'GitHub authentication failed');
-  } finally {
-    sessionStorage.removeItem('oauthState');
+    console.error('GitHub auth error:', error);
+    
+    const authError = error as AuthError;
+    
+    if (authError.code === 'auth/popup-blocked') {
+      toast.error('Please allow popups for this website');
+    } else if (authError.code === 'auth/cancelled-popup-request') {
+      throw new Error('Authentication cancelled');
+    } else if (authError.code === 'auth/account-exists-with-different-credential') {
+      toast.error('An account already exists with the same email but different sign-in method');
+    } else if (error instanceof Error) {
+      toast.error(error.message);
+    } else {
+      toast.error(`Failed to ${mode === 'login' ? 'sign in' : 'sign up'} with GitHub`);
+    }
+    
+    throw error;
+  }
+};
+
+// Helper function to check if email exists
+export const checkEmailExists = async (email: string): Promise<boolean> => {
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    return methods.length > 0;
+  } catch (error) {
+    console.error('Error checking email:', error);
+    return false;
   }
 };
 
@@ -130,9 +248,13 @@ export const login = async (data: LoginData): Promise<LoginResponse> => {
 
 export const registerUser = async (data: RegisterData): Promise<{ token: string; user: User }> => {
     try {
+      const newDataWithProvider = {
+        ...data,
+        provider: "email",
+      }
       const response = await api.post<{ token: string; user: User }>(
         API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-        data
+        newDataWithProvider
       );
       if (!response.data.token || !response.data.user) {
         throw new Error("Invalid response from server");
@@ -160,6 +282,7 @@ export const registerUser = async (data: RegisterData): Promise<{ token: string;
   export const logout = async (): Promise<void> => {
     try {
       await api.patch(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
+      await auth.signOut();
     } catch (error) {
       throw new Error(handleError(error) || "Logout failed");
     }
