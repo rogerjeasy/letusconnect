@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Select, SelectItem, Avatar, Button, Card, CardHeader, CardBody, Chip } from "@nextui-org/react";
+import { Select, SelectItem, Avatar, Button, Chip } from "@nextui-org/react";
+import { Button as ButtonComponent } from "@/components/ui/button";
 import { useCountryStore } from "../../store/userCountryStore";
 import { useUserLanguageStore } from "../../store/userLanguageStore";
 import { fetchCountryData } from "../../utils/countryapi"
@@ -196,15 +197,15 @@ export default function UserSelection({
           
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="bordered"
+                  <ButtonComponent
+                    variant="secondary"
                     role="combobox"
                     aria-expanded={open}
                     className="w-full justify-between bg-default-50 hover:bg-default-100 transition-colors"
                   >
                     Select Languages
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
+                  </ButtonComponent>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0">
                   <Command>
@@ -260,8 +261,8 @@ export default function UserSelection({
               <div className="space-y-4">
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="solid"
+                    <ButtonComponent
+                      variant="secondary"
                       role="combobox"
                       aria-expanded={open}
                       className="w-full justify-between"
@@ -270,7 +271,7 @@ export default function UserSelection({
                         phoneCodes.find(pc => pc.code === defaultValue)?.code || "Select Phone Code" 
                         : "Select Phone Code"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
+                    </ButtonComponent>
                   </PopoverTrigger>
                   <PopoverContent className="w-full p-0">
                     <Command>
