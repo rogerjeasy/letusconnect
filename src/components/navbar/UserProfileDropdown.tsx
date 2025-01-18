@@ -48,7 +48,7 @@ export function UserProfileDropdown() {
   };
 
   const navigateToProfile = () => {
-    router.push("/profile");
+    router.push(`/profile/${user?.uid}`);
   };
 
   return (
