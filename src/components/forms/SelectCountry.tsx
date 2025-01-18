@@ -187,20 +187,20 @@ export default function UserSelection({
 
         case "language":
           return (
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm text-muted-foreground">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center bg-default-100 p-4 rounded-lg">
+                <span className="text-sm font-medium">
                   Selected Languages: {selectedLanguages.length}
                 </span>
               </div>
-  
+          
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                   <Button
-                    variant="solid"
+                    variant="bordered"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between"
+                    className="w-full justify-between bg-default-50 hover:bg-default-100 transition-colors"
                   >
                     Select Languages
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -234,47 +234,75 @@ export default function UserSelection({
                   </Command>
                 </PopoverContent>
               </Popover>
-  
+          
               {selectedLanguages.length > 0 && (
-                <Card className="mt-4">
-                  <CardHeader className="pb-3">
-                    <h4 className="font-medium">Selected Languages</h4>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedLanguages.map((lang) => (
-                        <Chip
-                          key={lang}
-                          variant="flat"
-                          color="primary"
-                          className="cursor-pointer"
-                          onClose={() => handleLanguageToggle(lang)}
-                        >
-                          {lang}
-                        </Chip>
-                      ))}
-                    </div>
-                  </CardBody>
-                </Card>
+                <div className="border border-default-200 p-6 rounded-lg bg-white">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedLanguages.map((lang) => (
+                      <Chip
+                        key={lang}
+                        variant="flat"
+                        color="primary"
+                        className="cursor-pointer hover:opacity-90"
+                        onClose={() => handleLanguageToggle(lang)}
+                      >
+                        {lang}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           );
 
-      case "phone":
-        return (
-          <Select
-            className="max-w-full"
-            label="Select Phone Code"
-            defaultSelectedKeys={typeof defaultValue === "string" ? [defaultValue] : undefined}
-            onSelectionChange={(keys) => handleSelect(keys as Set<string>, "phone")}
-          >
-            {phoneCodes.map((pc) => (
-              <SelectItem key={pc.code} value={pc.code}>
-                {`${pc.country} (${pc.code})`}
-              </SelectItem>
-            ))}
-          </Select>
-        );
+          case "phone":
+            return (
+              <div className="space-y-4">
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="solid"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between"
+                    >
+                      {defaultValue ? 
+                        phoneCodes.find(pc => pc.code === defaultValue)?.code || "Select Phone Code" 
+                        : "Select Phone Code"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search phone codes..." />
+                      <CommandList>
+                        <CommandEmpty>No phone code found.</CommandEmpty>
+                        <CommandGroup>
+                          {phoneCodes.map((pc) => (
+                            <CommandItem
+                              key={pc.code}
+                              value={pc.code}
+                              onSelect={() => {
+                                onChange?.(pc.code);
+                                setOpen(false);
+                              }}
+                            >
+                              {`${pc.country} (${pc.code})`}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  defaultValue === pc.code ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            );
     }
   };
 

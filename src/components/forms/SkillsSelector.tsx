@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { AlertCircle, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@nextui-org/react";
 import {
@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Card, CardBody, CardHeader, Chip } from "@nextui-org/react";
+import { Chip } from "@nextui-org/react";
 import { 
   SKILL_CATEGORIES,
   type SkillCategory,
@@ -37,7 +37,7 @@ export default function SkillSelector({
   maxSelections = 10
 }: SkillSelectorProps) {
   const [open, setOpen] = React.useState(false);
-  const [activeCategory, setActiveCategory] = React.useState<SkillCategory>("TECHNICAL_SKILLS");
+  const [activeCategory, setActiveCategory] = React.useState<SkillCategory | null>(null);
 
   const handleSkillToggle = (skill: Skill) => {
     if (selectedSkills.includes(skill)) {
@@ -48,9 +48,9 @@ export default function SkillSelector({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-muted-foreground">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center bg-default-100 p-4 rounded-lg">
+        <span className="text-sm font-medium">
           Selected Skills: {selectedSkills.length}/{maxSelections}
         </span>
       </div>
@@ -59,12 +59,12 @@ export default function SkillSelector({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="solid"
+            variant="bordered"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className="w-full justify-between bg-default-50 hover:bg-default-100 transition-colors"
           >
-            {SKILL_CATEGORIES[activeCategory].name}
+            {activeCategory ? SKILL_CATEGORIES[activeCategory].name : "Select Your Skills"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -99,18 +99,18 @@ export default function SkillSelector({
       </Popover>
 
       {/* Available Skills Display */}
-      <Card className="mt-4">
-        <CardHeader className="pb-3">
-          <h4 className="font-medium">Available Skills in {SKILL_CATEGORIES[activeCategory].name}</h4>
-        </CardHeader>
-        <CardBody>
+      {activeCategory && (
+        <div className="bg-default-50 p-6 rounded-lg shadow-sm">
+          <h4 className="font-medium text-lg mb-4 text-default-800">
+            Available Skills in {SKILL_CATEGORIES[activeCategory].name}
+          </h4>
           <div className="flex flex-wrap gap-2">
             {[...SKILL_CATEGORIES[activeCategory].skills].map((skill) => (
               <Chip
                 key={skill}
                 variant="flat"
                 color={selectedSkills.includes(skill) ? "primary" : "default"}
-                className="cursor-pointer transition-colors"
+                className="cursor-pointer transition-colors hover:opacity-80"
                 onClick={() => handleSkillToggle(skill)}
               >
                 {skill}
@@ -120,31 +120,36 @@ export default function SkillSelector({
               </Chip>
             ))}
           </div>
-        </CardBody>
-      </Card>
+        </div>
+      )}
+
+      {/* No Skills Selected Message */}
+      {selectedSkills.length === 0 && (
+        <div className="bg-default-50 p-6 rounded-lg text-center">
+          <div className="flex items-center gap-2 justify-center py-4">
+            <AlertCircle className="h-5 w-5 text-default-400" />
+            <p className="text-default-400">No skills selected yet. Choose a category to start selecting your skills.</p>
+          </div>
+        </div>
+      )}
 
       {/* Selected Skills Display */}
       {selectedSkills.length > 0 && (
-        <Card className="mt-4">
-          <CardHeader className="pb-3">
-            <h4 className="font-medium">Your Selected Skills</h4>
-          </CardHeader>
-          <CardBody>
-            <div className="flex flex-wrap gap-2">
-              {selectedSkills.map((skill) => (
-                <Chip
-                  key={skill}
-                  variant="flat"
-                  color="primary"
-                  className="cursor-pointer"
-                  onClose={() => handleSkillToggle(skill)}
-                >
-                  {skill}
-                </Chip>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
+        <div className="border border-default-200 p-6 rounded-lg bg-white">
+          <div className="flex flex-wrap gap-2">
+            {selectedSkills.map((skill) => (
+              <Chip
+                key={skill}
+                variant="flat"
+                color="primary"
+                className="cursor-pointer hover:opacity-90"
+                onClose={() => handleSkillToggle(skill)}
+              >
+                {skill}
+              </Chip>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

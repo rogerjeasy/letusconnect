@@ -1,5 +1,4 @@
 "use client"
-
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -23,11 +22,12 @@ import type { RegisterFormValues } from "@/schemas/registerSchema"
 interface ProgramComboboxProps {
   value: RegisterFormValues['program']
   onChange: (value: RegisterFormValues['program']) => void
+  style?: React.CSSProperties
 }
 
-export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
+export function ProgramCombobox({ value, onChange, style }: ProgramComboboxProps) {
   const [open, setOpen] = React.useState(false)
-
+  
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -35,7 +35,7 @@ export function ProgramCombobox({ value, onChange }: ProgramComboboxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          style={{ backgroundColor: "#faf6e9" }}
+          style={style}
           className="w-full justify-between"
         >
           {value || "Select you study program..."}

@@ -4,9 +4,7 @@ import UserConnectionComponents from "@/components/connectstudents/UserConnectio
 
 const UserConnectionsPage: React.FC = () => {
   return (
-    <div className="mt-16">
       <UserConnectionComponents />
-    </div>
   );
 };
 
