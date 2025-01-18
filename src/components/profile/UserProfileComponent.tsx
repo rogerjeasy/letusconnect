@@ -15,6 +15,7 @@ import { Card, CardContent } from '../ui/card';
 import { AvatarFallback, AvatarImage, Avatar } from '../ui/avatar';
 import { updateUserPersonalInformation } from '@/services/users.services';
 import { toast } from 'react-toastify';
+import DevelopmentModal from '../utils/DevelopmentModal';
 
 const UserProfileComponent = () => {
   const { user, loading: isUserLoading, setUser } = useUserStore();
@@ -119,10 +120,18 @@ const UserProfileComponent = () => {
       <div className="w-full max-w-5xl mx-auto mb-8 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-            <Button variant="outline">
-              <Camera className="h-4 w-4 mr-2" />
-              Change Photo
-            </Button>
+            <DevelopmentModal
+                buttonText={
+                    <>
+                    <Camera className="h-4 w-4 mr-2" />
+                    Change Photo
+                    </>
+                }
+                buttonVariant="outline"
+                title="Profile Photo Upload Coming Soon"
+                description="We're working on implementing secure profile photo uploads. Soon you'll be able to personalize your profile with a photo of your choice. This feature will include image cropping, size optimization, and easy updating."
+                icon="construction"
+                />
           </div>
           
           <Card>
@@ -216,275 +225,3 @@ const UserProfileComponent = () => {
 };
 
 export default UserProfileComponent;
-// "use client";
-// import React, { useState } from 'react';
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Button } from "@/components/ui/button";
-// import UserDetails from './UserDetails';
-// import UserSchoolExperiences from './UserSchoolExperience';
-// import UserAddressComponent from './UserAddress';
-// import UserWorkExperiences from './UserWorkExperience';
-// import { 
-//   Users, 
-//   Briefcase, 
-//   GraduationCap, 
-//   MapPin, 
-//   Loader2, 
-//   Camera
-// } from "lucide-react";
-// import { Users as UserIcon } from "lucide-react";
-// import { toast } from '@/hooks/use-toast';
-// import { User, UserAddress, UserSchoolExperience, UserWorkExperience, useUserStore } from '@/store/userStore';
-
-// const UserProfileComponent = () => {
-//   const [activeTab, setActiveTab] = useState("personal");
-//   const { user, loading: isUserLoading } = useUserStore();
-//   const [loadingStates, setLoadingStates] = useState({
-//     personal: false,
-//     education: false,
-//     work: false,
-//     address: false,
-//   });
-
-//   const mockUser = {
-//     name: user?.username,
-//     email: user?.email,
-//     avatar: user?.profilePicture,
-//   };
-
-//   const setTabLoading = (tab: string, loading: boolean) => {
-//         setLoadingStates(prev => ({
-//           ...prev,
-//           [tab]: loading
-//         }));
-//       };
-
-//     // Update handlers for each section
-//     const handlePersonalUpdate = async (data: Partial<User >) => {
-//         try {
-//           setTabLoading('personal', true);
-//           // Implement your API call here
-//           await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-          
-//           toast({
-//             title: "Success",
-//             description: "Personal information updated successfully",
-//           });
-//         } catch (error) {
-//           console.error('Error updating personal information:', error);
-//           toast({
-//             title: "Error",
-//             description: "Failed to update personal information",
-//             variant: "destructive",
-//           });
-//         } finally {
-//           setTabLoading('personal', false);
-//         }
-//       };
-    
-//       const handleEducationUpdate = async (data: UserSchoolExperience) => {
-//         try {
-//           setTabLoading('education', true);
-//           // Implement your API call here
-//           await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-          
-//           toast({
-//             title: "Success",
-//             description: "Education history updated successfully",
-//           });
-//         } catch (error) {
-//           console.error('Error updating education history:', error);
-//           toast({
-//             title: "Error",
-//             description: "Failed to update education history",
-//             variant: "destructive",
-//           });
-//         } finally {
-//           setTabLoading('education', false);
-//         }
-//       };
-    
-//       const handleWorkUpdate = async (data: UserWorkExperience) => {
-//         try {
-//           setTabLoading('work', true);
-//           // Implement your API call here
-//           await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-          
-//           toast({
-//             title: "Success",
-//             description: "Work history updated successfully",
-//           });
-//         } catch (error) {
-//           console.error('Error updating work history:', error);
-//           toast({
-//             title: "Error",
-//             description: "Failed to update work history",
-//             variant: "destructive",
-//           });
-//         } finally {
-//           setTabLoading('work', false);
-//         }
-//       };
-    
-//       const handleAddressUpdate = async (data: UserAddress) => {
-//         try {
-//           setTabLoading('address', true);
-//           // Implement your API call here
-//           await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-          
-//           toast({
-//             title: "Success",
-//             description: "Address updated successfully",
-//           });
-//         } catch (error) {
-//           console.error('Error updating address:', error);
-//           toast({
-//             title: "Error",
-//             description: "Failed to update address",
-//             variant: "destructive",
-//           });
-//         } finally {
-//           setTabLoading('address', false);
-//         }
-//       };
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 py-8">
-//       <div className="container max-w-6xl mx-auto px-4">
-        // <div className="mb-8 space-y-4">
-        //   <div className="flex items-center justify-between">
-        //     <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-        //     <Button variant="outline">
-        //       <Camera className="h-4 w-4 mr-2" />
-        //       Change Photo
-        //     </Button>
-        //   </div>
-          
-        //   <Card>
-        //     <CardContent className="p-6">
-        //       <div className="flex items-center space-x-6">
-        //         <Avatar className="h-24 w-24">
-        //           <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
-        //           <AvatarFallback>JD</AvatarFallback>
-        //         </Avatar>
-        //         <div>
-        //           <h2 className="text-2xl font-semibold">{mockUser.name}</h2>
-        //           <p className="text-gray-500">{mockUser.email}</p>
-        //         </div>
-        //       </div>
-        //     </CardContent>
-        //   </Card>
-        // </div>
-
-//         <Card className="mt-6">
-//           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-//             <TabsList className="w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
-//               <TabsTrigger
-//                 value="personal"
-//                 disabled={loadingStates.personal}
-//                 className="relative h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-//               >
-//                 <Users className="h-4 w-4 mr-2" />
-//                 Personal Info
-//                 {loadingStates.personal && (
-//                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-//                 )}
-//               </TabsTrigger>
-//               <TabsTrigger
-//                 value="education"
-//                 disabled={loadingStates.education}
-//                 className="relative h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-//               >
-//                 <GraduationCap className="h-4 w-4 mr-2" />
-//                 Education
-//                 {loadingStates.education && (
-//                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-//                 )}
-//               </TabsTrigger>
-//               <TabsTrigger
-//                 value="work"
-//                 disabled={loadingStates.work}
-//                 className="relative h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-//               >
-//                 <Briefcase className="h-4 w-4 mr-2" />
-//                 Work History
-//                 {loadingStates.work && (
-//                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-//                 )}
-//               </TabsTrigger>
-//               <TabsTrigger
-//                 value="address"
-//                 disabled={loadingStates.address}
-//                 className="relative h-11 rounded-none border-b-2 border-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
-//               >
-//                 <MapPin className="h-4 w-4 mr-2" />
-//                 Address
-//                 {loadingStates.address && (
-//                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-//                 )}
-//               </TabsTrigger>
-//             </TabsList>
-
-//             <ScrollArea className="h-[600px]">
-//               <div className="p-6">
-//                 <TabsContent value="personal" className="mt-0 space-y-4">
-//                   <div className="space-y-4">
-//                     <h3 className="text-lg font-medium">Personal Information</h3>
-//                     <div className="text-sm text-muted-foreground">
-//                       Update your personal details and how others see you on the platform.
-//                     </div>
-//                     <UserDetails user={user} onUpdate={handlePersonalUpdate} />
-//                   </div>
-//                 </TabsContent>
-
-//                 <TabsContent value="education" className="mt-0 space-y-4">
-//                   <div className="space-y-4">
-//                     <h3 className="text-lg font-medium">Education History</h3>
-//                     <div className="text-sm text-muted-foreground">
-//                       Add or update your educational background and academic achievements.
-//                     </div>
-//                         <UserSchoolExperiences 
-//                             schoolExperience={null} // Replace with actual data
-//                             onUpdate={handleEducationUpdate}
-//                         />
-//                   </div>
-//                 </TabsContent>
-
-//                 <TabsContent value="work" className="mt-0 space-y-4">
-//                   <div className="space-y-4">
-//                     <h3 className="text-lg font-medium">Work Experience</h3>
-//                     <div className="text-sm text-muted-foreground">
-//                       Manage your professional experience and career history.
-//                     </div>
-//                         <UserWorkExperiences 
-//                             workExperience={null} // Replace with actual data
-//                             onUpdate={handleWorkUpdate}
-//                         />
-//                   </div>
-//                 </TabsContent>
-
-//                 <TabsContent value="address" className="mt-0 space-y-4">
-//                   <div className="space-y-4">
-//                     <h3 className="text-lg font-medium">Address Information</h3>
-//                     <div className="text-sm text-muted-foreground">
-//                       Update your current address and contact information.
-//                     </div>
-//                         <UserAddressComponent 
-//                             address={null}
-//                             onUpdate={handleAddressUpdate}
-//                         />
-//                   </div>
-//                 </TabsContent>
-//               </div>
-//             </ScrollArea>
-//           </Tabs>
-//         </Card>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default UserProfileComponent;
