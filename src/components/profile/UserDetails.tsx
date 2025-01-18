@@ -261,7 +261,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({
                 name="phoneCode"
                 render={({ field: fieldProps }) => (
                     <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel>Country Code</FormLabel>
                     <FormControl>
                         <UserSelection
                         selectionMode="phone"
