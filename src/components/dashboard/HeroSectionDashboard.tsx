@@ -94,7 +94,7 @@ export default function HeroSectionDashboard() {
               >
                 <div 
                   className="bg-white p-4 rounded-lg shadow-md border border-gray-200 cursor-pointer hover:shadow-lg transition-all"
-                  onClick={() => router.push('/settings')}
+                  onClick={() => router.push('/profile-settings')}
                 >
                   <div className="flex flex-col space-y-2">
                     <div className="flex justify-between items-center">

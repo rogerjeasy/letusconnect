@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Briefcase, Book, Award, MapPin, Globe, Mail, Phone, Check, UserCheck, Users, Activity, RefreshCcw } from 'lucide-react';
+import { Calendar, Briefcase, Book, Award, MapPin, Globe, Mail, Phone, Check, UserCheck, Users, Activity, RefreshCcw, Pencil } from 'lucide-react';
 import { User, useUserStore, WorkExperience } from "@/store/userStore";
 import { Skill } from "@/store/skills";
 import { ExpertiseSkill } from "@/store/areaOfExpertise";
@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useRouter } from 'next/navigation';
 import { Tooltip } from '@nextui-org/react';
 import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
+import { Button } from '../ui/button';
 
 interface UserProfileProps {
   user: User;
@@ -23,8 +24,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     maxRetries: 3,
     retryDelay: 1000
   });
-
-
+  const currentUser = useUserStore((state) => state.user);
 
   const renderConnectionBadge = () => {
     const content = loading ? (
@@ -66,9 +66,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   
   return (
     // p-6 max-w-5xl mx-auto pt-28
-    <div className="container mx-auto p-4 space-y-6">
       <Card className="w-full max-w-4xl mx-auto mt-10 flex flex-col">
-        <CardHeader className="flex flex-col items-center text-center pb-4">
+        <CardHeader className="flex flex-col items-center text-center pb-4 relative">
+          {currentUser?.uid === user.uid && (
+                <Tooltip
+                  content="Edit your profile"
+                  placement="left"
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-4 top-4"
+                    onClick={() => router.push('/profile-settings')}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </Tooltip>
+              )}
             <Avatar className="h-24 w-24 mb-4">
                 <AvatarImage src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} />
                 <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
@@ -97,7 +111,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
                         {user.phoneNumber || 'Phone not available'}
                     </div>
                 </div>
-                </div>
+            </div>
         </CardHeader>
 
         <CardContent className="space-y-2">
@@ -244,7 +258,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
           </Card>
         </CardContent>
       </Card>
-    </div>
   );
 };
 

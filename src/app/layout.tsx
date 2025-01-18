@@ -38,7 +38,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className="min-h-screen bg-background text-foreground">
+      <body className="min-h-screen font-sans antialiased bg-background">
         <ErrorBoundary>
           <QueryClientWrapper>
             <ThemeProvider
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                       {/* </div> */}
                       <main className="flex-1 overflow-y-auto">
                         <ErrorBoundary>
-                          <div className="w-full outline h-full">
+                          <div className="w-full h-full">
                             {children}
                           </div>
                         </ErrorBoundary>
