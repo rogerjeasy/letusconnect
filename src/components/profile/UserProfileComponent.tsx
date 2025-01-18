@@ -35,14 +35,12 @@ const UserProfileComponent = () => {
     }));
   };
 
-  // Update handlers for each section
   const handlePersonalUpdate = async (data: Partial<User>) => {
     try {
       setTabLoading('personal', true);
       const { user, token } = await updateUserPersonalInformation(data);
       setUser(user, token);
-      console.log('response:', { user, token });
-      
+
       toast.success("Personal information updated successfully");
     } catch (error) {
       console.error('Error updating personal information:', error);

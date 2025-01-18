@@ -21,13 +21,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
 import { User } from '@/store/userStore';
 import { 
@@ -37,7 +30,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { DateValue } from '@nextui-org/react';
+import { DateValue, Spinner } from '@nextui-org/react';
 import UserSelection from '../forms/SelectCountry';
 import SkillSelector from '../forms/SkillsSelector';
 import { ProgramCombobox } from '../utils/StudyProgram';
@@ -67,7 +60,7 @@ const userDetailsSchema = z.object({
       name: z.string(),
       level: z.enum(["Beginner", "Intermediate", "Advanced", "Expert"]),
     })
-  ),  
+  ),
   certifications: z.array(z.string()),
   projects: z.array(z.string()),
   dateOfBirth: z.string().nullable(),
@@ -114,16 +107,17 @@ const UserDetails: React.FC<UserDetailsProps> = ({
   });
 
   const onSubmit = async (data: FormValues) => {
-    console.log("data from the form: ", data);
     try {
       setIsLoading(true);
-      await onUpdate({
+      const updatedUserData = {
+        ...user,
         ...data,
         dateOfBirth: data.dateOfBirth 
           ? new Date(data.dateOfBirth) as unknown as DateValue
           : null,
-          skills: data.skills.map((skill) => skill.name) as Skill[],
-      });
+        skills: data.skills.map((skill) => skill.name) as Skill[],
+      };
+      await onUpdate(updatedUserData);
     } catch (error) {
       console.error('Error updating user details:', error);
     } finally {
@@ -559,7 +553,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Updating..." : "Save Personal Information"}
+              {isLoading ? <Spinner size="sm" color="white" /> : "Save Personal Information"}
             </Button>
           </form>
         </Form>
