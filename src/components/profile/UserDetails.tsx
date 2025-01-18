@@ -35,6 +35,7 @@ import UserSelection from '../forms/SelectCountry';
 import SkillSelector from '../forms/SkillsSelector';
 import { ProgramCombobox } from '../utils/StudyProgram';
 import { RegisterFormValues, studyPrograms } from "@/schemas/registerSchema";
+import GraduationYearPicker from '../forms/GraduationYearSelector';
 
 interface UserDetailsProps {
   user: User | null;
@@ -184,24 +185,25 @@ const UserDetails: React.FC<UserDetailsProps> = ({
                 )}
               />
 
-              <FormField
+                <FormField
                 control={form.control}
                 name="graduationYear"
                 render={({ field: fieldProps }) => (
-                  <FormItem>
+                    <FormItem>
                     <FormLabel>Graduation Year</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number"
-                        placeholder="Graduation year"
-                        {...fieldProps}
-                        onChange={(e) => fieldProps.onChange(parseInt(e.target.value) || new Date().getFullYear())}
-                      />
+                        <GraduationYearPicker
+                        value={fieldProps.value}
+                        onChange={fieldProps.onChange}
+                        />
                     </FormControl>
+                    <FormDescription>
+                        Select your expected graduation year
+                    </FormDescription>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
+                />
 
                 <FormField
                 control={form.control}
