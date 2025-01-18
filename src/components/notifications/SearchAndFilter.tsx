@@ -1,22 +1,36 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Settings, X, ChevronDown, RefreshCcw, Search, Bell, Filter, GrapeIcon } from "lucide-react";
+import { 
+  Card, 
+  CardContent
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  Input,
-  Card,
-  CardBody,
-  Dropdown,
-  DropdownTrigger,
   DropdownMenu,
-  DropdownItem,
-  Button,
-  Modal,
-  ModalContent,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
   Tooltip,
-} from "@nextui-org/react";
-import { FaTimesCircle, FaCog } from "react-icons/fa";
-import { ChevronDown } from "../navbar/Icons";
-import NotificationsSettings from "./NotificationsSettings";
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import NotificationGroup from "./NotificationGroup";
 import NotificationStats from "./NotificationStats";
 
@@ -54,8 +68,8 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortOption, setSortOption] = useState("date");
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const token = localStorage.getItem("token");
+  const router = useRouter();
 
   const handleClearFilters = () => {
     setSearchQuery("");
@@ -73,197 +87,292 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
     onFilterChange({ type, status });
   };
 
+  const navigateToSettings = () => {
+    router.push("platform-settings?current=notifications");
+  };
+
+  const activeFiltersCount = [
+    filterType !== "all",
+    filterStatus !== "all",
+    sortOption !== "date"
+  ].filter(Boolean).length;
+
   return (
-    <div className="flex flex-col gap-8">
-      <div className="mx-auto pt-16 w-full">
-        <Card className="p-6 shadow-lg relative">
-          {/* Stats with responsive positioning */}
-          {token && (
-            <div className="md:absolute md:top-4 md:left-4 md:z-20 w-full md:w-auto md:max-w-xs mb-6 md:mb-0">
-              <NotificationStats token={token} />
-            </div>
-          )}
-
-          {/* Settings Icon */}
-          <Tooltip
-            content={
-              <Card className="p-4 shadow-md">
-                <h4 className="font-bold text-lg">Notification Settings</h4>
-                <p className="text-sm text-gray-600">
-                  Manage notification preferences
-                </p>
-              </Card>
-            }
-            placement="top"
-            showArrow
-          >
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors duration-200 rounded-full hover:bg-gray-100 z-10"
-            >
-              <FaCog className="w-6 h-6" />
-            </button>
-          </Tooltip>
-
-          <CardBody>
-            {/* Title with responsive margin */}
-            <div className="md:mt-0">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                🔍 Search and Filter Notifications
-              </h2>
-
-              {/* Search bar */}
-              <div className="flex justify-center mb-6">
-                <Input
-                  placeholder="Search notifications..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    onSearch(e.target.value);
-                  }}
-                  size="lg"
-                  className="w-full md:w-2/3 lg:w-1/2"
-                />
-              </div>
-
-              {/* Filters with responsive wrapping */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-                <div className="w-full sm:w-auto">
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        variant="bordered"
-                        className="w-full sm:w-40 h-10"
-                        endContent={<ChevronDown fill="currentColor" size={16} />}
-                      >
-                        Filter by Type
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      onAction={(selected) =>
-                        handleFilterChange(selected as string, filterStatus)
-                      }
-                    >
-                      <DropdownItem key="all">All</DropdownItem>
-                      <DropdownItem key="message">Message</DropdownItem>
-                      <DropdownItem key="event">Event</DropdownItem>
-                      <DropdownItem key="reminder">Reminder</DropdownItem>
-                      <DropdownItem key="system">System</DropdownItem>
-                      <DropdownItem key="custom">Custom</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
-
-                <div className="w-full sm:w-auto">
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        variant="bordered"
-                        className="w-full sm:w-40 h-10"
-                        endContent={<ChevronDown fill="currentColor" size={16} />}
-                      >
-                        Filter by Status
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      onAction={(selected) =>
-                        handleFilterChange(filterType, selected as string)
-                      }
-                    >
-                      <DropdownItem key="all">All</DropdownItem>
-                      <DropdownItem key="unread">Unread</DropdownItem>
-                      <DropdownItem key="read">Read</DropdownItem>
-                      <DropdownItem key="hidden">Hidden</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
-
-                <div className="w-full sm:w-auto">
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        variant="bordered"
-                        className="w-full sm:w-40 h-10"
-                        endContent={<ChevronDown fill="currentColor" size={16} />}
-                      >
-                        Sort By
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      onAction={(selected) => {
-                        setSortOption(selected as string);
-                        onSortChange(selected as string);
-                      }}
-                    >
-                      <DropdownItem key="date">Date</DropdownItem>
-                      <DropdownItem key="priority">Priority</DropdownItem>
-                      <DropdownItem key="type">Type</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-            <Button 
-              color="primary" 
-              size="md" 
-              className="w-full sm:w-auto h-10 px-4"
-              isLoading={isRefreshing}
-            >
-              {isRefreshing ? 'Applying...' : 'Apply Filters'}
-            </Button>
-            <Button
-              color="danger"
-              variant="bordered"
-              size="md"
-              className="w-full sm:w-auto h-10 px-4"
-              onClick={handleClearFilters}
-              startContent={<FaTimesCircle />}
-              isDisabled={isRefreshing}
-            >
-              Clear Filters
-            </Button>
+    <div className="max-w-7xl mx-auto">
+      <div className="w-[740px] max-w-full mx-auto px-4 py-6">
+        {/* Header Section */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Bell className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold">Notifications</h1>
           </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={onRefreshNotifications}
+              disabled={isRefreshing}
+              size="icon"
+            >
+              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={navigateToSettings}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Notification Settings</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-              {/* Notification Groups */}
-              <div className="w-full mt-8">
-            {Object.entries(groupedNotifications).map(([date, notifications]) => (
-              <NotificationGroup
-                key={date}
-                date={date}
-                notifications={notifications}
-                onActionClick={onActionClick}
-                onRefresh={onRefreshNotifications}
-              />
-            ))}
-            {isRefreshing && (
-              <div className="flex justify-center py-4">
-                <div className="animate-pulse flex space-x-4">
-                  <div className="h-3 w-3 bg-gray-200 rounded-full"></div>
-                  <div className="h-3 w-3 bg-gray-300 rounded-full"></div>
-                  <div className="h-3 w-3 bg-gray-400 rounded-full"></div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  📊
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SheetHeader>
+                  <SheetTitle>Notifications Stats</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6">
+                  {token && (
+                    <NotificationStats />
+                  )}
                 </div>
-              </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+
+        {/* Search and Filters Section */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search notifications..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                onSearch(e.target.value);
+              }}
+              className="pl-9"
+            />
+          </div>
+          
+          <div className="flex gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Filter className="h-4 w-4" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Filter Notifications</SheetTitle>
+                </SheetHeader>
+                <div className="py-6 space-y-6">
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">Type</label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full">
+                        <DropdownMenuLabel>Select Type</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {["all", "message", "event", "reminder", "system", "custom"].map((type) => (
+                          <DropdownMenuItem
+                            key={type}
+                            onClick={() => handleFilterChange(type, filterStatus)}
+                          >
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">Status</label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full">
+                        <DropdownMenuLabel>Select Status</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {["all", "unread", "read", "hidden"].map((status) => (
+                          <DropdownMenuItem
+                            key={status}
+                            onClick={() => handleFilterChange(filterType, status)}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">Sort By</label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                          {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full">
+                        <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {["date", "priority", "type"].map((sort) => (
+                          <DropdownMenuItem
+                            key={sort}
+                            onClick={() => {
+                              setSortOption(sort);
+                              onSortChange(sort);
+                            }}
+                          >
+                            {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {(filterType !== "all" || filterStatus !== "all" || sortOption !== "date") && (
+                    <Button
+                      variant="ghost"
+                      onClick={handleClearFilters}
+                      className="w-full"
+                      disabled={isRefreshing}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {["date", "priority", "type"].map((sort) => (
+                  <DropdownMenuItem
+                    key={sort}
+                    onClick={() => {
+                      setSortOption(sort);
+                      onSortChange(sort);
+                    }}
+                  >
+                    {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Active Filters */}
+        {(filterType !== "all" || filterStatus !== "all" || sortOption !== "date") && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {filterType !== "all" && (
+              <Badge variant="secondary" className="text-sm">
+                Type: {filterType}
+                <button
+                  onClick={() => handleFilterChange("all", filterStatus)}
+                  className="ml-2 hover:text-primary"
+                >
+                  <X className="h-3 w-3 inline-block" />
+                </button>
+              </Badge>
+            )}
+            {filterStatus !== "all" && (
+              <Badge variant="secondary" className="text-sm">
+                Status: {filterStatus}
+                <button
+                  onClick={() => handleFilterChange(filterType, "all")}
+                  className="ml-2 hover:text-primary"
+                >
+                  <X className="h-3 w-3 inline-block" />
+                </button>
+              </Badge>
+            )}
+            {sortOption !== "date" && (
+              <Badge variant="secondary" className="text-sm">
+                Sorted by: {sortOption}
+                <button
+                  onClick={() => {
+                    setSortOption("date");
+                    onSortChange("date");
+                  }}
+                  className="ml-2 hover:text-primary"
+                >
+                  <X className="h-3 w-3 inline-block" />
+                </button>
+              </Badge>
             )}
           </div>
-            </div>
-          </CardBody>
-        </Card>
+        )}
 
-        {/* Settings Modal */}
-        <Modal
-          size="2xl"
-          isOpen={isSettingsOpen}
-          onOpenChange={(open) => setIsSettingsOpen(open)}
-          scrollBehavior="inside"
-        >
-          <ModalContent>
-            <div className="p-6">
-              <NotificationsSettings />
+        {/* Notifications List */}
+        <div className="space-y-4">
+          {Object.entries(groupedNotifications).map(([date, notifications]) => (
+            <NotificationGroup
+              key={date}
+              date={date}
+              notifications={notifications}
+              onActionClick={onActionClick}
+              onRefresh={onRefreshNotifications}
+            />
+          ))}
+          
+          {isRefreshing && (
+            <div className="flex justify-center py-8">
+              <div className="space-x-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-2 w-2 bg-primary/20 rounded-full inline-block animate-pulse"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  />
+                ))}
+              </div>
             </div>
-          </ModalContent>
-        </Modal>
+          )}
+        </div>
       </div>
     </div>
   );

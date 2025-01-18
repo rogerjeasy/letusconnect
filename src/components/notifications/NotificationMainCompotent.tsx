@@ -207,7 +207,7 @@ const groupNotificationsByDate = (notifs: Notification[]): TransformedGroupedNot
   
 
   return (
-    <div className="p-6">
+    <div>
       <SearchAndFilter
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}

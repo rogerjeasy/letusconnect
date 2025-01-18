@@ -3,11 +3,7 @@ import React, { useEffect } from "react";
 import { Spinner } from "@nextui-org/react";
 import { useNotificationStatsStore } from '@/store/notificationStatsStore';
 
-interface NotificationStatsProps {
-  token: string;
-}
-
-const NotificationStats: React.FC<NotificationStatsProps> = ({ token }) => {
+const NotificationStats = () => {
   const { 
     stats, 
     unreadCount, 
