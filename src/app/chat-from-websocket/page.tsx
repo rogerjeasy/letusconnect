@@ -1,11 +1,19 @@
 "use client";
 
-import ChatInterfaceWebsocket from "@/components/websocket/ChatInterface";
+import LoadingPage from "@/components/loadingpage/LoadingPage";
 
 export default function ChatFromWebsocketPage() {
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-background">
-      <ChatInterfaceWebsocket />
-    </div>
+    <LoadingPage />
   );
 }
+
+// import ChatInterfaceWebsocket from "@/components/websocket/ChatInterface";
+
+// export default function ChatFromWebsocketPage() {
+//   return (
+//     <div className="flex h-[calc(100vh-4rem)] bg-background">
+//       <ChatInterfaceWebsocket />
+//     </div>
+//   );
+// }

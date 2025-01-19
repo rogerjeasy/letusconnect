@@ -13,7 +13,7 @@ import LoadingFallback from "@/components/loadingfallback/LoadingFallback";
 import QueryClientWrapper from "@/components/QueryClientWrapper";
 import React from "react";
 import NewNavBar from "@/components/navbar/NewNavBar";
-import { WebSocketProvider } from "@/components/WebSocketContext";
+// import { WebSocketProvider } from "@/components/WebSocketContext";
 
 // Lazy load the AI Assistant component
 const AIAssistant = React.lazy(() => import("@/components/aiassistant/ChatGPT"));
