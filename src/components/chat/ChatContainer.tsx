@@ -143,8 +143,8 @@ export const ChatContainer = ({
 
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetTrigger asChild className="md:hidden">
-          <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <Menu className="h-6 w-6" />
+          <button className="p-2 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors">
+            <Menu className="h-6 w-6 text-emerald-500 hover:text-emerald-600" />
           </button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
@@ -160,9 +160,11 @@ export const ChatContainer = ({
       <Card className="flex-1 flex flex-col">
         {currentChat ? (
           <>
+          {console.log('currentChat', currentChat)}
             <ChatHeader
               title={getChatName(currentChat)}
               type={selectedChat?.type || 'direct'}
+              participants={isGroupChat(currentChat) ? currentChat.participants : undefined}
               membersCount={
                 isGroupChat(currentChat)
                   ? currentChat.participants?.length
