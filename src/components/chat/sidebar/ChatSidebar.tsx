@@ -1,7 +1,7 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Plus } from "lucide-react";
 import { ChatList } from "./ChatList";
 import { ChatSidebarProps } from "../types/chat";
 import ChatManagement from "@/components/messages/ChatManagement";
@@ -11,7 +11,10 @@ export const ChatSidebar = ({
   groupChats,
   selectedChatId,
   currentUserId,
+  activeTab = 'direct',
   onChatSelect,
+  onTabChange,
+  onCreateGroup,
 }: ChatSidebarProps) => {
   return (
     <Card className="w-64 h-full flex flex-col">
@@ -25,7 +28,9 @@ export const ChatSidebar = ({
           groupChats={groupChats}
           currentUserId={currentUserId}
           selectedChatId={selectedChatId}
+          activeTab={activeTab}
           onChatSelect={onChatSelect}
+          onTabChange={onTabChange}
         />
       </div>
     </Card>

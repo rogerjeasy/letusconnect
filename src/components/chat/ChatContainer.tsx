@@ -27,12 +27,10 @@ type SelectedChat = {
   type: 'direct' | 'group';
 } | null;
 
-// Type guard for group chat
 const isGroupChat = (chat: DirectMessage | GroupChat): chat is GroupChat => {
   return 'participants' in chat;
 };
 
-// Type guard for direct message chat
 const isDirectChat = (chat: any): chat is DirectMessage => {
   return 'receiverId' in chat && 'senderId' in chat;
 };
@@ -51,6 +49,7 @@ export const ChatContainer = ({
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeTab, setActiveTab] = useState<'direct' | 'groups'>('direct');
 
   useEffect(() => {
     const checkMobile = () => {
@@ -64,20 +63,18 @@ export const ChatContainer = ({
   }, []);
 
   const getCurrentChat = (): DirectMessage | GroupChat | null => {
-    if (!selectedChat) return null;
+    if (!selectedChat || selectedChat.type !== activeTab.replace('s', '')) {
+      return null;
+    }
     
     if (selectedChat.type === 'direct') {
-      // For direct messages, find the most recent message
       const relevantMessages = directChats.filter(msg => 
         msg.senderId === selectedChat.id || msg.receiverId === selectedChat.id
       );
       if (relevantMessages.length === 0) return null;
-      
-      // Return the most recent message as the chat representation
       return relevantMessages[relevantMessages.length - 1];
     }
     
-    // For group chats, return the group
     return groupChats.find(group => group.id === selectedChat.id) || null;
   };
 
@@ -88,7 +85,6 @@ export const ChatContainer = ({
       return chat.messages;
     }
     
-    // For direct messages, get all messages between the users
     const chatPartnerId = chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
     return directChats.filter(msg => 
       (msg.senderId === currentUserId && msg.receiverId === chatPartnerId) ||
@@ -96,8 +92,17 @@ export const ChatContainer = ({
     );
   };
 
+  const handleTabChange = (tab: 'direct' | 'groups') => {
+    setActiveTab(tab);
+    setSelectedChat(null); // Reset selected chat when switching tabs
+  };
+
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
-    setSelectedChat({ id: chatId, type });
+    // Only set selected chat if the type matches the active tab
+    if ((type === 'direct' && activeTab === 'direct') || 
+        (type === 'group' && activeTab === 'groups')) {
+      setSelectedChat({ id: chatId, type });
+    }
     if (isMobile) {
       setIsMobileOpen(false);
     }
@@ -125,17 +130,17 @@ export const ChatContainer = ({
       selectedChatId={selectedChat?.id}
       onChatSelect={handleChatSelect}
       onCreateGroup={() => setShowCreateGroup(true)}
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
     />
   );
 
   return (
     <div className="h-[600px] max-w-4xl mx-auto flex rounded-lg border">
-      {/* Desktop Sidebar */}
       <div className="hidden md:block w-64">
         {renderSidebar()}
       </div>
 
-      {/* Mobile Sheet */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetTrigger asChild className="md:hidden">
           <button className="p-2 hover:bg-gray-100 rounded-lg">
@@ -179,7 +184,7 @@ export const ChatContainer = ({
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            Select a chat to start messaging
+            Select a {activeTab === 'direct' ? 'conversation' : 'group'} to start messaging
           </div>
         )}
       </Card>

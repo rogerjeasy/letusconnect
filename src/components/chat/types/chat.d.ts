@@ -46,7 +46,9 @@ export interface ChatSidebarProps {
   groupChats: GroupChat[];
   currentUserId: string;
   selectedChatId?: string;
+  activeTab?: 'direct' | 'groups';
   onChatSelect: (chatId: string, type: 'direct' | 'group') => void;
+  onTabChange?: (tab: 'direct' | 'groups') => void;
   onCreateGroup: () => void;
 }
 

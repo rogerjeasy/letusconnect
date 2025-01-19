@@ -19,11 +19,10 @@ export const ChatListItem = ({
   name,
   avatar,
   lastMessage,
-  unreadCount = 0,  // Provide default value
-  isActive = false, // Provide default value
+  unreadCount = 0,  
+  isActive = false,
   onClick
 }: ChatListItemProps) => {
-  // Get first character safely for avatar fallback
   const getAvatarFallback = (name: string): string => {
     return name.charAt(0).toUpperCase();
   };

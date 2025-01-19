@@ -1,12 +1,25 @@
-"use client";
-
 import React from 'react';
 import { DirectMessage } from '@/store/message';
 import { BaseMessage } from '@/store/groupChat';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { MessageBubbleOptions } from './MessageBubbleOptions';
+import { 
+  Clock, 
+  Check, 
+  CheckCheck, 
+  Paperclip,
+  Download
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MessageBubbleProps {
   message: BaseMessage | DirectMessage;
@@ -48,37 +61,45 @@ export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) =
   };
 
   return (
-    <div
-      className={cn(
-        "flex items-start gap-2",
-        isOwn ? "flex-row-reverse" : "flex-row"
-      )}
-    >
-      <Avatar className="w-8 h-8 mt-1">
-        <AvatarFallback>
-          {message.senderName?.[0]?.toUpperCase() || '?'}
-        </AvatarFallback>
-      </Avatar>
-      <div
-        className={cn(
-          "flex flex-col max-w-[70%]",
-          isOwn ? "items-end" : "items-start"
-        )}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm text-muted-foreground">
+    <div className={cn(
+      "flex items-start gap-3 p-2 hover:bg-gray-50 transition-colors duration-200",
+      isOwn ? "flex-row-reverse" : "flex-row"
+    )}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Avatar className="w-10 h-10 border-2 border-white shadow-sm">
+              <AvatarImage src={`/api/placeholder/32/32`} />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-medium">
+                {message.senderName?.[0]?.toUpperCase() || '?'}
+              </AvatarFallback>
+            </Avatar>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{message.senderName}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <div className={cn(
+        "flex flex-col max-w-[70%] space-y-1",
+        isOwn ? "items-end" : "items-start"
+      )}>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">
             {message.senderName}
           </span>
+          {isAdmin && (
+            <Badge variant="secondary" className="text-xs">Admin</Badge>
+          )}
         </div>
-        
+
         <Card className={cn(
-          isOwn ? "bg-blue-500 text-white" : "bg-muted"
+          "shadow-sm",
+          isOwn ? "bg-blue-50 border-blue-100" : "bg-white"
         )}>
-          <CardHeader className={cn(
-            "p-2 flex flex-row items-center justify-between",
-            isOwn ? "bg-blue-600" : "bg-gray-100"
-          )}>
-            <MessageBubbleOptions 
+          <CardHeader className="p-3 pb-0">
+            <MessageBubbleOptions
               isAdmin={isAdmin}
               onPin={() => console.log('Pin message')}
               onUnpin={() => console.log('Unpin message')}
@@ -89,37 +110,46 @@ export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) =
               onDelete={() => console.log('Delete message')}
             />
           </CardHeader>
-          <CardContent className={cn(
-            "p-3",
-            isOwn ? "bg-blue-500" : "bg-gray-50"
-          )}>
-            <p className="text-sm whitespace-pre-wrap break-words">
+
+          <CardContent className="p-3 pt-1">
+            <p className="text-sm text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
               {message.content}
             </p>
-            
+
             {hasAttachments(message) && message.attachments?.length > 0 && (
-              <div className="mt-2 space-y-1">
+              <div className="mt-3 space-y-2 border-t pt-2">
                 {message.attachments.map((attachment, index) => (
-                  <div
+                  <Button
                     key={index}
-                    className="text-xs underline cursor-pointer hover:text-primary transition-colors"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2 text-gray-600 hover:text-blue-600"
                   >
-                    {attachment}
-                  </div>
+                    <Paperclip className="h-4 w-4" />
+                    <span className="text-xs truncate">{attachment}</span>
+                    <Download className="h-4 w-4 ml-auto" />
+                  </Button>
                 ))}
               </div>
             )}
           </CardContent>
-        </Card>
 
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-muted-foreground">
-            {formatMessageTime(message.createdAt)}
-          </span>
-          {!isOwn && isMessageRead() && (
-            <span className="text-xs text-blue-500">✓✓</span>
-          )}
-        </div>
+          <CardFooter className="p-3 pt-0">
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Clock className="h-3 w-3" />
+              <span>{formatMessageTime(message.createdAt)}</span>
+              {isOwn && (
+                <>
+                  {isMessageRead() ? (
+                    <CheckCheck className="h-3 w-3 text-blue-500" />
+                  ) : (
+                    <Check className="h-3 w-3" />
+                  )}
+                </>
+              )}
+            </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
