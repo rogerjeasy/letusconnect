@@ -1,4 +1,5 @@
 "use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListItem } from "./ChatListItem";
@@ -9,6 +10,7 @@ interface ChatListProps {
   directChats: DirectMessage[];
   groupChats: GroupChat[];
   selectedChatId?: string;
+  currentUserId: string;
   onChatSelect: (chatId: string, type: 'direct' | 'group') => void;
 }
 
@@ -16,8 +18,57 @@ export const ChatList = ({
   directChats,
   groupChats,
   selectedChatId,
+  currentUserId,
   onChatSelect
 }: ChatListProps) => {
+  // Helper function to group messages by chat partner
+  const groupDirectMessagesByChat = () => {
+    const chatGroups: { [key: string]: {
+      messages: DirectMessage[];
+      partnerId: string;
+      partnerName: string;
+      lastMessage: DirectMessage;
+      unreadCount: number;
+    }} = {};
+   
+    directChats.forEach(message => {
+      const isMessageFromCurrentUser = message.senderId === currentUserId;
+      const partnerId = isMessageFromCurrentUser ? message.receiverId : message.senderId;
+      const partnerName = isMessageFromCurrentUser ? message.receiverName : message.senderName;
+
+      if (!chatGroups[partnerId]) {
+        chatGroups[partnerId] = {
+          messages: [],
+          partnerId,
+          partnerName,
+          lastMessage: message,
+          unreadCount: 0
+        };
+      }
+
+      chatGroups[partnerId].messages.push(message);
+      
+      // Update last message if current message is newer
+      if (new Date(message.createdAt) > new Date(chatGroups[partnerId].lastMessage.createdAt)) {
+        chatGroups[partnerId].lastMessage = message;
+      }
+
+      // Count unread messages
+      if (!isMessageFromCurrentUser && !message.readStatus) {
+        chatGroups[partnerId].unreadCount++;
+      }
+    });
+
+    return chatGroups;
+  };
+
+  const chatGroups = groupDirectMessagesByChat();
+
+  // Sort chats by last message time
+  const sortedDirectChats = Object.values(chatGroups).sort((a, b) => 
+    new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+  );
+
   return (
     <Tabs defaultValue="direct" className="flex flex-col h-full">
       <TabsList className="w-full">
@@ -31,30 +82,39 @@ export const ChatList = ({
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <TabsContent value="direct" className="m-0">
-            {directChats.map((chat) => (
+            {sortedDirectChats.map((chat) => (
               <ChatListItem
-                key={chat.id}
-                id={chat.id}
-                name={chat.senderName}
-                lastMessage={chat.content}
-                isActive={selectedChatId === chat.id}
+                key={chat.partnerId}
+                id={chat.partnerId}
+                name={chat.partnerName}
+                lastMessage={chat.lastMessage.content}
+                unreadCount={chat.unreadCount}
+                isActive={selectedChatId === chat.partnerId}
                 type="direct"
-                onClick={() => onChatSelect(chat.id, 'direct')}
+                onClick={() => onChatSelect(chat.partnerId, 'direct')}
               />
             ))}
           </TabsContent>
           <TabsContent value="groups" className="m-0">
-            {groupChats.map((group) => (
-              <ChatListItem
-                key={group.id}
-                id={group.id}
-                name={group.name}
-                lastMessage={group.messages[group.messages.length - 1]?.content}
-                type="group"
-                isActive={selectedChatId === group.id}
-                onClick={() => onChatSelect(group.id, 'group')}
-              />
-            ))}
+            {groupChats.map((group) => {
+              const lastGroupMessage = group.messages[group.messages.length - 1];
+              const unreadCount = group.messages.filter(
+                msg => msg.senderId !== currentUserId && !msg.readStatus
+              ).length;
+
+              return (
+                <ChatListItem
+                  key={group.id}
+                  id={group.id}
+                  name={group.name}
+                  lastMessage={lastGroupMessage?.content}
+                  unreadCount={unreadCount}
+                  type="group"
+                  isActive={selectedChatId === group.id}
+                  onClick={() => onChatSelect(group.id, 'group')}
+                />
+              );
+            })}
           </TabsContent>
         </ScrollArea>
       </div>

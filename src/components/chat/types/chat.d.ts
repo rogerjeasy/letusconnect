@@ -44,6 +44,7 @@ export interface ChatHeaderProps {
 export interface ChatSidebarProps {
   directChats: DirectMessage[];
   groupChats: GroupChat[];
+  currentUserId: string;
   selectedChatId?: string;
   onChatSelect: (chatId: string, type: 'direct' | 'group') => void;
   onCreateGroup: () => void;

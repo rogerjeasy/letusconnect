@@ -22,10 +22,45 @@ import {
 } from '@/services/groupchat.service';
 
 const ContainerWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-[calc(100vh-4rem)] p-4 flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-[calc(100vh-4rem)] p-4 flex items-center justify-center relative">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="flex w-[300%] h-full animate-slide">
+          <div
+            className="w-1/3 h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1920&q=80')`,
+            }}
+          ></div>
+          <div
+            className="w-1/3 h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1920&q=80')`,
+            }}
+          ></div>
+          <div
+            className="w-1/3 h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1920&q=80')`,
+            }}
+          ></div>
+        </div>
+      </div>
+      <div className="w-full max-w-4xl relative z-10">
         {children}
       </div>
+      <style jsx>{`
+        @keyframes slide {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-66.66%);
+          }
+        }
+        .animate-slide {
+          animation: slide 20s linear infinite;
+        }
+      `}</style>
     </div>
   );
 

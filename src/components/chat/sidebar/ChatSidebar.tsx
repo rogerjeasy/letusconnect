@@ -10,6 +10,7 @@ export const ChatSidebar = ({
   directChats,
   groupChats,
   selectedChatId,
+  currentUserId,
   onChatSelect,
 }: ChatSidebarProps) => {
   return (
@@ -22,6 +23,7 @@ export const ChatSidebar = ({
         <ChatList
           directChats={directChats}
           groupChats={groupChats}
+          currentUserId={currentUserId}
           selectedChatId={selectedChatId}
           onChatSelect={onChatSelect}
         />

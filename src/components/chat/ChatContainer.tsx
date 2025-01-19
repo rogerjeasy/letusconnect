@@ -1,16 +1,16 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { ChatSidebar } from './sidebar/ChatSidebar';
 import { ChatHeader } from './header/ChatHeader';
 import { MessageList } from './message/MessageList';
 import { MessageInput } from './message/MessageInput';
 import { ChatSettings } from './settings/ChatSettings';
-import { CreateGroupDialog } from './dialogs/CreateGroupDialog';
 import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { DirectMessage } from '@/store/message';
 import { GroupChat, GroupSettings } from '@/store/groupChat';
-import ChatManagement from '@/components/messages/ChatManagement';
 
 interface ChatProps {
   currentUserId: string;
@@ -27,8 +27,14 @@ type SelectedChat = {
   type: 'direct' | 'group';
 } | null;
 
+// Type guard for group chat
 const isGroupChat = (chat: DirectMessage | GroupChat): chat is GroupChat => {
   return 'participants' in chat;
+};
+
+// Type guard for direct message chat
+const isDirectChat = (chat: any): chat is DirectMessage => {
+  return 'receiverId' in chat && 'senderId' in chat;
 };
 
 export const ChatContainer = ({
@@ -57,12 +63,37 @@ export const ChatContainer = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const getCurrentChat = () => {
+  const getCurrentChat = (): DirectMessage | GroupChat | null => {
     if (!selectedChat) return null;
     
-    return selectedChat.type === 'direct'
-      ? directChats.find(chat => chat.id === selectedChat.id)
-      : groupChats.find(group => group.id === selectedChat.id);
+    if (selectedChat.type === 'direct') {
+      // For direct messages, find the most recent message
+      const relevantMessages = directChats.filter(msg => 
+        msg.senderId === selectedChat.id || msg.receiverId === selectedChat.id
+      );
+      if (relevantMessages.length === 0) return null;
+      
+      // Return the most recent message as the chat representation
+      return relevantMessages[relevantMessages.length - 1];
+    }
+    
+    // For group chats, return the group
+    return groupChats.find(group => group.id === selectedChat.id) || null;
+  };
+
+  const getMessagesForChat = (chat: DirectMessage | GroupChat | null, directChats: DirectMessage[], currentUserId: string) => {
+    if (!chat) return [];
+    
+    if (isGroupChat(chat)) {
+      return chat.messages;
+    }
+    
+    // For direct messages, get all messages between the users
+    const chatPartnerId = chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
+    return directChats.filter(msg => 
+      (msg.senderId === currentUserId && msg.receiverId === chatPartnerId) ||
+      (msg.receiverId === currentUserId && msg.senderId === chatPartnerId)
+    );
   };
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
@@ -83,19 +114,14 @@ export const ChatContainer = ({
   const getChatName = (chat: DirectMessage | GroupChat | null): string => {
     if (!chat) return 'Chat';
     if (isGroupChat(chat)) return chat.name;
-    return chat.senderName;
-  };
-
-  const getMessagesForChat = (chat: DirectMessage | GroupChat | null) => {
-    if (!chat) return [];
-    if (isGroupChat(chat)) return chat.messages;
-    return [chat];
+    return chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
   };
 
   const renderSidebar = () => (
     <ChatSidebar
       directChats={directChats}
       groupChats={groupChats}
+      currentUserId={currentUserId}
       selectedChatId={selectedChat?.id}
       onChatSelect={handleChatSelect}
       onCreateGroup={() => setShowCreateGroup(true)}
@@ -141,8 +167,9 @@ export const ChatContainer = ({
             />
 
             <MessageList
-              messages={getMessagesForChat(currentChat)}
-              currentUserId={currentUserId}
+                messages={getMessagesForChat(currentChat, directChats, currentUserId)}
+                currentUserId={currentUserId}
+                chatType={selectedChat?.type}
             />
 
             <MessageInput
@@ -169,19 +196,6 @@ export const ChatContainer = ({
           chatId={selectedChat.id}
         />
       )}
-
-      {/* <ChatManagement/> */}
-
-      {/* <CreateGroupDialog
-        isOpen={showCreateGroup}
-        onClose={() => setShowCreateGroup(false)}
-        onCreate={async (name: string, description: string) => {
-          if (onCreateGroup) {
-            await onCreateGroup(name, description);
-          }
-          setShowCreateGroup(false);
-        }}
-      /> */}
     </div>
   );
 };
