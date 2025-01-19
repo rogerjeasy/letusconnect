@@ -25,10 +25,11 @@ const hasAttachments = (message: BaseMessage | DirectMessage): message is BaseMe
 export const MessageBubble = ({ message, isOwn }: MessageBubbleProps) => {
   const formatMessageTime = (timestamp: string) => {
     try {
-      return new Date(timestamp).toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+        return new Intl.DateTimeFormat(undefined, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hourCycle: 'h23',
+          }).format(new Date(timestamp));
     } catch (error) {
       console.error('Error formatting timestamp:', error);
       return '';
@@ -95,8 +96,8 @@ export const MessageBubble = ({ message, isOwn }: MessageBubbleProps) => {
           <span className="text-xs text-muted-foreground">
             {formatMessageTime(message.createdAt)}
           </span>
-          {isMessageRead() && (
-            <span className="text-xs text-blue-500">✓</span>
+          {!isOwn && isMessageRead() && (
+            <span className="text-xs text-blue-500">✓✓</span>
           )}
         </div>
       </div>

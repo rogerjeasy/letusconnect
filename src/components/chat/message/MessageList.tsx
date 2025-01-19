@@ -32,18 +32,14 @@ export const MessageList = ({ messages, currentUserId, chatType }: MessageListPr
   };
   
   const groupMessagesByDay = (messages: (BaseMessage | DirectMessage)[]): GroupedMessages[] => {
-    // Filter only BaseMessages
     const baseMessages = messages.filter(isBaseMessage);
   
-    // Sort messages by date first
     const sortedMessages = _.sortBy(baseMessages, msg => new Date(msg.createdAt));
   
-    // Group messages by date
     const groups = _.groupBy(sortedMessages, msg =>
       format(new Date(msg.createdAt), 'yyyy-MM-dd')
     );
   
-    // Convert to array and sort by date
     return Object.entries(groups)
       .map(([dateStr, messages]) => ({
         date: new Date(dateStr),
@@ -64,15 +60,6 @@ export const MessageList = ({ messages, currentUserId, chatType }: MessageListPr
   };
 
   const groupedMessages = groupMessagesByDay(messages);
-
-//   if (chatType === 'direct') {
-//     return (
-//       <DirectMessagesGroupedByUid
-//         messages={messages as DirectMessage[]}
-//         currentUserId={currentUserId}
-//       />
-//     );
-//   }
 
   return (
     <ScrollArea ref={scrollRef} className="flex-1 p-4">
