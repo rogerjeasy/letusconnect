@@ -108,38 +108,55 @@ export const ParticipantsModal = ({
                   </div>
                 </div>
 
-                {(currentUserIsOwner || currentUserIsModerator) && 
-                 participant.userId !== currentUserId && 
-                 canManageParticipant(participant.role) && (
+                {participant.userId !== currentUserId && (
                   <div className="self-end sm:self-center ml-auto sm:ml-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="focus:outline-none">
-                        <MoreHorizontal className="h-5 w-5 text-gray-500 hover:text-gray-700" />
+                        <MoreHorizontal className="h-5 w-5 text-green-600 hover:text-green-700 font-bold" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
                         align="end" 
                         className="w-48 sm:w-56"
                       >
-                        {currentUserIsOwner && (
-                          <DropdownMenuItem
-                            onClick={() => onParticipantAction?.('change_role', participant.userId)}
-                            className="text-sm sm:text-base py-2 cursor-pointer"
-                          >
-                            Change Role
-                          </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => window.location.href = `/profile/${participant.userId}`}
+                          className="text-sm sm:text-base py-2 cursor-pointer"
+                        >
+                          View Profile
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() => alert('Send private message currently not available from here')}
+                          className="text-sm sm:text-base py-2 cursor-pointer"
+                        >
+                          Send Private Message
+                        </DropdownMenuItem>
+                        
+                        {(currentUserIsOwner || currentUserIsModerator) && 
+                         canManageParticipant(participant.role) && (
+                          <>
+                            {currentUserIsOwner && (
+                              <DropdownMenuItem
+                                onClick={() => onParticipantAction?.('change_role', participant.userId)}
+                                className="text-sm sm:text-base py-2 cursor-pointer"
+                              >
+                                Change Role
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => onParticipantAction?.('block', participant.userId)}
+                              className="text-sm sm:text-base py-2 text-orange-600 cursor-pointer"
+                            >
+                              Block User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onParticipantAction?.('remove', participant.userId)}
+                              className="text-sm sm:text-base py-2 text-red-600 cursor-pointer"
+                            >
+                              Remove from Group
+                            </DropdownMenuItem>
+                          </>
                         )}
-                        <DropdownMenuItem
-                          onClick={() => onParticipantAction?.('block', participant.userId)}
-                          className="text-sm sm:text-base py-2 text-orange-600 cursor-pointer"
-                        >
-                          Block User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onParticipantAction?.('remove', participant.userId)}
-                          className="text-sm sm:text-base py-2 text-red-600 cursor-pointer"
-                        >
-                          Remove from Group
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
