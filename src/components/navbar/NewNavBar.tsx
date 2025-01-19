@@ -11,6 +11,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -194,6 +195,19 @@ const NewNavbar = () => {
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
+
+        {/* Add Message for a authentificated user */}
+        {isAuthenticated && (
+          <NavigationMenuItem>
+            <Link href="/chat" legacyBehavior passHref>
+              <NavigationMenuLink
+                className="text-black font-bold hover:text-black focus:text-black"
+              >
+                Messages
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        )}
 
         {/* Add Jobs Navigation Menu */}
         {/* <NavigationMenuItem>

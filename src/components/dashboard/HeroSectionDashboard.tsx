@@ -130,7 +130,7 @@ export default function HeroSectionDashboard() {
               <Button
                 className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
                 size="lg"
-                onPress={() => router.push("/chat-from-websocket")}
+                onPress={() => router.push("/users-directory")}
               >
                 <FaUserFriends className="mr-2" /> Find Connections
               </Button>
@@ -144,7 +144,7 @@ export default function HeroSectionDashboard() {
               <Button
                 className="bg-teal-600 text-white hover:bg-teal-700 font-bold"
                 size="lg"
-                onPress={() => router.push("/chat")}
+                onPress={() => router.push("/jobs")}
               >
                 <FaBriefcase className="mr-2" /> Browse Jobs
               </Button>

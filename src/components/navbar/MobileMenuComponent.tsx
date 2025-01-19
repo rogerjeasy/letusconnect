@@ -104,11 +104,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <div className="mt-6 flex flex-col space-y-4">
-          <MenuSection
-            title="About"
-            items={aboutComponents}
-            onItemClick={handleClose}
-          />
 
           {isAuthenticated && user?.role?.includes("admin") && (
             <MenuSection
@@ -116,6 +111,26 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
               items={adminComponents}
               onItemClick={handleClose}
             />
+          )}
+
+            {isAuthenticated && (
+            <>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-4 px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
+                onClick={handleClose}
+              >
+                Dashboard
+              </Link>
+
+              <Link
+                href="/chat"
+                className="flex items-center gap-4 px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
+                onClick={handleClose}
+              >
+                Messages
+              </Link>
+            </>
           )}
 
           <MenuSection
@@ -157,6 +172,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
           <MenuSection
             title="Testimonials"
             items={isAuthenticated ? testimonialsAuthComponents : testimonialsNonAuthComponents}
+            onItemClick={handleClose}
+          />
+
+          <MenuSection
+            title="About"
+            items={aboutComponents}
             onItemClick={handleClose}
           />
         </div>
