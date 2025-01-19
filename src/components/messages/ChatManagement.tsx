@@ -77,14 +77,14 @@ export default function ChatManagement() {
       userId: user.uid,
       username: user.username,
       email: user.email,
-      profilePicture: user.profilePicture,
+      profilePicture: user.profilePicture || user.username.charAt(0).toUpperCase(),
       role: "Member",
     };
 
     const newChatEntity: ChatEntity = {
       id: user.uid,
       name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
-      avatar: user.profilePicture,
+      avatar: user.profilePicture || user.username.charAt(0).toUpperCase(),
       type: "user",
       directMessages: [],
       groupMessages: [],

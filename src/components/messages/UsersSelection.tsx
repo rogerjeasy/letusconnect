@@ -61,7 +61,7 @@ const UsersSelection: React.FC<UsersSelectionProps> = ({
                   className="flex items-center gap-2 bg-blue-100 px-2 py-1 rounded-full shadow-md"
                 >
                   <img
-                    src={user.profilePicture}
+                    src={user.profilePicture || user.username.charAt(0).toUpperCase()}
                     alt={user.username}
                     className="w-8 h-8 rounded-full"
                   />
@@ -104,7 +104,7 @@ const UsersSelection: React.FC<UsersSelectionProps> = ({
                   onClick={() => onSelectUser(user)}
                 >
                   <img
-                    src={user.profilePicture}
+                    src={user.profilePicture || user.username.charAt(0).toUpperCase()}
                     alt={user.username}
                     className="w-10 h-10 rounded-full"
                   />

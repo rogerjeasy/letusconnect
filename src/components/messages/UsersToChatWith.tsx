@@ -56,7 +56,7 @@ const UsersToChatWith: React.FC<UsersToChatWithProps> = ({ users, onSelectUser, 
                   className="flex items-center gap-3 p-2 hover:bg-blue-100 rounded-lg cursor-pointer"
                   onClick={() => handleUserClick(user)}
                 >
-                  <Avatar src={user.profilePicture} alt={user.username} />
+                  <Avatar src={user.profilePicture || user.username.charAt(0).toUpperCase()} alt={user.username} />
                   <span className="font-medium text-black">{user.username}</span>
                 </div>
               ))}
