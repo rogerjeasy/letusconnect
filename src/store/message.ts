@@ -10,7 +10,7 @@ export interface Message {
   }
 
 export interface DirectMessage extends Message {
-    receiverId: string;
+    // receiverId: string;
     receiverName: string;
 }
 

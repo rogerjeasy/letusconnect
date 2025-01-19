@@ -7,6 +7,13 @@ export const API_CONFIG = {
     VERSION: '/api/v1',
     ENDPOINTS: {
 
+        WEBSOCKET: {
+            BASE: '/ws',
+            CHAT: '/ws/chat',
+            GROUP_CHAT: '/ws/group-chat',
+            NOTIFICATIONS: '/ws/notifications',
+        },
+
         CONNECTIONS: {
             BASE: '/connections',
             GET_ALL: '/connections',
