@@ -50,7 +50,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             >
               <Providers>
                 <NotificationProvider>
-                  <WebSocketProvider>
+                  {/* <WebSocketProvider> */}
                     <AuthWrapper>
                       <div className="relative flex min-h-screen flex-col">
                         <NewNavBar />
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                         </main>
                       </div>
                     </AuthWrapper>
-                  </WebSocketProvider>
+                  {/* </WebSocketProvider> */}
                 </NotificationProvider>
                 <ToastContainer
                   position="top-center"

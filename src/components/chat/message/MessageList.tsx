@@ -1,4 +1,5 @@
 "use client";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DirectMessage } from '@/store/message';
 import { BaseMessage } from '@/store/groupChat';
@@ -14,11 +15,11 @@ interface MessageListProps {
 }
 
 interface GroupedMessages {
-    date: Date;
-    messages: (BaseMessage | DirectMessage)[];
-  }
+  date: Date;
+  messages: (BaseMessage | DirectMessage)[];
+}
 
-export const MessageList = ({ messages, currentUserId, chatType }: MessageListProps) => {
+export const MessageList = ({ messages = [], currentUserId, chatType }: MessageListProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,26 +29,52 @@ export const MessageList = ({ messages, currentUserId, chatType }: MessageListPr
   }, [messages]);
 
   const isBaseMessage = (message: BaseMessage | DirectMessage): message is BaseMessage => {
-    return 'isDeleted' in message && 'isPinned' in message;
+    return message !== null && 'isDeleted' in message && 'isPinned' in message;
   };
-  
+
+  const isValidMessage = (message: BaseMessage | DirectMessage | null): message is (BaseMessage | DirectMessage) => {
+    return message !== null && 
+           typeof message === 'object' && 
+           'createdAt' in message &&
+           'id' in message &&
+           'senderId' in message;
+  };
+
   const groupMessagesByDay = (messages: (BaseMessage | DirectMessage)[]): GroupedMessages[] => {
-    const baseMessages = messages.filter(isBaseMessage);
-  
-    const sortedMessages = _.sortBy(baseMessages, msg => new Date(msg.createdAt));
-  
-    const groups = _.groupBy(sortedMessages, msg =>
-      format(new Date(msg.createdAt), 'yyyy-MM-dd')
-    );
-  
-    return Object.entries(groups)
-      .map(([dateStr, messages]) => ({
-        date: new Date(dateStr),
-        messages: messages,
-      }))
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (!Array.isArray(messages)) {
+      return [];
+    }
+
+    // Filter out null messages and validate remaining messages
+    const validMessages = messages.filter(isValidMessage);
+    
+    // Filter base messages
+    const baseMessages = validMessages.filter(isBaseMessage);
+
+    // If no valid messages after filtering, return empty array
+    if (baseMessages.length === 0) {
+      return [];
+    }
+
+    try {
+      const sortedMessages = _.sortBy(baseMessages, msg => new Date(msg.createdAt));
+
+      const groups = _.groupBy(sortedMessages, msg => {
+        const date = new Date(msg.createdAt);
+        return format(date, 'yyyy-MM-dd');
+      });
+
+      return Object.entries(groups)
+        .map(([dateStr, messages]) => ({
+          date: new Date(dateStr),
+          messages: messages,
+        }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+    } catch (error) {
+      console.error('Error grouping messages:', error);
+      return [];
+    }
   };
-  
 
   const formatDateHeader = (date: Date): string => {
     if (isToday(date)) {
@@ -61,22 +88,31 @@ export const MessageList = ({ messages, currentUserId, chatType }: MessageListPr
 
   const groupedMessages = groupMessagesByDay(messages);
 
+  // If no messages, render empty state
+  if (groupedMessages.length === 0) {
+    return (
+      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+        <div className="flex items-center justify-center h-full text-gray-500">
+          No messages yet
+        </div>
+      </ScrollArea>
+    );
+  }
+
   return (
     <ScrollArea ref={scrollRef} className="flex-1 p-4">
       <div className="space-y-6">
         {groupedMessages.map(({ date, messages }) => (
           <div key={date.toISOString()} className="space-y-4">
-            {/* Date Header */}
             <div className="text-center text-sm font-medium text-gray-500">
               {formatDateHeader(date)}
             </div>
-
-            {/* Messages */}
             {messages.map((message) => (
               <MessageBubble
                 key={message.id}
                 message={message}
                 isOwn={message.senderId === currentUserId}
+                isAdmin={chatType === 'group'}
               />
             ))}
           </div>

@@ -1,13 +1,17 @@
 "use client";
 
+import React from 'react';
 import { DirectMessage } from '@/store/message';
 import { BaseMessage } from '@/store/groupChat';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { MessageBubbleOptions } from './MessageBubbleOptions';
 
 interface MessageBubbleProps {
   message: BaseMessage | DirectMessage;
   isOwn: boolean;
+  isAdmin?: boolean;
 }
 
 type MessageReadStatus = {
@@ -22,14 +26,14 @@ const hasAttachments = (message: BaseMessage | DirectMessage): message is BaseMe
   return 'attachments' in message && Array.isArray(message.attachments);
 };
 
-export const MessageBubble = ({ message, isOwn }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) => {
   const formatMessageTime = (timestamp: string) => {
     try {
-        return new Intl.DateTimeFormat(undefined, {
-            hour: 'numeric',
-            minute: 'numeric',
-            hourCycle: 'h23',
-          }).format(new Date(timestamp));
+      return new Intl.DateTimeFormat(undefined, {
+        hour: 'numeric',
+        minute: 'numeric',
+        hourCycle: 'h23',
+      }).format(new Date(timestamp));
     } catch (error) {
       console.error('Error formatting timestamp:', error);
       return '';
@@ -55,7 +59,6 @@ export const MessageBubble = ({ message, isOwn }: MessageBubbleProps) => {
           {message.senderName?.[0]?.toUpperCase() || '?'}
         </AvatarFallback>
       </Avatar>
-
       <div
         className={cn(
           "flex flex-col max-w-[70%]",
@@ -67,30 +70,47 @@ export const MessageBubble = ({ message, isOwn }: MessageBubbleProps) => {
             {message.senderName}
           </span>
         </div>
-
-        <div
-          className={cn(
-            "rounded-lg px-4 py-2",
-            isOwn ? "bg-primary text-primary-foreground" : "bg-muted"
-          )}
-        >
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
-          
-          {hasAttachments(message) && message.attachments?.length > 0 && (
-            <div className="mt-2 space-y-1">
-              {message.attachments.map((attachment, index) => (
-                <div
-                  key={index}
-                  className="text-xs underline cursor-pointer hover:text-primary transition-colors"
-                >
-                  {attachment}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        
+        <Card className={cn(
+          isOwn ? "bg-blue-500 text-white" : "bg-muted"
+        )}>
+          <CardHeader className={cn(
+            "p-2 flex flex-row items-center justify-between",
+            isOwn ? "bg-blue-600" : "bg-gray-100"
+          )}>
+            <MessageBubbleOptions 
+              isAdmin={isAdmin}
+              onPin={() => console.log('Pin message')}
+              onUnpin={() => console.log('Unpin message')}
+              onReply={() => console.log('Reply to message')}
+              onForward={() => console.log('Forward message')}
+              onCopy={() => console.log('Copy message')}
+              onStar={() => console.log('Star message')}
+              onDelete={() => console.log('Delete message')}
+            />
+          </CardHeader>
+          <CardContent className={cn(
+            "p-3",
+            isOwn ? "bg-blue-500" : "bg-gray-50"
+          )}>
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+            
+            {hasAttachments(message) && message.attachments?.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {message.attachments.map((attachment, index) => (
+                  <div
+                    key={index}
+                    className="text-xs underline cursor-pointer hover:text-primary transition-colors"
+                  >
+                    {attachment}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="flex items-center gap-2 mt-1">
           <span className="text-xs text-muted-foreground">

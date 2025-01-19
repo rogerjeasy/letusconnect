@@ -31,7 +31,7 @@ interface MessageOptionsProps {
   onDelete?: () => void;
 }
 
-export const MessageOptions: React.FC<MessageOptionsProps> = ({
+export const MessageBubbleOptions: React.FC<MessageOptionsProps> = ({
   isAdmin = false,
   isPinned = false,
   onPin,
