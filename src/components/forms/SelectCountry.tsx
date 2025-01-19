@@ -269,7 +269,7 @@ export default function UserSelection({
                     >
                       {defaultValue ? 
                         phoneCodes.find(pc => pc.code === defaultValue)?.code || "Select Phone Code" 
-                        : "Select Phone Code"}
+                        : "Select"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </ButtonComponent>
                   </PopoverTrigger>

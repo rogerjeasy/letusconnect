@@ -7,10 +7,11 @@ export interface Message {
     messageType: string;
     attachments: string[];
     senderName: string;
+    readStatus?: boolean;
   }
 
 export interface DirectMessage extends Message {
-    receiverId: string;
+    // receiverId: string;
     receiverName: string;
 }
 

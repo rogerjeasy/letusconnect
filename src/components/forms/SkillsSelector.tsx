@@ -3,7 +3,7 @@
 import * as React from "react";
 import { AlertCircle, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@nextui-org/react";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -59,7 +59,7 @@ export default function SkillSelector({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="bordered"
+            variant="secondary"
             role="combobox"
             aria-expanded={open}
             className="w-full justify-between bg-default-50 hover:bg-default-100 transition-colors"

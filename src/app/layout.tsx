@@ -13,6 +13,7 @@ import LoadingFallback from "@/components/loadingfallback/LoadingFallback";
 import QueryClientWrapper from "@/components/QueryClientWrapper";
 import React from "react";
 import NewNavBar from "@/components/navbar/NewNavBar";
+// import { WebSocketProvider } from "@/components/WebSocketContext";
 
 // Lazy load the AI Assistant component
 const AIAssistant = React.lazy(() => import("@/components/aiassistant/ChatGPT"));
@@ -38,7 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className="min-h-screen bg-background text-foreground">
+      <body className="min-h-screen font-sans antialiased bg-background">
         <ErrorBoundary>
           <QueryClientWrapper>
             <ThemeProvider
@@ -49,24 +50,24 @@ export default function RootLayout({ children }: RootLayoutProps) {
             >
               <Providers>
                 <NotificationProvider>
-                  <AuthWrapper>
-                    <div className="relative flex min-h-screen flex-col">
-                      {/* <div className="h-[10vh]"> */}
+                  {/* <WebSocketProvider> */}
+                    <AuthWrapper>
+                      <div className="relative flex min-h-screen flex-col">
                         <NewNavBar />
-                      {/* </div> */}
-                      <main className="flex-1 overflow-y-auto">
-                        <ErrorBoundary>
-                          <div className="w-full outline h-full">
-                            {children}
-                          </div>
-                        </ErrorBoundary>
-                        <Suspense fallback={<LoadingFallback />}>
-                          <AIAssistant />
-                        </Suspense>
-                        <Footer />
-                      </main>
-                    </div>
-                  </AuthWrapper>
+                        <main className="flex-1 overflow-y-auto">
+                          <ErrorBoundary>
+                            <div className="w-full h-full">
+                              {children}
+                            </div>
+                          </ErrorBoundary>
+                          <Suspense fallback={<LoadingFallback />}>
+                            <AIAssistant />
+                          </Suspense>
+                          <Footer />
+                        </main>
+                      </div>
+                    </AuthWrapper>
+                  {/* </WebSocketProvider> */}
                 </NotificationProvider>
                 <ToastContainer
                   position="top-center"
