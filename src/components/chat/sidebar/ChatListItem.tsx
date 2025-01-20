@@ -92,3 +92,5 @@ export const ChatListItem = memo(({
     </button>
   );
 });
+
+ChatListItem.displayName = 'ChatListItem';
