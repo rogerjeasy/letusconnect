@@ -9,6 +9,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { User, useUserStore } from '@/store/userStore';
 import { getUserByUid } from '@/services/users.services';
 import _ from "lodash";
+import { MessageSquare } from "lucide-react";
 
 interface MessageListProps {
   messages: (BaseMessage | DirectMessage)[] | null;
@@ -160,8 +161,34 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
   if (groupMessagesByDay.length === 0) {
     return (
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
-        <div className="flex items-center justify-center h-full text-gray-500">
-          No messages yet
+        <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+          <MessageSquare className="h-12 w-12 text-muted-foreground opacity-50" />
+          <div className="space-y-1">
+            <h3 className="font-medium text-base">Start a conversation</h3>
+            <p className="text-sm text-muted-foreground">
+              {chatType === 'direct' 
+                ? 'Say hello to start the conversation! 👋'
+                : 'Share your first message with the group! 👋'}
+            </p>
+          </div>
+        </div>
+      </ScrollArea>
+    );
+  }
+
+  if (groupMessagesByDay.length === 1 && groupMessagesByDay[0].messages.length === 1 && groupMessagesByDay[0].messages[0].content.trim().length === 0) {
+    return (
+      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+        <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+          <MessageSquare className="h-12 w-12 text-muted-foreground opacity-50" />
+          <div className="space-y-1">
+            <h3 className="font-medium text-base">No messages yet</h3>
+            <p className="text-sm text-muted-foreground">
+              {chatType === 'direct' 
+                ? 'Say hello to start the conversation! 👋'
+                : 'Share your first message with the group! 👋'}
+            </p>
+          </div>
         </div>
       </ScrollArea>
     );

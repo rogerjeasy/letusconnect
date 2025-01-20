@@ -1,12 +1,14 @@
 "use client";
-import { Button } from "@/components/ui/button";
+
 import { Card } from "@/components/ui/card";
 import { ChatList } from "./ChatList";
 import { ChatSidebarProps } from "../types/chat";
 import ChatManagement from "@/components/messages/ChatManagement";
+import { Message } from "@/store/message";
 
 interface ExtendedChatSidebarProps extends ChatSidebarProps {
   onSidebarClose?: () => void;
+  onNewDirectMessage?: (message: Message) => void;
 }
 
 export const ChatSidebar = ({
@@ -18,8 +20,15 @@ export const ChatSidebar = ({
   onChatSelect,
   onTabChange,
   onCreateGroup,
-  onSidebarClose
+  onSidebarClose,
+  onNewDirectMessage
 }: ExtendedChatSidebarProps) => {
+  const handleNewDirectMessage = (message: Message) => {
+    if (onNewDirectMessage) {
+      onNewDirectMessage(message);
+    }
+  };
+
   return (
     <Card className="w-64 h-full flex flex-col">
       <div className="p-4 border-b flex justify-between items-center shrink-0">
@@ -42,6 +51,7 @@ export const ChatSidebar = ({
           activeTab={activeTab}
           onChatSelect={onChatSelect}
           onTabChange={onTabChange}
+          onNewDirectMessage={handleNewDirectMessage}
         />
       </div>
     </Card>

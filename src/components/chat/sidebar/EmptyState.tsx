@@ -1,3 +1,5 @@
+"use client";
+
 import { MessageSquare, Users, LucideIcon } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,19 +49,31 @@ export const EmptyState = ({
     return null;
   }
 
-  const handleUserSelect = (user: User) => {
-    if (onUserSelect) {
+  const handleUserSelect = (selectedUser: User) => {
+    if (onUserSelect && currentUser) {
+      // Get the display name for the receiver
+      const receiverName = selectedUser.username || 
+        `${selectedUser.firstName} ${selectedUser.lastName}`.trim() ||
+        'Unknown User';
+
+      // Get the display name for the sender
+      const senderName = currentUser.username || 
+        `${currentUser.firstName} ${currentUser.lastName}`.trim() ||
+        'Unknown User';
+
       const newDirectMessage: Message = {
-        id: `${currentUser?.uid}-${user.uid}`,
-        senderId: currentUser?.uid || '',
-        senderName: currentUser?.username || '',
-        receiverId: user.uid,
-        content: '', 
+        id: `${currentUser.uid}-${selectedUser.uid}`,
+        senderId: currentUser.uid,
+        senderName: senderName,
+        receiverId: selectedUser.uid,
+        receiverName: receiverName,
+        content: '',
         messageType: 'text',
         attachments: [],
         createdAt: new Date().toISOString(),
         readStatus: false,
       };
+
       onUserSelect(newDirectMessage);
     }
   };
@@ -72,8 +86,8 @@ export const EmptyState = ({
       <Icon className="h-12 w-12 mb-4 opacity-50" />
       <p className="text-sm font-medium mb-1">{displayTitle}</p>
       <p className="text-xs text-gray-400 mb-4">{displayDescription}</p>
-      
-      {type === 'direct' && (
+     
+      {type === 'direct' && currentUser && (
         <UserToChatWith
           trigger={
             <Button variant="secondary" className="gap-2">
@@ -82,7 +96,7 @@ export const EmptyState = ({
             </Button>
           }
           onUserSelect={handleUserSelect}
-          currentUserId={currentUser?.uid}
+          currentUserId={currentUser.uid}
         />
       )}
     </div>

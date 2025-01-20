@@ -23,9 +23,29 @@ export const ChatListItem = ({
   isActive = false,
   onClick
 }: ChatListItemProps) => {
-  const getAvatarFallback = (name: string): string => {
-    return name.charAt(0).toUpperCase();
+  const getAvatarFallback = (displayName: string): string => {
+    if (!displayName || typeof displayName !== 'string') return '?';
+    const trimmedName = displayName.trim();
+    if (!trimmedName) return '?';
+    
+    // Handle names with spaces (e.g., get initials)
+    if (trimmedName.includes(' ')) {
+      const initials = trimmedName
+        .split(' ')
+        .map(part => part.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+      return initials || '?';
+    }
+    
+    return trimmedName.charAt(0).toUpperCase();
   };
+
+  const displayName = name || 'Unknown User';
+  const displayMessage = !lastMessage || lastMessage.trim().length === 0
+    ? 'Start a conversation'
+    : lastMessage;
 
   return (
     <button
@@ -36,25 +56,23 @@ export const ChatListItem = ({
       )}
     >
       <Avatar>
-        <AvatarImage src={avatar} alt={name} />
-        <AvatarFallback>{getAvatarFallback(name)}</AvatarFallback>
+        <AvatarImage src={avatar} alt={displayName} />
+        <AvatarFallback>{getAvatarFallback(displayName)}</AvatarFallback>
       </Avatar>
-      
+     
       <div className="flex-1 text-left">
         <div className="flex items-center justify-between">
-          <p className="font-medium">{name}</p>
+          <p className="font-medium truncate">{displayName}</p>
           {unreadCount > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 shrink-0">
               {unreadCount}
             </Badge>
           )}
         </div>
-        
-        {lastMessage && lastMessage.length > 0 && (
-          <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-            {lastMessage}
-          </p>
-        )}
+       
+        <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+          {displayMessage}
+        </p>
       </div>
     </button>
   );
