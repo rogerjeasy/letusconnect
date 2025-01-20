@@ -30,16 +30,39 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
   const scrollRef = useRef<HTMLDivElement>(null);
   const [partnerUsers, setPartnerUsers] = useState<Record<string, User>>({});
   const currentUser = useUserStore(state => state.user) || undefined;
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   // Memoize the messages array to prevent unnecessary re-renders
   const messages = useMemo(() => rawMessages || [], [rawMessages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (!scrollRef.current) return;
+
+    const scrollToBottom = () => {
+      const scrollElement = scrollRef.current;
+      if (!scrollElement) return;
+
+      // Get the scroll container (this might be different depending on your ScrollArea implementation)
+      const scrollContainer = scrollElement.querySelector('[data-radix-scroll-area-viewport]');
+      if (!scrollContainer) return;
+
+      const scrollOptions: ScrollToOptions = {
+        top: scrollContainer.scrollHeight,
+        behavior: isFirstLoad ? 'auto' : 'smooth'
+      };
+
+      scrollContainer.scrollTo(scrollOptions);
+    };
+
+    // Use requestAnimationFrame to ensure DOM has updated
+    requestAnimationFrame(scrollToBottom);
+
+    // After first load, set isFirstLoad to false
+    if (isFirstLoad) {
+      setIsFirstLoad(false);
     }
-  }, [messages]);
+  }, [messages, isFirstLoad]);
 
   // Fetch partner users' data
   useEffect(() => {
@@ -103,7 +126,7 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
     return () => {
       isMounted = false;
     };
-  }, [messages, currentUserId, chatType]); // Added chatType to dependencies
+  }, [messages, currentUserId, chatType]);
 
   const isBaseMessage = (message: BaseMessage | DirectMessage): message is BaseMessage => {
     return message !== null && 'isDeleted' in message && 'isPinned' in message;
