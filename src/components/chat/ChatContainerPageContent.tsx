@@ -20,6 +20,7 @@ import {
   leaveGroupChat,
   processGroupChats,
 } from '@/services/groupchat.service';
+import { handleSendMessage } from './sendmessage/centralize.send.message';
 
 const ContainerWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-[calc(100vh-4rem)] p-4 flex items-center justify-center relative">
@@ -103,126 +104,23 @@ export default function ChatContainerPage() {
     }
   }, [user?.uid]);
 
-  const handleSendDirectMessage = async (content: string, receiverId: string) => {
-    if (!user?.uid) {
+
+  const handleSendingMessage = async (content: string, chatId: string, chatType: 'direct' | 'group') => {
+    if (!user?.uid || !user?.username) {
       toast.error('You must be logged in to send messages');
       return;
     }
 
-    const tempMessage: DirectMessage = {
-      id: Date.now().toString(),
-      senderId: user.uid,
-      senderName: user.username || 'Anonymous',
-      receiverId,
-      receiverName: directChats.find(chat => chat.senderId === receiverId)?.senderName || '',
+    await handleSendMessage({
       content,
-      messageType: 'text',
-      createdAt: new Date().toISOString(),
-      attachments: []
-    };
-
-    try {
-        setDirectChats(prev => [...prev, tempMessage]);
-
-        // await sendDirectMessage(
-        //     receiverId,
-        //     content,
-        //     (newMessage: Message) => {
-        //       if ('receiverId' in newMessage) {
-        //         // Handle DirectMessage
-        //         setDirectChats((prev) =>
-        //           prev.map((m) =>
-        //             m.id === tempMessage.id ? (newMessage as DirectMessage) : m
-        //           )
-        //         );
-        //       } else {
-        //         console.error("Unexpected message type received:", newMessage);
-        //       }
-        //     },
-        //     () => {}, // setNewMessage handled by child component
-        //     () => {}  // setSendingMessage handled by child component
-        //   );
-          
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
-      console.error('Error sending message:', err);
-      toast.error(errorMessage);
-      
-      setDirectChats(prev => prev.filter(m => m.id !== tempMessage.id));
-    }
-  };
-
-  const handleSendGroupMessage = async (content: string, groupId: string) => {
-    if (!user?.uid) {
-      toast.error('You must be logged in to send messages');
-      return;
-    }
-
-    const group = groupChats.find((g) => g.id === groupId);
-    if (!group) {
-      toast.error('Group not found');
-      return;
-    }
-
-    const tempMessage: BaseMessage = {
-      id: Date.now().toString(),
-      senderId: user.uid,
-      senderName: user.username || 'Anonymous',
-      content,
-      createdAt: new Date().toISOString(),
-      readStatus: {},
-      isDeleted: false,
-      messageType: 'text',
-      isPinned: false
-    };
-
-    try {
-      setGroupChats(prev =>
-        prev.map(g =>
-          g.id === groupId
-            ? { ...g, messages: [...g.messages, tempMessage] }
-            : g
-        )
-      );
-
-      await sendMessageToGroup(
-        groupId,
-        content,
-        (message: BaseMessage) => {
-          setGroupChats(prev =>
-            prev.map(g =>
-              g.id === groupId
-                ? {
-                    ...g,
-                    messages: g.messages.map(m =>
-                      m.id === tempMessage.id ? message : m
-                    ),
-                  }
-                : g
-            )
-          );
-        },
-        () => {}, // setNewMessage handled by child component
-        () => {}, // setSendingMessage handled by child component
-        () => {}, // updateEntity handled by store
-        group.messages
-      );
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send message to group';
-      console.error('Error sending group message:', err);
-      toast.error(errorMessage);
-      
-      setGroupChats(prev =>
-        prev.map(g =>
-          g.id === groupId
-            ? {
-                ...g,
-                messages: g.messages.filter(m => m.id !== tempMessage.id),
-              }
-            : g
-        )
-      );
-    }
+      chatId,
+      chatType,
+      currentUserId: user.uid,
+      username: user.username,
+      updateDirectChats: setDirectChats,
+      updateGroupChats: setGroupChats,
+      groupChats
+    });
   };
 
   const handleCreateGroup = async (name: string, description: string) => {
@@ -295,7 +193,7 @@ export default function ChatContainerPage() {
         currentUserId={user.uid}
         directChats={directChats}
         groupChats={groupChats}
-        onSendMessage={handleSendDirectMessage}
+        onSendMessage={handleSendingMessage}
         onCreateGroup={handleCreateGroup}
         onLeaveGroup={handleLeaveGroup}
         onUpdateSettings={handleUpdateSettings}

@@ -151,7 +151,7 @@ export const MessageBubble = ({ message, isOwn, isAdmin, currentUser, partnerUse
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Clock className="h-3 w-3" />
               <span>{formatMessageTime(message.createdAt)}</span>
-              {isOwn && (
+              {!isOwn && (
                 <>
                   {isMessageRead() ? (
                     <CheckCheck className="h-3 w-3 text-blue-500" />

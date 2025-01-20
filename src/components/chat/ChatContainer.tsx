@@ -9,14 +9,14 @@ import { ChatSettings } from './settings/ChatSettings';
 import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { DirectMessage } from '@/store/message';
+import { DirectMessage, Message } from '@/store/message';
 import { GroupChat, GroupSettings } from '@/store/groupChat';
 
 interface ChatProps {
   currentUserId: string;
   directChats: DirectMessage[];
   groupChats: GroupChat[];
-  onSendMessage: (content: string, receiverId: string) => Promise<void>;
+  onSendMessage: (content: string, chatId: string, chatType: 'direct' | 'group') => Promise<void>;
   onCreateGroup?: (name: string, description: string) => Promise<void>;
   onLeaveGroup?: (groupId: string) => Promise<void>;
   onUpdateSettings?: (groupId: string, settings: Partial<GroupSettings>) => Promise<void>;
@@ -50,6 +50,7 @@ export const ChatContainer = ({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<'direct' | 'groups'>('direct');
+  const [pendingChats, setPendingChats] = useState<DirectMessage[]>([]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -68,6 +69,13 @@ export const ChatContainer = ({
     }
     
     if (selectedChat.type === 'direct') {
+      // Check pending chats first
+      const pendingChat = pendingChats.find(chat => 
+        chat.receiverId === selectedChat.id || chat.senderId === selectedChat.id
+      );
+      if (pendingChat) return pendingChat;
+
+      // Then check existing chats
       const relevantMessages = directChats.filter(msg => 
         msg.senderId === selectedChat.id || msg.receiverId === selectedChat.id
       );
@@ -86,19 +94,27 @@ export const ChatContainer = ({
     }
     
     const chatPartnerId = chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
-    return directChats.filter(msg => 
+    
+    // Combine pending and existing messages
+    const existingMessages = directChats.filter(msg => 
       (msg.senderId === currentUserId && msg.receiverId === chatPartnerId) ||
       (msg.receiverId === currentUserId && msg.senderId === chatPartnerId)
     );
+    
+    const pendingMessages = pendingChats.filter(msg => 
+      (msg.senderId === currentUserId && msg.receiverId === chatPartnerId) ||
+      (msg.receiverId === currentUserId && msg.senderId === chatPartnerId)
+    );
+    
+    return [...existingMessages, ...pendingMessages];
   };
 
   const handleTabChange = (tab: 'direct' | 'groups') => {
     setActiveTab(tab);
-    setSelectedChat(null); // Reset selected chat when switching tabs
+    setSelectedChat(null);
   };
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
-    // Only set selected chat if the type matches the active tab
     if ((type === 'direct' && activeTab === 'direct') || 
         (type === 'group' && activeTab === 'groups')) {
       setSelectedChat({ id: chatId, type });
@@ -108,10 +124,21 @@ export const ChatContainer = ({
     }
   };
 
+  const handleNewDirectMessage = (message: Message) => {
+    setPendingChats(prev => [...prev, message as DirectMessage]);
+    setSelectedChat({ id: message.receiverId, type: 'direct' });
+    setActiveTab('direct');
+  };
+
   const handleSendMessage = async (content: string) => {
     if (selectedChat) {
-      await onSendMessage(content, selectedChat.id);
+      await onSendMessage(content, selectedChat.id, selectedChat.type);
     }
+  };
+
+  const getPartnerId = (chat: DirectMessage | GroupChat | null): string | undefined => {
+    if (!chat || isGroupChat(chat)) return undefined;
+    return chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
   };
 
   const currentChat = getCurrentChat();
@@ -124,7 +151,7 @@ export const ChatContainer = ({
 
   const renderSidebar = () => (
     <ChatSidebar
-      directChats={directChats}
+      directChats={[...pendingChats, ...directChats]}
       groupChats={groupChats}
       currentUserId={currentUserId}
       selectedChatId={selectedChat?.id}
@@ -133,6 +160,7 @@ export const ChatContainer = ({
       activeTab={activeTab}
       onTabChange={handleTabChange}
       onSidebarClose={() => setIsMobileOpen(false)}
+      onNewDirectMessage={handleNewDirectMessage}
     />
   );
 
@@ -165,6 +193,7 @@ export const ChatContainer = ({
               title={getChatName(currentChat)}
               type={selectedChat?.type || 'direct'}
               participants={isGroupChat(currentChat) ? currentChat.participants : undefined}
+              partnerId={getPartnerId(currentChat)}
               membersCount={
                 isGroupChat(currentChat)
                   ? currentChat.participants?.length
@@ -174,9 +203,9 @@ export const ChatContainer = ({
             />
 
             <MessageList
-                messages={getMessagesForChat(currentChat, directChats, currentUserId)}
-                currentUserId={currentUserId}
-                chatType={selectedChat?.type}
+              messages={getMessagesForChat(currentChat, directChats, currentUserId)}
+              currentUserId={currentUserId}
+              chatType={selectedChat?.type}
             />
 
             <MessageInput

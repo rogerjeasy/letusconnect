@@ -8,6 +8,7 @@ export interface Message {
     attachments: string[];
     senderName: string;
     readStatus?: boolean;
+    receiverName?: string;
   }
 
 export interface DirectMessage extends Message {

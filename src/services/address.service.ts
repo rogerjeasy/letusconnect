@@ -26,7 +26,7 @@ interface AddressesResponse {
   data: Address[];
 }
 
-interface AddressUpdateRequest {
+export interface AddressUpdateRequest {
   country?: string;
   state?: string;
   city?: string;
