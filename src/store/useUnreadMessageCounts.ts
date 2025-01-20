@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useMemo, Dispatch, SetStateAction, useCallback } from 'react';
 import { getUnreadDirectMessageCount } from "@/services/message.service";
 import { getGroupUnreadCount } from "@/services/groupchat.service";
 
@@ -24,6 +24,7 @@ interface UnreadCountsReturn {
   isLoading: boolean;
   directUnreadCounts: Record<string, number>;
   groupUnreadCounts: Record<string, number>;
+  refreshUnreadCounts: () => Promise<void>;
 }
 
 /**
@@ -36,69 +37,75 @@ export const useUnreadMessageCounts = (
 ): UnreadCountsReturn => {
   const [directUnreadCounts, setDirectUnreadCounts] = useState<Record<string, number>>({});
   const [groupUnreadCounts, setGroupUnreadCounts] = useState<Record<string, number>>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchUnreadCounts = async (): Promise<void> => {
-      setIsLoading(true);
-      try {
-        // Get unique partner IDs from direct chats
-        const partnerIds = new Set(
-          directChats.map(chat =>
-            chat.senderId === currentUserId ? chat.receiverId : chat.senderId
-          )
-        );
+  const fetchUnreadCounts = async (isInitialFetch: boolean = false): Promise<void> => {
+    // Only show loading state on initial fetch
+    if (isInitialFetch) {
+      setIsInitialLoading(true);
+    }
 
-        // Fetch unread counts for direct messages
-        const directPromises = Array.from(partnerIds).map(async partnerId => {
-          try {
-            // Pass setDirectUnreadCounts and partnerId to get individual unread counts
-            const count = await getUnreadDirectMessageCount(
-              undefined,
-              setDirectUnreadCounts,
-              partnerId
-            );
-            return { partnerId, count };
-          } catch (error) {
-            console.error(`Error fetching direct count for ${partnerId}:`, error);
-            return { partnerId, count: 0 };
-          }
-        });
+    try {
+      // Get unique partner IDs from direct chats
+      const partnerIds = new Set(
+        directChats.map(chat =>
+          chat.senderId === currentUserId ? chat.receiverId : chat.senderId
+        )
+      );
 
-        // Fetch unread counts for group messages
-        const groupPromises = groupChats.map(async group => {
-          try {
-            // Pass setGroupUnreadCounts and group.id to get individual group unread counts
-            const count = await getGroupUnreadCount(
-              group.id,
-              undefined,
-              setGroupUnreadCounts
-            );
-            return { groupId: group.id, count };
-          } catch (error) {
-            console.error(`Error fetching group count for ${group.id}:`, error);
-            return { groupId: group.id, count: 0 };
-          }
-        });
+      // Fetch unread counts for direct messages
+      const directPromises = Array.from(partnerIds).map(async partnerId => {
+        try {
+          const count = await getUnreadDirectMessageCount(
+            undefined,
+            setDirectUnreadCounts,
+            partnerId
+          );
+          return { partnerId, count };
+        } catch (error) {
+          console.error(`Error fetching direct count for ${partnerId}:`, error);
+          return { partnerId, count: 0 };
+        }
+      });
 
-        // Wait for all promises to resolve
-        await Promise.all([
-          Promise.all(directPromises),
-          Promise.all(groupPromises)
-        ]);
+      // Fetch unread counts for group messages
+      const groupPromises = groupChats.map(async group => {
+        try {
+          const count = await getGroupUnreadCount(
+            group.id,
+            undefined,
+            setGroupUnreadCounts
+          );
+          return { groupId: group.id, count };
+        } catch (error) {
+          console.error(`Error fetching group count for ${group.id}:`, error);
+          return { groupId: group.id, count: 0 };
+        }
+      });
 
-        // Note: We don't need to manually update states here anymore
-        // as the service functions will handle the state updates via the passed setters
+      // Wait for all promises to resolve
+      await Promise.all([
+        Promise.all(directPromises),
+        Promise.all(groupPromises)
+      ]);
 
-      } catch (error) {
-        console.error('Error fetching unread counts:', error);
-      } finally {
-        setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching unread counts:', error);
+    } finally {
+      if (isInitialFetch) {
+        setIsInitialLoading(false);
+        setIsInitialized(true);
       }
-    };
+    }
+  };
 
-    fetchUnreadCounts();
-  }, [currentUserId, directChats, groupChats]);
+  // Initial fetch
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchUnreadCounts(true);
+    }
+  }, [currentUserId, directChats, groupChats, isInitialized]);
 
   // Calculate total unread counts
   const totalUnreadCounts = useMemo((): UnreadCounts => {
@@ -125,11 +132,15 @@ export const useUnreadMessageCounts = (
     return groupUnreadCounts[chatId] || 0;
   };
 
+  // Expose a refresh function that doesn't trigger loading state
+  const refreshUnreadCounts = useCallback(() => fetchUnreadCounts(false), []);
+
   return {
     getUnreadCount,
     totalUnreadCounts,
-    isLoading,
+    isLoading: isInitialLoading,
     directUnreadCounts,
-    groupUnreadCounts
+    groupUnreadCounts,
+    refreshUnreadCounts
   };
 };

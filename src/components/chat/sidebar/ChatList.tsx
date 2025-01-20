@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListItem } from "./ChatListItem";
@@ -11,6 +11,9 @@ import { getUserByUid } from '@/services/users.services';
 import { EmptyState } from './EmptyState';
 import { useUnreadMessageCounts } from '@/store/useUnreadMessageCounts';
 import { Badge } from "@/components/ui/badge";
+import { markMessagesAsRead } from '@/services/message.service';
+import { markGroupMessagesAsRead } from '@/services/groupchat.service';
+import React from 'react';
 
 interface ChatListProps {
   directChats: DirectMessage[];
@@ -21,13 +24,6 @@ interface ChatListProps {
   onChatSelect: (chatId: string, type: 'direct' | 'group') => void;
   onTabChange?: (tab: 'direct' | 'groups') => void;
   onNewDirectMessage?: (message: Message) => void;
-}
-
-interface ProcessedGroupChat {
-  id: string;
-  name: string;
-  lastMessage: string;
-  unreadCount: number;
 }
 
 export const ChatList = ({
@@ -45,13 +41,14 @@ export const ChatList = ({
   const [partnerUsers, setPartnerUsers] = useState<Record<string, User>>({});
   const currentUser = useUserStore(state => state.user);
   const [recentlySelectedUser, setRecentlySelectedUser] = useState<string | null>(null);
+  const [loadingChatId, setLoadingChatId] = useState<string | null>(null);
 
-  // Use the unread counts hook
   const {
     directUnreadCounts,
     groupUnreadCounts,
     totalUnreadCounts,
-    isLoading: isLoadingUnreadCounts
+    isLoading: isInitialLoading,
+    refreshUnreadCounts
   } = useUnreadMessageCounts(currentUserId, directChats, groupChats);
 
   // Fetch partner users' data
@@ -157,10 +154,28 @@ export const ChatList = ({
     }));
   }, [groupChats, groupUnreadCounts]);
 
-  const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
+  const handleChatSelect = useCallback(async (chatId: string, type: 'direct' | 'group') => {
+    if (loadingChatId === chatId) return;
+      
     setSelectedChatType(type);
     onChatSelect(chatId, type);
-  };
+    setLoadingChatId(chatId);
+  
+    try {
+      // Only mark messages as read if there are unread messages
+      if (type === 'direct' && directUnreadCounts[chatId] > 0) {
+        await markMessagesAsRead(chatId);
+        await refreshUnreadCounts();
+      } else if (type === 'group' && groupUnreadCounts[chatId] > 0) {
+        await markGroupMessagesAsRead(chatId);
+        await refreshUnreadCounts();
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    } finally {
+      setLoadingChatId(null);
+    }
+  }, [loadingChatId, onChatSelect, refreshUnreadCounts, directUnreadCounts, groupUnreadCounts]);
 
   const handleTabChange = (value: string) => {
     const newTab = value as 'direct' | 'groups';
@@ -213,7 +228,7 @@ export const ChatList = ({
       </TabsList>
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          {isLoadingUnreadCounts ? (
+          {isInitialLoading ? (
             <div className="p-4 text-center text-muted-foreground">
               Loading messages...
             </div>
@@ -231,6 +246,7 @@ export const ChatList = ({
                       unreadCount={chat.unreadCount}
                       type="direct"
                       isActive={selectedChatId === chat.partnerId && selectedChatType === 'direct'}
+                      isLoading={loadingChatId === chat.partnerId}
                       onClick={() => handleChatSelect(chat.partnerId, 'direct')}
                     />
                   ))
