@@ -77,14 +77,14 @@ export default function ChatManagement() {
       userId: user.uid,
       username: user.username,
       email: user.email,
-      profilePicture: user.profilePicture,
+      profilePicture: user.profilePicture || user.username.charAt(0).toUpperCase(),
       role: "Member",
     };
 
     const newChatEntity: ChatEntity = {
       id: user.uid,
       name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username,
-      avatar: user.profilePicture,
+      avatar: user.profilePicture || user.username.charAt(0).toUpperCase(),
       type: "user",
       directMessages: [],
       groupMessages: [],
@@ -96,22 +96,63 @@ export default function ChatManagement() {
     setIsUsersModalOpen(false);
   };
 
+  const handleTriggerClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  // Properly typed modal close handlers
+  const handleCreateGroupModalClose = () => {
+    setIsCreateGroupModalOpen(false);
+  };
+
+  const handleUsersModalClose = () => {
+    setIsUsersModalOpen(false);
+  };
+
   return (
-    <>
-      <Dropdown>
+    <div 
+      className="relative z-[9999]"
+    >
+      <Dropdown 
+        classNames={{
+          base: "z-[9999]",
+          content: "z-[9999]",
+          trigger: "z-[9999]"
+        }}
+      >
         <DropdownTrigger>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-md hover:bg-gray-100 transition duration-200">
+          <button 
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-md hover:bg-gray-100 transition duration-200"
+            onClick={handleTriggerClick}
+          >
             <FaPlusCircle className="text-green-500 text-2xl" />
           </button>
         </DropdownTrigger>
-        <DropdownMenu aria-label="Chat Management Options" variant="faded">
+        <DropdownMenu 
+          aria-label="Chat Management Options" 
+          variant="faded"
+          onAction={(key) => {
+            switch(key) {
+              case "createGroupChat":
+                setIsCreateGroupModalOpen(true);
+                break;
+              case "messageConnection":
+                setIsUserConnectionsModalOpen(true);
+                break;
+              case "browseUsers":
+                setIsUsersModalOpen(true);
+                break;
+            }
+          }}
+          className="z-[9999]"
+        >
           <DropdownSection showDivider title="Quick Actions">
             <DropdownItem
               key="createGroupChat"
               description="Start a new group conversation"
               shortcut="⌘G"
               startContent={<CreateGroupChatIcon />}
-              onPress={() => setIsCreateGroupModalOpen(true)}
             >
               Create a Group Chat
             </DropdownItem>
@@ -120,7 +161,6 @@ export default function ChatManagement() {
               description="Message someone in your connections"
               shortcut="⌘M"
               startContent={<MessageConnectionIcon />}
-              onPress = {() => setIsUserConnectionsModalOpen(true)}
             >
               Message Your Connection
             </DropdownItem>
@@ -129,7 +169,6 @@ export default function ChatManagement() {
               description="Find and connect with other users"
               shortcut="⌘B"
               startContent={<BrowseUsersIcon />}
-              onPress={() => setIsUsersModalOpen(true)}
             >
               Browse All Users
             </DropdownItem>
@@ -155,20 +194,23 @@ export default function ChatManagement() {
         </DropdownMenu>
       </Dropdown>
 
-      {/* Modal to Create Group */}
-      <ModalToCreateGroup
-        isOpen={isCreateGroupModalOpen}
-        onClose={() => setIsCreateGroupModalOpen(false)}
-      />
+      {/* Modal container with highest z-index */}
+      <div className="z-[9999] relative">
+        {isCreateGroupModalOpen && (
+          <ModalToCreateGroup
+            isOpen={isCreateGroupModalOpen}
+            onClose={handleCreateGroupModalClose}
+          />
+        )}
 
-      {/* Modal to Browse Users */}
-      {isUsersModalOpen && (
-        <UsersToChatWith
-          users={users}
-          onSelectUser={handleUserSelect}
-          onClose={() => setIsUsersModalOpen(false)}
-        />
-      )}
-    </>
+        {isUsersModalOpen && (
+          <UsersToChatWith
+            users={users}
+            onSelectUser={handleUserSelect}
+            onClose={handleUsersModalClose}
+          />
+        )}
+      </div>
+    </div>
   );
 }

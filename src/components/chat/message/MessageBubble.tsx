@@ -20,11 +20,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { User } from '@/store/userStore';
 
 interface MessageBubbleProps {
   message: BaseMessage | DirectMessage;
   isOwn: boolean;
   isAdmin?: boolean;
+  currentUser?: User;
+  partnerUsers: Record<string, User>;
 }
 
 type MessageReadStatus = {
@@ -39,7 +42,7 @@ const hasAttachments = (message: BaseMessage | DirectMessage): message is BaseMe
   return 'attachments' in message && Array.isArray(message.attachments);
 };
 
-export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, isOwn, isAdmin, currentUser, partnerUsers }: MessageBubbleProps) => {
   const formatMessageTime = (timestamp: string) => {
     try {
       return new Intl.DateTimeFormat(undefined, {
@@ -60,6 +63,16 @@ export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) =
     return false;
   };
 
+  const getProfilePicture = () => {
+    if (isOwn && currentUser?.profilePicture) {
+      return currentUser.profilePicture;
+    }
+    if (!isOwn && partnerUsers[message.senderId]?.profilePicture) {
+      return partnerUsers[message.senderId].profilePicture;
+    }
+    return `/api/placeholder/32/32`;
+  };
+
   return (
     <div className={cn(
       "flex items-start gap-3 p-2 hover:bg-gray-50 transition-colors duration-200",
@@ -69,7 +82,7 @@ export const MessageBubble = ({ message, isOwn, isAdmin }: MessageBubbleProps) =
         <Tooltip>
           <TooltipTrigger>
             <Avatar className="w-10 h-10 border-2 border-white shadow-sm">
-              <AvatarImage src={`/api/placeholder/32/32`} />
+              <AvatarImage src={getProfilePicture()} />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-medium">
                 {message.senderName?.[0]?.toUpperCase() || '?'}
               </AvatarFallback>

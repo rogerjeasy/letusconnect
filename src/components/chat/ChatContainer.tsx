@@ -132,6 +132,7 @@ export const ChatContainer = ({
       onCreateGroup={() => setShowCreateGroup(true)}
       activeTab={activeTab}
       onTabChange={handleTabChange}
+      onSidebarClose={() => setIsMobileOpen(false)}
     />
   );
 
@@ -160,7 +161,6 @@ export const ChatContainer = ({
       <Card className="flex-1 flex flex-col">
         {currentChat ? (
           <>
-          {console.log('currentChat', currentChat)}
             <ChatHeader
               title={getChatName(currentChat)}
               type={selectedChat?.type || 'direct'}

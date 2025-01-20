@@ -50,7 +50,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
           userId: user.uid,
           username: user.username,
           email: user.email,
-          profilePicture: user.profilePicture,
+          profilePicture: user.profilePicture || user.username.charAt(0).toUpperCase(),
           role: "Member",
         }));
 
@@ -160,7 +160,7 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
                     onClick={() => handleUserSelection(user)}
                   >
                     <img
-                      src={user.profilePicture}
+                      src={user.profilePicture || user.username.charAt(0).toUpperCase()}
                       alt={user.username}
                       className="w-10 h-10 rounded-full"
                     />

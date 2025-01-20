@@ -1,14 +1,21 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@nextui-org/react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  LightbulbIcon, 
-  Network, 
-  Wrench, 
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Lightbulb,
+  Network,
+  Wrench,
   Heart,
   Users,
-  Handshake
+  Handshake,
+  Rocket,
+  GraduationCap,
+  Globe,
+  Target,
+  Trophy,
+  Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -16,120 +23,149 @@ const benefits = [
   {
     id: 1,
     title: "Build Strong Teams",
-    description: "Form teams with like-minded individuals to achieve project goals effectively.",
-    icon: <Handshake className="h-8 w-8" />,
+    description: "Form high-performing teams with diverse skills and expertise. Our intelligent matching system connects you with the right collaborators for your project goals.",
+    icon: <Handshake className="h-8 w-8 text-indigo-500" />,
     category: "Collaboration",
     stats: "90% success rate in team formation",
-    iconColor: "text-indigo-600",
-    badgeColor: "bg-indigo-100 text-indigo-700"
+    secondaryStats: "2000+ successful teams formed"
   },
   {
     id: 2,
-    title: "Collaborate with Peers",
-    description: "Work together with fellow students to create amazing projects and learn from each other.",
-    icon: <Users className="h-8 w-8" />,
+    title: "Global Networking",
+    description: "Connect with peers and professionals worldwide. Expand your network across industries and cultures while building lasting professional relationships.",
+    icon: <Globe className="h-8 w-8 text-cyan-500" />,
     category: "Networking",
     stats: "500+ active collaborations",
-    iconColor: "text-emerald-600",
-    badgeColor: "bg-emerald-100 text-emerald-700"
+    secondaryStats: "Users from 50+ countries"
   },
   {
     id: 3,
-    title: "Discover Innovative Ideas",
-    description: "Learn about cutting-edge projects in various industries.",
-    icon: <LightbulbIcon className="h-8 w-8" />,
+    title: "Drive Innovation",
+    description: "Be part of cutting-edge projects that push boundaries. Work on emerging technologies and contribute to innovative solutions across various domains.",
+    icon: <Lightbulb className="h-8 w-8 text-amber-500" />,
     category: "Innovation",
     stats: "200+ innovative projects",
-    iconColor: "text-amber-600",
-    badgeColor: "bg-amber-100 text-amber-700"
+    secondaryStats: "30+ patent applications"
   },
   {
     id: 4,
-    title: "Network with Professionals",
-    description: "Collaborate and connect with project owners, students, and alumni.",
-    icon: <Network className="h-8 w-8" />,
+    title: "Career Growth",
+    description: "Accelerate your professional development through hands-on experience. Gain valuable skills and certifications while working on real-world projects.",
+    icon: <Rocket className="h-8 w-8 text-rose-500" />,
     category: "Professional Growth",
-    stats: "1000+ professional connections",
-    iconColor: "text-blue-600",
-    badgeColor: "bg-blue-100 text-blue-700"
+    stats: "1000+ career advancements",
+    secondaryStats: "85% skill improvement rate"
   },
   {
     id: 5,
-    title: "Enhance Your Skills",
-    description: "Participate in real-world projects to sharpen your skills.",
-    icon: <Wrench className="h-8 w-8" />,
-    category: "Skill Development",
-    stats: "50+ skill workshops",
-    iconColor: "text-purple-600",
-    badgeColor: "bg-purple-100 text-purple-700"
+    title: "Skill Enhancement",
+    description: "Master new technologies and methodologies through practical application. Access exclusive workshops, mentoring sessions, and learning resources.",
+    icon: <GraduationCap className="h-8 w-8 text-emerald-500" />,
+    category: "Learning",
+    stats: "50+ skill workshops monthly",
+    secondaryStats: "24/7 learning resources"
   },
   {
     id: 6,
-    title: "Contribute to Meaningful Work",
-    description: "Join projects that make a real impact in fields like healthcare, education, and technology.",
-    icon: <Heart className="h-8 w-8" />,
-    category: "Impact",
+    title: "Create Impact",
+    description: "Work on projects that matter. Contribute to initiatives in healthcare, sustainability, education, and social impact while building your portfolio.",
+    icon: <Target className="h-8 w-8 text-purple-500" />,
+    category: "Social Impact",
     stats: "100+ impact projects",
-    iconColor: "text-rose-600",
-    badgeColor: "bg-rose-100 text-rose-700"
+    secondaryStats: "1M+ lives impacted"
   },
 ];
 
 const WhyExploreProjects = () => {
   const router = useRouter();
-  
   return (
-    <section className="pt-0"> 
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-8"> 
-          <Badge variant="outline" className="mb-2"> 
-            Why Choose Us?
-          </Badge>
-          <h2 className="text-4xl font-bold tracking-tight mb-2"> 
-            Discover the Benefits
+    <ScrollArea className="h-full w-full">
+      <section className="pt-4 pb-12 px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center space-y-4 mb-8">
+          <div className="flex justify-center">
+            <Badge variant="secondary" className="px-4 py-1 text-base">
+              Why Choose Us?
+            </Badge>
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+            Unlock Your Potential
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Join our vibrant community of innovators, creators, and problem-solvers to unlock endless possibilities for growth and collaboration.
+          
+          <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
+            Join our thriving community of innovators, creators, and change-makers. 
+            Discover endless possibilities for growth, learning, and meaningful impact 
+            through collaborative projects.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {benefits.map((benefit) => (
-            <Card key={benefit.id} className="group hover:shadow-lg transition-all duration-300">
+            <Card 
+              key={benefit.id} 
+              className="group hover:shadow-lg transition-all duration-300 border-none bg-gradient-to-br from-background to-secondary/20"
+            >
               <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline" className={`text-xs font-medium ${benefit.badgeColor}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <Badge variant="outline" className="font-medium">
                     {benefit.category}
                   </Badge>
-                  <span className="text-sm text-gray-500">{benefit.stats}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {benefit.stats}
+                  </span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-lg bg-white/50 ${benefit.iconColor}`}>
+                
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     {benefit.icon}
                   </div>
-                  <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-bold">
+                      {benefit.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                      {benefit.secondaryStats}
+                    </CardDescription>
+                  </div>
                 </div>
               </CardHeader>
+              
               <CardContent>
-                <CardDescription className="text-base">
+                <p className="text-sm leading-relaxed">
                   {benefit.description}
-                </CardDescription>
+                </p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="flex justify-center pb-8">
-          <Button 
-            size="lg"
-            color="success"
-            onClick={() => router.push("/projects/explore")}
-          >
-            Start Exploring Projects
-          </Button>
+        <div className="text-center space-y-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-primary" />
+              <span className="text-xl font-semibold">
+                Ready to start your journey?
+              </span>
+            </div>
+            <p className="text-muted-foreground max-w-2xl">
+              Join thousands of professionals who are already creating, collaborating, 
+              and achieving their goals through our platform.
+            </p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button size="lg" className="rounded-full"
+              onClick={() => router.push("/projects/explore")}
+            >
+              Start Exploring Projects
+            </Button>
+            {/* <Button size="lg" variant="outline" className="rounded-full">
+              Learn More
+            </Button> */}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </ScrollArea>
   );
 };
 
