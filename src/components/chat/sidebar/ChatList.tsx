@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListItem } from "./ChatListItem";
 import { DirectMessage } from "@/store/message";
 import { GroupChat } from "@/store/groupChat";
+import { User, useUserStore } from '@/store/userStore';
+import { getUserByUid } from '@/services/users.services';
 
 interface ChatListProps {
   directChats: DirectMessage[];
@@ -36,6 +38,8 @@ export const ChatList = ({
   const [activeTab, setActiveTab] = useState<'direct' | 'groups'>(initialTab);
   const [selectedChatType, setSelectedChatType] = useState<'direct' | 'group' | null>(null);
   const [processedGroupChats, setProcessedGroupChats] = useState<ProcessedGroupChat[]>([]);
+  const [partnerUsers, setPartnerUsers] = useState<Record<string, User>>({});
+  const currentUser = useUserStore(state => state.user);
 
   // Process group chats whenever they change
   useEffect(() => {
@@ -68,6 +72,33 @@ export const ChatList = ({
     setProcessedGroupChats(processGroups());
   }, [groupChats, currentUserId]);
 
+  // Fetch partner users' data
+  useEffect(() => {
+    const fetchPartnerUsers = async () => {
+      const uniquePartnerIds = new Set(
+        directChats.map(message => 
+          message.senderId === currentUserId ? message.receiverId : message.senderId
+        )
+      );
+
+      const userPromises = Array.from(uniquePartnerIds).map(async (partnerId) => {
+        try {
+          const user = await getUserByUid(partnerId);
+          return [partnerId, user] as [string, User];
+        } catch (error) {
+          console.error(`Error fetching user ${partnerId}:`, error);
+          return null;
+        }
+      });
+
+      const users = await Promise.all(userPromises);
+      const usersMap = Object.fromEntries(users.filter(Boolean) as [string, User][]);
+      setPartnerUsers(usersMap);
+    };
+
+    fetchPartnerUsers();
+  }, [directChats, currentUserId]);
+
   // Process direct chats
   const processedDirectChats = useMemo(() => {
     const chatGroups: { [key: string]: {
@@ -76,6 +107,7 @@ export const ChatList = ({
       partnerName: string;
       lastMessage: DirectMessage;
       unreadCount: number;
+      profilePicture?: string;
     }} = {};
    
     directChats.forEach(message => {
@@ -88,6 +120,7 @@ export const ChatList = ({
           messages: [],
           partnerId,
           partnerName,
+          profilePicture: partnerUsers[partnerId]?.profilePicture,
           lastMessage: message,
           unreadCount: 0
         };
@@ -107,7 +140,7 @@ export const ChatList = ({
     return Object.values(chatGroups).sort((a, b) => 
       new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
     );
-  }, [directChats, currentUserId]);
+  }, [directChats, currentUserId, partnerUsers]);
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
     setSelectedChatType(type);
@@ -162,6 +195,7 @@ export const ChatList = ({
                 key={chat.partnerId}
                 id={chat.partnerId}
                 name={chat.partnerName}
+                avatar={chat.profilePicture}
                 lastMessage={chat.lastMessage.content}
                 unreadCount={chat.unreadCount}
                 type="direct"
