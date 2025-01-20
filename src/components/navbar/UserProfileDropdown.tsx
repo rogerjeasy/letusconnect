@@ -105,13 +105,13 @@ export function UserProfileDropdown() {
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/chat")}>
                     <Mail className="mr-2 h-4 w-4" />
                     <span>Inbox</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/platform-settings?current=notifications")}>
                     <PenSquare className="mr-2 h-4 w-4" />
-                    <span>Compose</span>
+                    <span>Setting</span>
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>

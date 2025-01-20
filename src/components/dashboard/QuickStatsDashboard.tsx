@@ -8,7 +8,7 @@ import { useUserStore } from "@/store/userStore";
 import { useUserConnections } from '../connectstudents/GetUserConnectionNumbers';
 import { useRouter } from 'next/navigation';
 import CustomizedTooltip from "../forms/CustomizedTooltip";
-import { GetGroupAndDirectUnreadMessages, useUnreadMessages } from '@/components/messages/GetGroupAndDirectUnreadMessages';
+import { useUnreadMessages } from "@/store/useUnreadMessageCounts";
 
 type StatAction = {
   buttonText: string;

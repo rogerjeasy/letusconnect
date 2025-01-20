@@ -22,7 +22,7 @@ import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/com
 import { adminComponents } from "@/components/utils/adminOptions"
 import { useNotificationCount } from "../notifications/ManagingNotifications";
 import React from "react";
-import { useUnreadMessages } from "../messages/GetGroupAndDirectUnreadMessages";
+import { useUnreadMessages } from "@/store/useUnreadMessageCounts";
 import SearchComponent from "./SearchComponent";
 
 interface NavigationMenuProps {
