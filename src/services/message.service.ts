@@ -161,7 +161,7 @@ export const organizeDirectMessages = (messages: Messages[]): Record<string, Dir
 };
 
 /////////////////////
-type Message = BaseMessage | DirectMessage;
+export type SendMessage = BaseMessage | DirectMessage;
 
 /**
  * Send a new direct message to a user.
@@ -174,7 +174,7 @@ type Message = BaseMessage | DirectMessage;
 export const sendDirectMessage = async (
   receiverId: string,
   content: string,
-  addMessageToState: (newMessage: Message) => void,
+  addMessageToState: (newMessage: SendMessage) => void,
   setNewMessage: Dispatch<SetStateAction<string>>,
   setSendingMessage: Dispatch<SetStateAction<boolean>>
 ) => {

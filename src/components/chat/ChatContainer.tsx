@@ -16,7 +16,7 @@ interface ChatProps {
   currentUserId: string;
   directChats: DirectMessage[];
   groupChats: GroupChat[];
-  onSendMessage: (content: string, receiverId: string) => Promise<void>;
+  onSendMessage: (content: string, chatId: string, chatType: 'direct' | 'group') => Promise<void>;
   onCreateGroup?: (name: string, description: string) => Promise<void>;
   onLeaveGroup?: (groupId: string) => Promise<void>;
   onUpdateSettings?: (groupId: string, settings: Partial<GroupSettings>) => Promise<void>;
@@ -132,11 +132,7 @@ export const ChatContainer = ({
 
   const handleSendMessage = async (content: string) => {
     if (selectedChat) {
-      await onSendMessage(content, selectedChat.id);
-      // Clear pending chat after successful send
-      setPendingChats(prev => 
-        prev.filter(chat => chat.receiverId !== selectedChat.id)
-      );
+      await onSendMessage(content, selectedChat.id, selectedChat.type);
     }
   };
 
