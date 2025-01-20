@@ -6,14 +6,14 @@ import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 
 // Interfaces
-interface Address {
+export interface Address {
   id: string;
   country: string;
   state: string;
   city: string;
-  postalCode: string;
+  postalCode: number;
   street: string;
-  houseNumber: string;
+  houseNumber: number;
   apartment: string;
   region: string;
 }
@@ -30,9 +30,9 @@ export interface AddressUpdateRequest {
   country?: string;
   state?: string;
   city?: string;
-  postalCode?: string;
+  postalCode?: number;
   street?: string;
-  houseNumber?: string;
+  houseNumber?: number;
   apartment?: string;
   region?: string;
 }
@@ -55,7 +55,6 @@ export const createUserAddress = async (
     
     const createdAddress = response.data.data;
     setAddress(createdAddress);
-    toast.success("Address created successfully");
     return createdAddress;
   } catch (error) {
     const errorMessage = handleError(error);
@@ -84,7 +83,6 @@ export const updateUserAddress = async (
     
     const updatedAddress = response.data.data;
     setAddress(updatedAddress);
-    toast.success("Address updated successfully");
     return updatedAddress;
   } catch (error) {
     const errorMessage = handleError(error);
@@ -126,9 +124,9 @@ export const deleteUserAddress = async (
       country: "",
       state: "",
       city: "",
-      postalCode: "",
+      postalCode: 0,
       street: "",
-      houseNumber: "",
+      houseNumber: 0,
       apartment: "",
       region: "",
       id: "",
