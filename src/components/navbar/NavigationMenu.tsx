@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getPusherInstance } from "@/helpers/pusher";
 import { User } from "@/store/userStore";
 import { NotificationIcon } from "../icons/NotificationIcon";
-import { getUnreadMessageCount } from "@/services/message.service";
+import { getUnreadDirectMessageCount } from "@/services/message.service";
 
 import { aboutComponents } from "@/components/utils/aboutusmenu"
 import { projectsNonAuthComponents, projectsAuthComponents } from "@/components/utils/projectsOptions"
@@ -22,7 +22,7 @@ import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/com
 import { adminComponents } from "@/components/utils/adminOptions"
 import { useNotificationCount } from "../notifications/ManagingNotifications";
 import React from "react";
-import { useUnreadMessages } from "../messages/GetGroupAndDirectUnreadMessages";
+import { useUnreadMessages } from "@/store/useUnreadMessageCounts";
 import SearchComponent from "./SearchComponent";
 
 interface NavigationMenuProps {
@@ -185,7 +185,7 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
   useEffect(() => {
     if (!user?.uid) return;
 
-    getUnreadMessageCount(setUnreadCountMsg);
+    getUnreadDirectMessageCount(setUnreadCountMsg);
 
     const pusher = getPusherInstance();
     const notificationChannel = pusher?.subscribe(`user-notifications-${user.uid}`);
@@ -195,11 +195,11 @@ const NavigationMenu = React.memo(({ isAuthenticated, user, closeMenu, isMobile 
     });
 
     notificationChannel?.bind("update-unread-count", () => {
-      getUnreadMessageCount(setUnreadCountMsg);
+      getUnreadDirectMessageCount(setUnreadCountMsg);
     });
 
     notificationChannel?.bind("message-read", () => {
-      getUnreadMessageCount(setUnreadCountMsg);
+      getUnreadDirectMessageCount(setUnreadCountMsg);
     });
 
     return () => {

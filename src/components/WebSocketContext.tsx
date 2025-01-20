@@ -7,7 +7,7 @@ import { API_CONFIG } from '@/config/api.config';
 import { toast } from 'react-toastify';
 import { DirectMessage } from '@/store/message';
 import { Notification, NotificationType } from '@/store/notification';
-import { getUnreadMessageCount } from '@/services/message.service';
+import { getUnreadDirectMessageCount as getUnreadMessageCount } from '@/services/message.service';
 import { getUnreadNotificationCount } from '@/services/notification.service';
 import { getDomain } from '@/helpers/getDomain';
 

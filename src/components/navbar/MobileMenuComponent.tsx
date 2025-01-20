@@ -29,6 +29,7 @@ import { jobsNonAuthComponents, jobsAuthComponents } from "@/components/utils/jo
 import { groupsAuthComponents, groupsNonAuthComponents } from "@/components/utils/forumOptions";
 import { testimonialsNonAuthComponents, testimonialsAuthComponents } from "@/components/utils/testimonialOptions";
 import { adminComponents } from "@/components/utils/adminOptions";
+import { useUnreadMessages } from "@/store/useUnreadMessageCounts";
 
 interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
   title: string;
@@ -92,6 +93,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
     setIsOpen(false);
   };
 
+  const { totalCount: unreadMessagesCount, loading: messagesLoading, error: messagesError } = useUnreadMessages({
+    userId: user?.uid ?? '',
+    maxRetries: 3
+  });
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -125,10 +131,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
 
               <Link
                 href="/chat"
-                className="flex items-center gap-4 px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
+                className="flex items-center gap-4 px-4 py-2 text-sm font-medium rounded-md hover:bg-accent relative"
                 onClick={handleClose}
               >
                 Messages
+                {unreadMessagesCount > 0 && (
+                  <span className="absolute -top-2 right-2 flex items-center justify-center h-5 w-5 text-xs text-white bg-red-500 rounded-full">
+                    {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+                  </span>
+                )}
               </Link>
             </>
           )}

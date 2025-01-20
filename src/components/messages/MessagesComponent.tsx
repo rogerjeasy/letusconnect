@@ -19,7 +19,7 @@ import { getAllUsers } from "@/services/users.services";
 import { getDirectMessages, organizeDirectMessages } from "@/services/message.service";
 import { getGroupUnreadCount, getMyGroupChats, markGroupMessagesAsRead, processGroupChats } from "@/services/groupchat.service";
 import { markMessagesAsRead } from "@/services/message.service";
-import { getUnreadMessageCount } from "@/services/message.service";
+import { getUnreadDirectMessageCount } from "@/services/message.service";
 import SortedChatList from "@/components/messages/SortedChatList";
 import { useRouter } from "next/navigation";
 
@@ -78,13 +78,13 @@ const MessagesComponent = ({ current = "" }) => {
       setEntities(combinedEntities);
   
       userEntities.forEach((entity) =>
-        getUnreadMessageCount(undefined, setUnreadCounts, entity.id)
+        getUnreadDirectMessageCount(undefined, setUnreadCounts, entity.id)
       );
       groupEntities.forEach((entity) =>
         fetchUnreadCountForEntity(entity.id)
       );
   
-      getUnreadMessageCount(setTotalUnreadCount);
+      getUnreadDirectMessageCount(setTotalUnreadCount);
       // fetchUnreadCountForTotal();
     } catch (error) {
       const errorMessage = handleError(error);
@@ -202,18 +202,18 @@ const MessagesComponent = ({ current = "" }) => {
     });
 
     notificationChannel?.bind("new-unread-message", ({ senderId }: { senderId: string }) => {
-      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
-      getUnreadMessageCount(setTotalUnreadCount);
+      getUnreadDirectMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadDirectMessageCount(setTotalUnreadCount);
     });
 
     notificationChannel?.bind("update-unread-count", ({ senderId }: { senderId: string}) => {
-      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
-      getUnreadMessageCount(setTotalUnreadCount);
+      getUnreadDirectMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadDirectMessageCount(setTotalUnreadCount);
     });
 
     notificationChannel?.bind("message-read", ({ senderId }: { senderId: string }) => {
-      getUnreadMessageCount(undefined, setUnreadCounts, senderId);
-      getUnreadMessageCount(setTotalUnreadCount);
+      getUnreadDirectMessageCount(undefined, setUnreadCounts, senderId);
+      getUnreadDirectMessageCount(setTotalUnreadCount);
     });
 
     return () => {

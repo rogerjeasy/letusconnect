@@ -30,7 +30,7 @@ import { getPusherInstance } from "@/helpers/pusher"
 import { useRouter } from "next/navigation"
 import { SearchIcon } from "./SearchIcon"
 import { FaComments } from "react-icons/fa"
-import { getUnreadMessageCount } from "@/services/message.service"
+import { getUnreadDirectMessageCount as getUnreadMessageCount } from "@/services/message.service"
 
 interface MenuComponent {
   title: string;

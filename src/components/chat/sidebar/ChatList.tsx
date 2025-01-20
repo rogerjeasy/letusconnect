@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListItem } from "./ChatListItem";
@@ -9,6 +9,11 @@ import { GroupChat } from "@/store/groupChat";
 import { User, useUserStore } from '@/store/userStore';
 import { getUserByUid } from '@/services/users.services';
 import { EmptyState } from './EmptyState';
+import { useUnreadMessageCounts } from '@/store/useUnreadMessageCounts';
+import { Badge } from "@/components/ui/badge";
+import { markMessagesAsRead } from '@/services/message.service';
+import { markGroupMessagesAsRead } from '@/services/groupchat.service';
+import React from 'react';
 
 interface ChatListProps {
   directChats: DirectMessage[];
@@ -19,13 +24,6 @@ interface ChatListProps {
   onChatSelect: (chatId: string, type: 'direct' | 'group') => void;
   onTabChange?: (tab: 'direct' | 'groups') => void;
   onNewDirectMessage?: (message: Message) => void;
-}
-
-interface ProcessedGroupChat {
-  id: string;
-  name: string;
-  lastMessage: string;
-  unreadCount: number;
 }
 
 export const ChatList = ({
@@ -40,41 +38,18 @@ export const ChatList = ({
 }: ChatListProps) => {
   const [activeTab, setActiveTab] = useState<'direct' | 'groups'>(initialTab);
   const [selectedChatType, setSelectedChatType] = useState<'direct' | 'group' | null>(null);
-  const [processedGroupChats, setProcessedGroupChats] = useState<ProcessedGroupChat[]>([]);
   const [partnerUsers, setPartnerUsers] = useState<Record<string, User>>({});
   const currentUser = useUserStore(state => state.user);
   const [recentlySelectedUser, setRecentlySelectedUser] = useState<string | null>(null);
+  const [loadingChatId, setLoadingChatId] = useState<string | null>(null);
 
-  // Process group chats whenever they change
-  useEffect(() => {
-    const processGroups = () => {
-      return groupChats.map((group) => {
-        if (!group || !group.messages) {
-          return {
-            id: group.id,
-            name: group.name || 'Unnamed Group',
-            lastMessage: '',
-            unreadCount: 0
-          };
-        }
-
-        const messages = Array.isArray(group.messages) ? group.messages : [];
-        const lastGroupMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-        const unreadCount = messages.filter(
-          msg => msg && msg.senderId !== currentUserId && !msg.readStatus
-        ).length;
-
-        return {
-          id: group.id,
-          name: group.name || 'Unnamed Group',
-          lastMessage: lastGroupMessage?.content || '',
-          unreadCount: unreadCount
-        };
-      });
-    };
-
-    setProcessedGroupChats(processGroups());
-  }, [groupChats, currentUserId]);
+  const {
+    directUnreadCounts,
+    groupUnreadCounts,
+    totalUnreadCounts,
+    isLoading: isInitialLoading,
+    refreshUnreadCounts
+  } = useUnreadMessageCounts(currentUserId, directChats, groupChats);
 
   // Fetch partner users' data
   useEffect(() => {
@@ -103,7 +78,7 @@ export const ChatList = ({
     fetchPartnerUsers();
   }, [directChats, currentUserId]);
 
-  // Process direct chats
+  // Process direct chats with unread counts
   const processedDirectChats = useMemo(() => {
     const chatGroups: { [key: string]: {
       messages: DirectMessage[];
@@ -115,7 +90,7 @@ export const ChatList = ({
       isRecentlySelected?: boolean;
     }} = {};
    
-    // First, process existing chats
+    // Process existing chats
     directChats.forEach(message => {
       const isMessageFromCurrentUser = message.senderId === currentUserId;
       const partnerId = isMessageFromCurrentUser ? message.receiverId : message.senderId;
@@ -128,7 +103,7 @@ export const ChatList = ({
           partnerName,
           profilePicture: partnerUsers[partnerId]?.profilePicture,
           lastMessage: null,
-          unreadCount: 0,
+          unreadCount: directUnreadCounts[partnerId] || 0,
           isRecentlySelected: partnerId === recentlySelectedUser
         };
       }
@@ -140,10 +115,6 @@ export const ChatList = ({
           messageDate > new Date(chatGroups[partnerId].lastMessage.createdAt)) {
         chatGroups[partnerId].lastMessage = message;
       }
-
-      if (!isMessageFromCurrentUser && !message.readStatus) {
-        chatGroups[partnerId].unreadCount++;
-      }
     });
 
     // Add recently selected user if they don't exist in chats
@@ -154,38 +125,57 @@ export const ChatList = ({
         partnerId: recentlySelectedUser,
         partnerName: user?.username || 'Unknown User',
         profilePicture: user?.profilePicture,
-        lastMessage: {
-          id: `temp-${recentlySelectedUser}`,
-          senderId: currentUser?.uid || '',
-          senderName: currentUser?.username || '',
-          receiverId: recentlySelectedUser,
-          receiverName: user?.username || 'Unknown User',
-          content: '',
-          messageType: 'text',
-          attachments: [],
-          createdAt: new Date().toISOString(),
-          readStatus: false,
-        },
-        unreadCount: 0,
+        lastMessage: null,
+        unreadCount: directUnreadCounts[recentlySelectedUser] || 0,
         isRecentlySelected: true
       };
     }
 
-    // Sort chats with recently selected user first, then by message date
     return Object.values(chatGroups).sort((a, b) => {
       if (a.isRecentlySelected) return -1;
       if (b.isRecentlySelected) return 1;
+      
+      // Sort by unread count first, then by date
+      if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
       
       const aDate = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
       const bDate = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
       return bDate - aDate;
     });
-  }, [directChats, currentUserId, partnerUsers, recentlySelectedUser]);
+  }, [directChats, currentUserId, partnerUsers, recentlySelectedUser, directUnreadCounts]);
 
-  const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
+  // Process group chats with unread counts
+  const processedGroupChats = useMemo(() => {
+    return groupChats.map((group) => ({
+      id: group.id,
+      name: group.name || 'Unnamed Group',
+      lastMessage: group.messages?.[group.messages.length - 1]?.content || '',
+      unreadCount: groupUnreadCounts[group.id] || 0
+    }));
+  }, [groupChats, groupUnreadCounts]);
+
+  const handleChatSelect = useCallback(async (chatId: string, type: 'direct' | 'group') => {
+    if (loadingChatId === chatId) return;
+      
     setSelectedChatType(type);
     onChatSelect(chatId, type);
-  };
+    setLoadingChatId(chatId);
+  
+    try {
+      // Only mark messages as read if there are unread messages
+      if (type === 'direct' && directUnreadCounts[chatId] > 0) {
+        await markMessagesAsRead(chatId);
+        await refreshUnreadCounts();
+      } else if (type === 'group' && groupUnreadCounts[chatId] > 0) {
+        await markGroupMessagesAsRead(chatId);
+        await refreshUnreadCounts();
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    } finally {
+      setLoadingChatId(null);
+    }
+  }, [loadingChatId, onChatSelect, refreshUnreadCounts, directUnreadCounts, groupUnreadCounts]);
 
   const handleTabChange = (value: string) => {
     const newTab = value as 'direct' | 'groups';
@@ -197,14 +187,10 @@ export const ChatList = ({
     const receiverId = newDirectMessage.receiverId;
     setRecentlySelectedUser(receiverId);
     
-    // If the partner user isn't already fetched, fetch them
     if (!partnerUsers[receiverId]) {
       try {
         const user = await getUserByUid(receiverId);
-        setPartnerUsers(prev => ({
-          ...prev,
-          [receiverId]: user
-        }));
+        setPartnerUsers(prev => ({ ...prev, [receiverId]: user }));
       } catch (error) {
         console.error('Error fetching user:', error);
       }
@@ -215,25 +201,6 @@ export const ChatList = ({
     setActiveTab('direct');
   };
 
-  // Update selected chat type when selectedChatId changes
-  useEffect(() => {
-    if (!selectedChatId) {
-      setSelectedChatType(null);
-      return;
-    }
-
-    const isDirectChat = processedDirectChats.some(chat => chat.partnerId === selectedChatId);
-    if (isDirectChat) {
-      setSelectedChatType('direct');
-      return;
-    }
-
-    const isGroupChat = processedGroupChats.some(chat => chat.id === selectedChatId);
-    if (isGroupChat) {
-      setSelectedChatType('group');
-    }
-  }, [selectedChatId, processedDirectChats, processedGroupChats]);
-
   return (
     <Tabs 
       defaultValue="direct" 
@@ -242,56 +209,75 @@ export const ChatList = ({
       onValueChange={handleTabChange}
     >
       <TabsList className="w-full">
-        <TabsTrigger value="direct" className="flex-1">
+        <TabsTrigger value="direct" className="flex-1 relative">
           Direct Messages
+          {totalUnreadCounts.direct > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {totalUnreadCounts.direct}
+            </Badge>
+          )}
         </TabsTrigger>
-        <TabsTrigger value="groups" className="flex-1">
+        <TabsTrigger value="groups" className="flex-1 relative">
           Groups
+          {totalUnreadCounts.group > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {totalUnreadCounts.group}
+            </Badge>
+          )}
         </TabsTrigger>
       </TabsList>
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <TabsContent value="direct" className="m-0">
-            {processedDirectChats.length > 0 ? (
-              processedDirectChats.map((chat) => (
-                <ChatListItem
-                  key={chat.partnerId}
-                  id={chat.partnerId}
-                  name={chat.partnerName}
-                  avatar={chat.profilePicture}
-                  lastMessage={chat.lastMessage?.content || 'Start a conversation'}
-                  unreadCount={chat.unreadCount}
-                  type="direct"
-                  isActive={selectedChatId === chat.partnerId && selectedChatType === 'direct'}
-                  onClick={() => handleChatSelect(chat.partnerId, 'direct')}
-                />
-              ))
-            ) : (
-              <EmptyState 
-                type="direct" 
-                onUserSelect={handleNewChat}
-                currentUser={currentUser as User}
-              />
-            )}
-          </TabsContent>
-          <TabsContent value="groups" className="m-0">
-            {processedGroupChats.length > 0 ? (
-              processedGroupChats.map((group) => (
-                <ChatListItem
-                  key={group.id}
-                  id={group.id}
-                  name={group.name}
-                  lastMessage={group.lastMessage}
-                  unreadCount={group.unreadCount}
-                  type="group"
-                  isActive={selectedChatId === group.id && selectedChatType === 'group'}
-                  onClick={() => handleChatSelect(group.id, 'group')}
-                />
-              ))
-            ) : (
-              <EmptyState type="groups" />
-            )}
-          </TabsContent>
+          {isInitialLoading ? (
+            <div className="p-4 text-center text-muted-foreground">
+              Loading messages...
+            </div>
+          ) : (
+            <>
+              <TabsContent value="direct" className="m-0">
+                {processedDirectChats.length > 0 ? (
+                  processedDirectChats.map((chat) => (
+                    <ChatListItem
+                      key={chat.partnerId}
+                      id={chat.partnerId}
+                      name={chat.partnerName}
+                      avatar={chat.profilePicture}
+                      lastMessage={chat.lastMessage?.content}
+                      unreadCount={chat.unreadCount}
+                      type="direct"
+                      isActive={selectedChatId === chat.partnerId && selectedChatType === 'direct'}
+                      isLoading={loadingChatId === chat.partnerId}
+                      onClick={() => handleChatSelect(chat.partnerId, 'direct')}
+                    />
+                  ))
+                ) : (
+                  <EmptyState 
+                    type="direct" 
+                    onUserSelect={handleNewChat}
+                    currentUser={currentUser as User}
+                  />
+                )}
+              </TabsContent>
+              <TabsContent value="groups" className="m-0">
+                {processedGroupChats.length > 0 ? (
+                  processedGroupChats.map((group) => (
+                    <ChatListItem
+                      key={group.id}
+                      id={group.id}
+                      name={group.name}
+                      lastMessage={group.lastMessage}
+                      unreadCount={group.unreadCount}
+                      type="group"
+                      isActive={selectedChatId === group.id && selectedChatType === 'group'}
+                      onClick={() => handleChatSelect(group.id, 'group')}
+                    />
+                  ))
+                ) : (
+                  <EmptyState type="groups" />
+                )}
+              </TabsContent>
+            </>
+          )}
         </ScrollArea>
       </div>
     </Tabs>

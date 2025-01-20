@@ -27,6 +27,7 @@ import { adminComponents } from "@/components/utils/adminOptions";
 import { UserProfileDropdown } from "./UserProfileDropdown";
 import { MobileMenu } from "./MobileMenuComponent";
 import DevelopmentModal from "../utils/DevelopmentModal";
+import { useUnreadMessages } from '@/store/useUnreadMessageCounts';
 
 interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
     title: string;
@@ -38,6 +39,12 @@ interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
 const NewNavbar = () => {
   const { user, isAuthenticated } = useUserStore();
   const searchUnderDevelopment = true;
+
+  const { totalCount: unreadMessagesCount, loading: messagesLoading, error: messagesError } = useUnreadMessages({
+    userId: user?.uid ?? '',
+    maxRetries: 3
+  });
+
 
   const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
     ({ className, title, description, href, icon, ...props }, ref) => {
@@ -64,6 +71,23 @@ const NewNavbar = () => {
     }
   );
   ListItem.displayName = "ListItem";
+
+  const MessagesMenuItem = () => (
+    <NavigationMenuItem>
+      <Link href="/chat" legacyBehavior passHref>
+        <NavigationMenuLink
+          className="relative text-black font-bold hover:text-black focus:text-black"
+        >
+          Messages
+          {unreadMessagesCount > 0 && (
+            <span className="absolute -top-2 -right-4 flex items-center justify-center h-5 w-5 text-xs text-white bg-red-500 rounded-full">
+              {unreadMessagesCount > 99 ? '99+' : unreadMessagesCount}
+            </span>
+          )}
+        </NavigationMenuLink>
+      </Link>
+    </NavigationMenuItem>
+  );
 
   const NavContent = () => (
     <NavigationMenu className="hidden lg:flex max-w-max">
@@ -197,17 +221,7 @@ const NewNavbar = () => {
         </NavigationMenuItem>
 
         {/* Add Message for a authentificated user */}
-        {isAuthenticated && (
-          <NavigationMenuItem>
-            <Link href="/chat" legacyBehavior passHref>
-              <NavigationMenuLink
-                className="text-black font-bold hover:text-black focus:text-black"
-              >
-                Messages
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-        )}
+        {isAuthenticated && <MessagesMenuItem />}
 
         {/* Add Jobs Navigation Menu */}
         {/* <NavigationMenuItem>
