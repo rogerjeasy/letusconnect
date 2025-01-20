@@ -19,7 +19,7 @@ export const ChatListItem = ({
   name,
   avatar,
   lastMessage,
-  unreadCount = 0,  
+  unreadCount = 0,
   isActive = false,
   onClick
 }: ChatListItemProps) => {
@@ -27,7 +27,7 @@ export const ChatListItem = ({
     if (!displayName || typeof displayName !== 'string') return '?';
     const trimmedName = displayName.trim();
     if (!trimmedName) return '?';
-    
+   
     // Handle names with spaces (e.g., get initials)
     if (trimmedName.includes(' ')) {
       const initials = trimmedName
@@ -38,7 +38,7 @@ export const ChatListItem = ({
         .slice(0, 2);
       return initials || '?';
     }
-    
+   
     return trimmedName.charAt(0).toUpperCase();
   };
 
@@ -55,19 +55,24 @@ export const ChatListItem = ({
         isActive && "bg-accent"
       )}
     >
-      <Avatar>
-        <AvatarImage src={avatar} alt={displayName} />
-        <AvatarFallback>{getAvatarFallback(displayName)}</AvatarFallback>
-      </Avatar>
+      <div className="relative">
+        <Avatar>
+          <AvatarImage src={avatar} alt={displayName} />
+          <AvatarFallback>{getAvatarFallback(displayName)}</AvatarFallback>
+        </Avatar>
+        {unreadCount > 0 && (
+          <Badge
+            variant="default"
+            className="absolute -top-2 -left-2 h-5 min-w-[20px] text-xs bg-emerald-500 hover:bg-emerald-500 text-white border-2 border-white rounded-full p-0 flex items-center justify-center"
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Badge>
+        )}
+      </div>
      
       <div className="flex-1 text-left">
         <div className="flex items-center justify-between">
           <p className="font-medium truncate">{displayName}</p>
-          {unreadCount > 0 && (
-            <Badge variant="secondary" className="ml-2 shrink-0">
-              {unreadCount}
-            </Badge>
-          )}
         </div>
        
         <p className="text-sm text-muted-foreground truncate max-w-[200px]">

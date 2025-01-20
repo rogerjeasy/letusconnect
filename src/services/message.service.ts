@@ -20,7 +20,7 @@ interface UnreadCountResponse {
  * @param userId - Optional user ID to fetch unread count for specific user
  * @returns Promise with the unread count
  */
-export const getUnreadMessageCount = async (
+export const getUnreadDirectMessageCount = async (
   setUnreadCount?: (count: number) => void,
   setUnreadCounts?: Dispatch<SetStateAction<Record<string, number>>>,
   userId?: string

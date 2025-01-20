@@ -10,7 +10,7 @@ import {
   getDirectMessages,
   sendDirectMessage,
   markMessagesAsRead,
-  getUnreadMessageCount,
+  getUnreadDirectMessageCount,
 } from '@/services/message.service';
 import {
   getMyGroupChats,

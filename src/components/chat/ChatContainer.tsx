@@ -69,13 +69,11 @@ export const ChatContainer = ({
     }
     
     if (selectedChat.type === 'direct') {
-      // Check pending chats first
       const pendingChat = pendingChats.find(chat => 
         chat.receiverId === selectedChat.id || chat.senderId === selectedChat.id
       );
       if (pendingChat) return pendingChat;
 
-      // Then check existing chats
       const relevantMessages = directChats.filter(msg => 
         msg.senderId === selectedChat.id || msg.receiverId === selectedChat.id
       );

@@ -76,7 +76,7 @@ const QuickStatsDashboard: React.FC = () => {
         {
           buttonText: "View",
           tooltipContent:  "Check your messages",
-          onClick: async () => router.push('/messages'),
+          onClick: async () => router.push('/chat'),
           buttonColor: "default"
         }
       ]
