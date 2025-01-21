@@ -76,9 +76,10 @@ const UserProfileComponent = () => {
     try {
       setTabLoading('education', true);
       // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+    //   await new Promise(resolve => setTimeout(resolve, 1000));
+        alert("Not implemented yet")
       
-      toast.success("Education history updated successfully");
+    //   toast.success("Education history updated successfully");
     } catch (error) {
       console.error('Error updating education history:', error);
       toast.error("Failed to update education history");
@@ -91,9 +92,10 @@ const UserProfileComponent = () => {
     try {
       setTabLoading('work', true);
       // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+    //   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      alert("Not implemented yet")
       
-      toast.success("Work history updated successfully")
+    //   toast.success("Work history updated successfully")
     } catch (error) {
       console.error('Error updating work history:', error);
       toast.error("Failed to update work history")

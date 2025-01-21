@@ -137,7 +137,7 @@ export const ChatList = ({
       if (b.isRecentlySelected) return 1;
       
       // Sort by unread count first, then by date
-      if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
+    //   if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
       
       const aDate = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
       const bDate = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
