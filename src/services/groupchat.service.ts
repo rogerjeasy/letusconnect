@@ -225,13 +225,15 @@ export const updateParticipantRole = async (roleData: RoleUpdateRequest): Promis
 
 /**
  * Update group chat settings
+ * @param groupId ID of the group chat
  * @param settingsData New settings data
  */
 export const updateGroupSettings = async (
-  settingsData: GroupSettingsUpdateRequest
+  groupId: string,
+  settingsData: GroupSettings
 ): Promise<void> => {
   try {
-    await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.SETTINGS, settingsData);
+    await api.put(API_CONFIG.ENDPOINTS.GROUP_CHATS.SETTINGS(groupId), settingsData);
   } catch (error) {
     const errorMessage = handleError(error);
     throw new Error(errorMessage || "Failed to update group settings");
@@ -326,5 +328,49 @@ export const deleteMultipleGroupChats = async (groupChatIds: string[]): Promise<
       toast.error(errorMessage || "Failed to delete group chats");
     }
     throw new Error(errorMessage || "Failed to delete group chats");
+  }
+};
+
+interface CreateGroupRequest {
+  name: string;
+  description: string;
+  participants: Participants[];
+}
+
+interface CreateGroupResponse {
+  groupId: string;
+  projectId?: string;
+  message?: string;
+  data: GroupChat;
+}
+
+/**
+ * Create a new group chat
+ * @param groupData Group creation data containing name, description and participants
+ * @param currentUser Current user information
+ * @param onSuccess Optional callback function to handle successful group creation
+ * @returns Promise with the created GroupChat
+ */
+export const createGroupChat = async (
+  groupData: CreateGroupRequest,
+): Promise<GroupChat> => {
+  try {
+    const response = await api.post<CreateGroupResponse>(
+      API_CONFIG.ENDPOINTS.GROUP_CHATS.BASE,
+      groupData
+    );
+
+    const groupChatData: GroupChat = {
+      ...response.data.data,
+      messages: response.data.data.messages || [],
+    };
+
+    toast.success(response.data.message || "Group created successfully.");
+    return groupChatData;
+
+  } catch (error) {
+    const errorMessage = handleError(error);
+    toast.error("Failed to create group: " + errorMessage);
+    throw new Error(errorMessage || "Failed to create group chat");
   }
 };
