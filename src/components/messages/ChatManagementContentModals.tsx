@@ -77,7 +77,6 @@ export const ModalToCreateGroup: React.FC<{ isOpen: boolean; onClose: () => void
   };
 
   const handleCreateGroup = async () => {
-    const token = localStorage.getItem("token");
     try {
       const groupData = {
         name,

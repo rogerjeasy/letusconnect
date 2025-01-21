@@ -16,10 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { MessageCircle } from 'lucide-react';
 import { UserToChatWith } from "@/components/chat/sidebar/UserToChatWith";
 import { User } from '@/store/userStore';
 import { DirectMessage } from '@/store/message';
+import { ModalToCreateGroup } from './CreateGroupDialog';
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />
@@ -79,6 +79,7 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
   onTabChange
 }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
     const handleUserSelect = (selectedUser: User) => {
       if (currentUser) {
@@ -115,12 +116,24 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
       setIsDialogOpen(false);
     };
 
+    const handleCreateGroupClick = () => {
+        setIsDialogOpen(false);
+        setTimeout(() => {
+          setIsCreateGroupModalOpen(true);
+      }, 100);
+    };
+  
+    const handleCreateGroupModalClose = () => {
+      setIsCreateGroupModalOpen(false);
+    };
+
     return (
+      <>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
-            <MessageCircle className="h-5 w-5" />
-            <span>Manage Chats</span>
+            <FaPlusCircle className="h-5 w-5" />
+            <span>Chats</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="w-[90%] sm:w-[385px] max-h-[90vh] overflow-y-auto mx-auto">
@@ -134,9 +147,10 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
               </CardHeader>
               <CardContent className="space-y-2">
                 <ChatOption
-                  icon={<CreateGroupChatIcon />}
-                  title="Create a Group Chat"
-                  description="Start a new group conversation"
+                    icon={<CreateGroupChatIcon />}
+                    title="Create a Group Chat"
+                    description="Start a new group conversation"
+                    onClick={handleCreateGroupClick}
                 />
                 <UserToChatWith
                   trigger={
@@ -172,6 +186,12 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+        <ModalToCreateGroup 
+            isOpen={isCreateGroupModalOpen}
+            onClose={handleCreateGroupModalClose}
+        />
+     </>
     );
 };
 
