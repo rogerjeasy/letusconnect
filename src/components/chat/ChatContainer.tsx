@@ -12,6 +12,7 @@ import { Menu } from 'lucide-react';
 import { DirectMessage, Message } from '@/store/message';
 import { GroupChat, GroupSettings } from '@/store/groupChat';
 import { useGroupChatStore } from '@/store/useGroupChatStore';
+import { toast } from 'react-toastify';
 
 interface ChatProps {
   currentUserId: string;
@@ -19,7 +20,7 @@ interface ChatProps {
   onSendMessage: (content: string, chatId: string, chatType: 'direct' | 'group') => Promise<void>;
   onCreateGroup?: (group: GroupChat) => Promise<void>;
   onLeaveGroup?: (groupId: string) => Promise<void>;
-  onUpdateSettings?: (groupId: string, settings: Partial<GroupSettings>) => Promise<void>;
+  onUpdateSettings?: (groupId: string, settings: GroupSettings) => Promise<void>;
   onDeleteGroup?: (groupId: string) => Promise<void>;
 }
 
@@ -180,6 +181,20 @@ export const ChatContainer = ({
     }
   };
 
+  const handleSettingsUpdate = async (groupId: string, settings: GroupSettings) => {
+    if (!currentChat || !isGroupChat(currentChat)) {
+      return;
+    }
+    try {
+      await onUpdateSettings?.(groupId, settings);
+      setShowSettings(false); 
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast.error('Failed to update group settings');
+    }
+  };
+
+
   const renderSidebar = () => (
     <ChatSidebar
       directChats={[...pendingChats, ...directChats]}
@@ -256,16 +271,14 @@ export const ChatContainer = ({
 
       {selectedChat?.type === 'group' && currentChat && isGroupChat(currentChat) && (
         <ChatSettings
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          settings={currentChat.groupSettings}
-          onUpdate={(settings) => 
-            onUpdateSettings?.(selectedChat.id, settings)
-          }
-          type="group"
-          chatId={selectedChat.id}
+            isOpen={showSettings}
+            onClose={() => setShowSettings(false)}
+            settings={currentChat.groupSettings}
+            onUpdate={(settings) => handleSettingsUpdate(selectedChat.id, settings)}
+            type="group"
+            chatId={selectedChat.id}
         />
-      )}
+    )}
     </div>
   );
 };

@@ -228,12 +228,13 @@ export const updateParticipantRole = async (roleData: RoleUpdateRequest): Promis
  * @param groupId ID of the group chat
  * @param settingsData New settings data
  */
-export const updateGroupSettings = async (
+export const updateAGivenGroupSettings = async (
   groupId: string,
   settingsData: GroupSettings
 ): Promise<void> => {
   try {
     await api.put(API_CONFIG.ENDPOINTS.GROUP_CHATS.SETTINGS(groupId), settingsData);
+    console.log("Updating group settings from group service", groupId, settingsData);
   } catch (error) {
     const errorMessage = handleError(error);
     throw new Error(errorMessage || "Failed to update group settings");

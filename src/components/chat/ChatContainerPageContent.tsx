@@ -8,19 +8,14 @@ import { GroupChat, GroupSettings, BaseMessage } from '@/store/groupChat';
 import { toast } from 'react-toastify';
 import {
   getDirectMessages,
-  sendDirectMessage,
   markMessagesAsRead,
   getUnreadDirectMessageCount,
 } from '@/services/message.service';
 import {
   getMyGroupChats,
-  sendMessageToGroup,
-  markGroupMessagesAsRead,
-  updateGroupSettings as updateGroupSettingsService,
+  updateAGivenGroupSettings,
   leaveGroupChat,
-  processGroupChats,
   deleteGroupChat,
-  createGroupChat,
 } from '@/services/groupchat.service';
 import { handleSendMessage } from './sendmessage/centralize.send.message';
 import { useGroupChatStore } from '@/store/useGroupChatStore';
@@ -94,24 +89,16 @@ export default function ChatContainerPage() {
   }, []);
 
   const fetchDirectChats = useCallback(async () => {
-    try {
-      const messagesResponse = await getDirectMessages();
-      const allDirectMessages = messagesResponse.flatMap((m: Messages) => m.directMessages || []);
-      setDirectChats(allDirectMessages);
-    } catch (err) {
-      throw err;
-    }
+    const messagesResponse = await getDirectMessages();
+    const allDirectMessages = messagesResponse.flatMap((m: Messages) => m.directMessages || []);
+    setDirectChats(allDirectMessages);
   }, []);
-
+  
   const fetchGroupChats = useCallback(async () => {
-    try {
-      const groupChatsResponse = await getMyGroupChats();
-      groupChatsResponse.forEach(groupChat => {
-        addGroupChat(groupChat);
-      });
-    } catch (err) {
-      throw err;
-    }
+    const groupChatsResponse = await getMyGroupChats();
+    groupChatsResponse.forEach(groupChat => {
+      addGroupChat(groupChat);
+    });
   }, [addGroupChat]);
 
   const fetchChats = useCallback(async () => {
@@ -121,7 +108,6 @@ export default function ChatContainerPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch both types of chats in parallel
       await Promise.all([
         fetchDirectChats(),
         fetchGroupChats(),
@@ -182,28 +168,23 @@ export default function ChatContainerPage() {
     }
   };
 
-  const handleUpdateSettings = async (groupId: string, settings: Partial<GroupSettings>) => {
+  const handleUpdateSettings = async (groupId: string, settings: GroupSettings) => {
     try {
-      const existingChat = groupChats.find(chat => chat.id === groupId);
-      if (!existingChat) {
-        throw new Error('Group chat not found');
-      }
-  
-      const completeSettings: GroupSettings = {
-        ...existingChat.groupSettings,
-        ...settings
-      };
-  
-      await updateGroupSettingsService(groupId, completeSettings);
+      await updateAGivenGroupSettings(groupId, settings);
+
+      console.log("Updating group settings", groupId, settings);
       
       updateGroupSettings(groupId, settings);
-      toast.success('Group settings updated');
+      
+      toast.success('Group settings updated successfully');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update group settings';
       console.error('Error updating group settings:', err);
       toast.error(errorMessage);
+      throw err;
     }
   };
+
   const handleDeleteGroup = async (groupId: string) => {
     try {
         await deleteGroupChat(groupId);
