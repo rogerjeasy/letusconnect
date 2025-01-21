@@ -22,15 +22,36 @@ body {
   }
 }
 
-/* Add global styles for links to improve accessibility */
-/* a {
-  @apply text-blue-500 hover:text-blue-700 transition-colors;
-} */
-
 /* Smooth scrolling behavior for better navigation */
 html {
   scroll-behavior: smooth;
 }
+
+/* Animation keyframes and classes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -59,6 +80,7 @@ html {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -86,6 +108,7 @@ html {
     --chart-5: 340 75% 55%;
   }
 }
+
 @layer base {
   * {
     @apply border-border;

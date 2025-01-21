@@ -138,6 +138,7 @@ export const markMessagesAsRead = async (senderId: string): Promise<void> => {
     throw new Error(errorMessage || "Failed to mark messages as read");
   }
 };
+
 /**
  * Process and organize direct messages by user
  * @param messages - Array of Messages objects

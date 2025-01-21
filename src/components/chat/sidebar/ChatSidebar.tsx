@@ -7,26 +7,30 @@ import { Message } from "@/store/message";
 import ChatManagementComponent from "../settings/ChatManagementComponent";
 import { useUserStore } from "@/store/userStore";
 import { GroupChat } from "@/store/groupChat";
+import { useGroupChatStore } from "@/store/useGroupChatStore";
+import { useEffect } from "react";
 
-interface ExtendedChatSidebarProps extends ChatSidebarProps {
+type BaseSidebarProps = Omit<ChatSidebarProps, 'onCreateGroup'>;
+
+interface ExtendedChatSidebarProps extends BaseSidebarProps {
   onSidebarClose?: () => void;
   onNewDirectMessage?: (message: Message) => void;
-  onNewGroup?: (group: GroupChat) => void;
+  onCreateGroup?: (group: GroupChat) => Promise<void>;
 }
 
 export const ChatSidebar = ({
-  directChats,
-  groupChats,
-  selectedChatId,
-  currentUserId,
-  activeTab = 'direct',
-  onChatSelect,
-  onTabChange,
-  onSidebarClose,
-  onNewDirectMessage,
-  onNewGroup
-}: ExtendedChatSidebarProps) => {
+    directChats,
+    selectedChatId,
+    currentUserId,
+    activeTab = 'direct',
+    onChatSelect,
+    onTabChange,
+    onSidebarClose,
+    onNewDirectMessage,
+    onCreateGroup
+  }: ExtendedChatSidebarProps) => {
   const currentUser = useUserStore(state => state.user);
+  const groupChats = useGroupChatStore(state => state.groupChats);
 
   const handleNewDirectMessage = (message: Message) => {
     if (onNewDirectMessage) {
@@ -34,21 +38,27 @@ export const ChatSidebar = ({
     }
   };
 
-  const handleNewGroup = (group: GroupChat) => {
-    if (onNewGroup) {
-      onNewGroup(group);
-      onTabChange?.('groups');
-      onChatSelect?.(group.id, 'group');
+  const handleCreateGroup = async (group: GroupChat) => {
+    if (onCreateGroup) {
+      await onCreateGroup(group);
     }
+    onTabChange?.('groups');
+    onChatSelect?.(group.id, 'group');
   };
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
     onChatSelect?.(chatId, type);
+    if (onSidebarClose) {
+      onSidebarClose();
+    }
   };
 
   const handleTabChange = (tab: 'direct' | 'groups') => {
     onTabChange?.(tab);
   };
+
+  useEffect(() => {
+  }, [groupChats]);
 
   return (
     <Card className="w-64 h-full flex flex-col">
@@ -61,7 +71,7 @@ export const ChatSidebar = ({
               onNewDirectMessage={handleNewDirectMessage}
               onChatSelect={handleChatSelect}
               onTabChange={handleTabChange}
-              onGroupCreated={handleNewGroup}
+              onCreateGroup={handleCreateGroup}
             />
           </div>
         </div>
@@ -72,7 +82,6 @@ export const ChatSidebar = ({
       >
         <ChatList
           directChats={directChats}
-          groupChats={groupChats}
           currentUserId={currentUserId}
           selectedChatId={selectedChatId}
           activeTab={activeTab}

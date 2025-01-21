@@ -21,6 +21,8 @@ import { User } from '@/store/userStore';
 import { DirectMessage } from '@/store/message';
 import { ModalToCreateGroup } from './CreateGroupDialog';
 import { GroupChat } from '@/store/groupChat';
+import { Participants } from '@/store/project';
+import { createGroupChat } from '@/services/groupchat.service';
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />
@@ -67,26 +69,25 @@ const ChatOption: React.FC<ChatOptionProps> = ({
 );
 
 interface ChatManagementComponentProps {
-  currentUser?: User;
-  onNewDirectMessage?: (message: DirectMessage) => void;
-  onChatSelect?: (chatId: string, type: 'direct' | 'group') => void;
-  onTabChange?: (tab: 'direct' | 'groups') => void;
-  onGroupCreated?: (group: GroupChat) => void;
-}
+    currentUser?: User;
+    onNewDirectMessage?: (message: DirectMessage) => void;
+    onChatSelect?: (chatId: string, type: 'direct' | 'group') => void;
+    onTabChange?: (tab: 'direct' | 'groups') => void;
+    onCreateGroup?: (group: GroupChat) => Promise<void>;
+  }
 
 const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({ 
   currentUser,
   onNewDirectMessage,
   onChatSelect,
   onTabChange,
-  onGroupCreated
+  onCreateGroup
 }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
 
     const handleUserSelect = (selectedUser: User) => {
       if (currentUser) {
-        // Get the display name for the receiver
         const receiverName = selectedUser.username ||
           `${selectedUser.firstName} ${selectedUser.lastName}`.trim() ||
           'Unknown User';
@@ -110,10 +111,8 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
         // Handle the new message
         onNewDirectMessage?.(newDirectMessage);
         
-        // Switch to direct messages tab
         onTabChange?.('direct');
         
-        // Select the chat
         onChatSelect?.(selectedUser.uid, 'direct');
       }
       setIsDialogOpen(false);
@@ -130,12 +129,27 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
       setIsCreateGroupModalOpen(false);
     };
 
-    const handleGroupCreated = (group: GroupChat) => {
-      onGroupCreated?.(group); 
-      onTabChange?.('groups'); 
-      onChatSelect?.(group.id, 'group');
-      setIsCreateGroupModalOpen(false);
-    };
+    const handleGroupCreated = async (groupData: {
+        name: string;
+        description: string;
+        participants: Participants[];
+      }) => {
+        if (!currentUser) return;
+  
+        try {
+          const newGroup = await createGroupChat(groupData);
+  
+          if (onCreateGroup) {
+            await onCreateGroup(newGroup);
+          }
+  
+          onTabChange?.('groups');
+          onChatSelect?.(newGroup.id, 'group');
+        } catch (error) {
+          console.error('Error in handleGroupCreated:', error);
+        }
+      };
+    
 
     return (
       <>

@@ -56,7 +56,7 @@ export interface ChatSettingsProps {
   isOpen: boolean;
   onClose: () => void;
   settings: GroupSettings;
-  onUpdate: (settings: Partial<GroupSettings>) => void;
+  onUpdate: (settings: GroupSettings) => void;
   type: 'direct' | 'group';
   chatId: string;
 }

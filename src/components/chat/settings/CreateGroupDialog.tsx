@@ -23,12 +23,17 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { GroupChat } from "@/store/groupChat";
+import { useGroupChatStore } from "@/store/useGroupChatStore";
 
 interface ModalToCreateGroupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onGroupCreated?: (group: GroupChat) => void;
-}
+    isOpen: boolean;
+    onClose: () => void;
+    onGroupCreated?: (groupData: {
+      name: string;
+      description: string;
+      participants: Participants[];
+    }) => Promise<void>;
+  }
 
 export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
   isOpen,
@@ -42,6 +47,7 @@ export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
   const [participants, setParticipants] = useState<Participants[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = useUserStore((state) => state.user);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -81,60 +87,24 @@ export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
   };
 
 
-  const handleCreateGroup = async () => {
+  const handleSubmit = async () => {
+    if (!name || selectedUsers.length === 0) return;
+    
+    setIsSubmitting(true);
     try {
       const groupData = {
         name,
         description,
         participants: selectedUsers,
       };
-      const response = await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.BASE, groupData);
-      
-      if (onGroupCreated && response.data.groupId) {
-        const currentUserParticipant: Participants = {
-          userId: currentUser?.uid || '',
-          username: currentUser?.username || '',
-          email: currentUser?.email || '',
-          profilePicture: currentUser?.profilePicture || currentUser?.username?.charAt(0).toUpperCase() || 'U',
-          role: 'owner'
-        };
 
-        const newGroup: GroupChat = {
-            id: response.data.groupId,
-            projectId: response.data.projectId || '',
-            createdByUid: currentUser?.uid || '',
-            createdByName: currentUser?.username || '',
-            name: name,
-            description: description,
-            participants: [...selectedUsers, currentUserParticipant],
-            messages: [],
-            pinnedMessages: [],
-            isArchived: false,
-            notifications: {},
-            readStatus: {},
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            groupSettings: {
-              allowFileSharing: true,
-              allowPinning: true,
-              allowReactions: true,
-              allowReplies: true,
-              muteNotifications: false,
-              onlyAdminsCanPost: false
-            }
-          };
-        
-        onGroupCreated(newGroup);
-      }
-
-      toast.success(response.data.message || "Group created successfully.");
-      setGroupName("");
-      setGroupDescription("");
-      setSelectedUsers([]);
+      await onGroupCreated?.(groupData);
       onClose();
     } catch (error) {
-      const errorMessage = handleError(error);
-      toast.error("Failed to create group: " + errorMessage);      
+      console.error('Error in handleSubmit:', error);
+      // Error handling is done in the parent component
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -268,10 +238,17 @@ export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
             Cancel
           </Button>
           <Button
-            onClick={handleCreateGroup}
-            disabled={!name || selectedUsers.length === 0}
+            onClick={handleSubmit}
+            disabled={!name || selectedUsers.length === 0 || isSubmitting}
           >
-            Create Group
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              'Create Group'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -11,15 +11,17 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/co
 import { Menu } from 'lucide-react';
 import { DirectMessage, Message } from '@/store/message';
 import { GroupChat, GroupSettings } from '@/store/groupChat';
+import { useGroupChatStore } from '@/store/useGroupChatStore';
+import { toast } from 'react-toastify';
 
 interface ChatProps {
   currentUserId: string;
   directChats: DirectMessage[];
-  groupChats: GroupChat[];
   onSendMessage: (content: string, chatId: string, chatType: 'direct' | 'group') => Promise<void>;
-  onCreateGroup?: (name: string, description: string) => Promise<void>;
+  onCreateGroup?: (group: GroupChat) => Promise<void>;
   onLeaveGroup?: (groupId: string) => Promise<void>;
-  onUpdateSettings?: (groupId: string, settings: Partial<GroupSettings>) => Promise<void>;
+  onUpdateSettings?: (groupId: string, settings: GroupSettings) => Promise<void>;
+  onDeleteGroup?: (groupId: string) => Promise<void>;
 }
 
 type SelectedChat = {
@@ -38,19 +40,20 @@ const isDirectChat = (chat: any): chat is DirectMessage => {
 export const ChatContainer = ({
   currentUserId,
   directChats,
-  groupChats,
   onSendMessage,
   onCreateGroup,
   onLeaveGroup,
-  onUpdateSettings
+  onUpdateSettings,
+  onDeleteGroup
 }: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<SelectedChat>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<'direct' | 'groups'>('direct');
   const [pendingChats, setPendingChats] = useState<DirectMessage[]>([]);
+
+  const groupChats = useGroupChatStore(state => state.groupChats);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -147,6 +150,51 @@ export const ChatContainer = ({
     return chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
   };
 
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await onDeleteGroup?.(groupId);
+      setSelectedChat(null);
+      setShowSettings(false);
+    } catch (error) {
+      console.error('Error deleting group chat:', error);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (selectedChat?.type === 'group') {
+      try {
+        await onLeaveGroup?.(selectedChat.id);
+        setSelectedChat(null);
+      } catch (error) {
+        console.error('Error leaving group:', error);
+      }
+    }
+  };
+
+  const handleCreateNewGroup = async (group: GroupChat) => {
+    try {
+      await onCreateGroup?.(group);
+      handleChatSelect(group.id, 'group');
+      setActiveTab('groups');
+    } catch (error) {
+      console.error('Error creating group:', error);
+    }
+  };
+
+  const handleSettingsUpdate = async (groupId: string, settings: GroupSettings) => {
+    if (!currentChat || !isGroupChat(currentChat)) {
+      return;
+    }
+    try {
+      await onUpdateSettings?.(groupId, settings);
+      setShowSettings(false); 
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast.error('Failed to update group settings');
+    }
+  };
+
+
   const renderSidebar = () => (
     <ChatSidebar
       directChats={[...pendingChats, ...directChats]}
@@ -154,7 +202,7 @@ export const ChatContainer = ({
       currentUserId={currentUserId}
       selectedChatId={selectedChat?.id}
       onChatSelect={handleChatSelect}
-      onCreateGroup={() => setShowCreateGroup(true)}
+      onCreateGroup={handleCreateNewGroup}
       activeTab={activeTab}
       onTabChange={handleTabChange}
       onSidebarClose={() => setIsMobileOpen(false)}
@@ -198,6 +246,9 @@ export const ChatContainer = ({
                   : undefined
               }
               onSettingsClick={() => setShowSettings(true)}
+              onLeaveGroup={handleLeaveGroup}
+              onDeleteGroup={handleDeleteGroup}
+              groupId={selectedChat?.type === 'group' ? selectedChat.id : undefined}
             />
 
             <MessageList
@@ -220,16 +271,14 @@ export const ChatContainer = ({
 
       {selectedChat?.type === 'group' && currentChat && isGroupChat(currentChat) && (
         <ChatSettings
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          settings={currentChat.groupSettings}
-          onUpdate={(settings) => 
-            onUpdateSettings?.(selectedChat.id, settings)
-          }
-          type="group"
-          chatId={selectedChat.id}
+            isOpen={showSettings}
+            onClose={() => setShowSettings(false)}
+            settings={currentChat.groupSettings}
+            onUpdate={(settings) => handleSettingsUpdate(selectedChat.id, settings)}
+            type="group"
+            chatId={selectedChat.id}
         />
-      )}
+    )}
     </div>
   );
 };
