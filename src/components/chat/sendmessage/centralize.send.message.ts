@@ -5,6 +5,7 @@ import { BaseMessage, GroupChat } from '@/store/groupChat';
 import { toast } from 'react-toastify';
 import { sendDirectMessage, SendMessage } from '@/services/message.service';
 import { sendMessageToGroup } from '@/services/groupchat.service';
+import { useGroupChatStore } from '@/store/useGroupChatStore';
 
 interface SendMessageParams {
   content: string;
@@ -131,6 +132,10 @@ const handleGroupMessage = async ({
     return;
   }
 
+  if (!Array.isArray(group.messages)) {
+    group.messages = [];
+  }
+
   const tempMessage: BaseMessage = {
     id: Date.now().toString(),
     senderId: currentUserId,
@@ -143,51 +148,27 @@ const handleGroupMessage = async ({
     isPinned: false
   };
 
+  const { addMessage, updateMessage, removeMessage } = useGroupChatStore.getState();
+
   try {
-    updateGroupChats(prev =>
-      prev.map(g =>
-        g.id === groupId
-          ? { ...g, messages: [...g.messages, tempMessage] }
-          : g
-      )
-    );
+    addMessage(groupId, tempMessage);
 
     await sendMessageToGroup(
       groupId,
       content,
       (message: BaseMessage) => {
-        updateGroupChats(prev =>
-          prev.map(g =>
-            g.id === groupId
-              ? {
-                  ...g,
-                  messages: g.messages.map(m =>
-                    m.id === tempMessage.id ? message : m
-                  ),
-                }
-              : g
-          )
-        );
+        updateMessage(groupId, tempMessage.id, message);
       },
-      () => {}, // setNewMessage handled by child component
-      () => {}, // setSendingMessage handled by child component
-      () => {}, // updateEntity handled by store
-      group.messages
+      () => {}, 
+      () => {},
+      () => {}, 
+      Array.isArray(group.messages) ? group.messages : []
     );
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to send message to group';
     console.error('Error sending group message:', err);
     toast.error(errorMessage);
     
-    updateGroupChats(prev =>
-      prev.map(g =>
-        g.id === groupId
-          ? {
-              ...g,
-              messages: g.messages.filter(m => m.id !== tempMessage.id),
-            }
-          : g
-      )
-    );
-  }
-};
+    removeMessage(groupId, tempMessage.id);
+    }
+  };

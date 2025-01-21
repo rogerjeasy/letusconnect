@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { useUserStore } from '@/store/userStore';
 import { DirectMessage, Message, Messages } from '@/store/message';
@@ -16,12 +16,14 @@ import {
   getMyGroupChats,
   sendMessageToGroup,
   markGroupMessagesAsRead,
-  updateGroupSettings,
+  updateGroupSettings as updateGroupSettingsService,
   leaveGroupChat,
   processGroupChats,
   deleteGroupChat,
+  createGroupChat,
 } from '@/services/groupchat.service';
 import { handleSendMessage } from './sendmessage/centralize.send.message';
+import { useGroupChatStore } from '@/store/useGroupChatStore';
 
 const ContainerWrapper = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-[calc(100vh-4rem)] p-4 flex items-center justify-center relative">
@@ -70,25 +72,61 @@ const ContainerWrapper = ({ children }: { children: React.ReactNode }) => (
 export default function ChatContainerPage() {
   const user = useUserStore((state) => state.user);
   const [directChats, setDirectChats] = useState<DirectMessage[]>([]);
-  const [groupChats, setGroupChats] = useState<GroupChat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchChats = async () => {
+  const {
+    groupChats,
+    addGroupChat,
+    removeGroupChat,
+    updateGroupSettings
+  } = useGroupChatStore();
+
+  const handleMarkMessagesAsRead = useCallback(async (userId: string) => {
+    try {
+      const unreadCount = await getUnreadDirectMessageCount();
+      if (unreadCount > 0) {
+        await markMessagesAsRead(userId);
+      }
+    } catch (err) {
+      console.error('Error marking messages as read:', err);
+    }
+  }, []);
+
+  const fetchDirectChats = useCallback(async () => {
+    try {
+      const messagesResponse = await getDirectMessages();
+      const allDirectMessages = messagesResponse.flatMap((m: Messages) => m.directMessages || []);
+      setDirectChats(allDirectMessages);
+    } catch (err) {
+      throw err;
+    }
+  }, []);
+
+  const fetchGroupChats = useCallback(async () => {
+    try {
+      const groupChatsResponse = await getMyGroupChats();
+      groupChatsResponse.forEach(groupChat => {
+        addGroupChat(groupChat);
+      });
+    } catch (err) {
+      throw err;
+    }
+  }, [addGroupChat]);
+
+  const fetchChats = useCallback(async () => {
+    if (!user?.uid) return;
+
     try {
       setLoading(true);
       setError(null);
 
-      const messagesResponse = await getDirectMessages();
-      const allDirectMessages = messagesResponse.flatMap((m: Messages) => m.directMessages || []);
-      setDirectChats(allDirectMessages);
-
-      const groupChatsResponse = await getMyGroupChats();
-      setGroupChats(groupChatsResponse);
-
-      if (user?.uid) {
-        await markMessagesAsRead(user.uid);
-      }
+      // Fetch both types of chats in parallel
+      await Promise.all([
+        fetchDirectChats(),
+        fetchGroupChats(),
+        handleMarkMessagesAsRead(user.uid)
+      ]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load chat messages';
       console.error('Error fetching chats:', err);
@@ -97,13 +135,11 @@ export default function ChatContainerPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.uid, fetchDirectChats, fetchGroupChats, handleMarkMessagesAsRead]);
 
   useEffect(() => {
-    if (user?.uid) {
-      fetchChats();
-    }
-  }, [user?.uid]);
+    fetchChats();
+  }, [fetchChats]);
 
 
   const handleSendingMessage = async (content: string, chatId: string, chatType: 'direct' | 'group') => {
@@ -119,19 +155,25 @@ export default function ChatContainerPage() {
       currentUserId: user.uid,
       username: user.username,
       updateDirectChats: setDirectChats,
-      updateGroupChats: setGroupChats,
+      updateGroupChats: () => {},     
       groupChats
     });
   };
 
-  const handleCreateGroup = async (name: string, description: string) => {
-    toast.info('Group creation not implemented yet');
+  const handleCreateGroup = async (group: GroupChat) => {
+    try {
+      addGroupChat(group);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create group';
+      console.error('Error creating group:', err);
+      toast.error(errorMessage || 'Failed to create group');
+    }
   };
 
   const handleLeaveGroup = async (groupId: string) => {
     try {
       await leaveGroupChat(groupId);
-      setGroupChats(prev => prev.filter(g => g.id !== groupId));
+      removeGroupChat(groupId);
       toast.success('Successfully left the group');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to leave group';
@@ -142,14 +184,19 @@ export default function ChatContainerPage() {
 
   const handleUpdateSettings = async (groupId: string, settings: Partial<GroupSettings>) => {
     try {
-      await updateGroupSettings({ groupId, settings });
-      setGroupChats(prev =>
-        prev.map(g =>
-          g.id === groupId
-            ? { ...g, groupSettings: { ...g.groupSettings, ...settings } }
-            : g
-        )
-      );
+      const existingChat = groupChats.find(chat => chat.id === groupId);
+      if (!existingChat) {
+        throw new Error('Group chat not found');
+      }
+  
+      const completeSettings: GroupSettings = {
+        ...existingChat.groupSettings,
+        ...settings
+      };
+  
+      await updateGroupSettingsService(groupId, completeSettings);
+      
+      updateGroupSettings(groupId, settings);
       toast.success('Group settings updated');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update group settings';
@@ -157,10 +204,10 @@ export default function ChatContainerPage() {
       toast.error(errorMessage);
     }
   };
-
   const handleDeleteGroup = async (groupId: string) => {
     try {
         await deleteGroupChat(groupId);
+        removeGroupChat(groupId);
     }
     catch (error) {
         console.error('Error deleting group chat:', error);
@@ -202,7 +249,6 @@ export default function ChatContainerPage() {
       <ChatContainer
         currentUserId={user.uid}
         directChats={directChats}
-        groupChats={groupChats}
         onSendMessage={handleSendingMessage}
         onCreateGroup={handleCreateGroup}
         onLeaveGroup={handleLeaveGroup}

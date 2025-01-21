@@ -1,6 +1,7 @@
 "use client";
 
 import { User } from "@/store/userStore";
+import { group } from "console";
 
 // config/api.config.ts
 export const API_CONFIG = {
@@ -147,7 +148,7 @@ export const API_CONFIG = {
         ROLES: '/group-chats/set-role',
         MUTE: '/group-chats/mute-participant',
         ONLINE_STATUS: (participantId: string) => `/group-chats/online-status/${participantId}`,
-        SETTINGS: '/group-chats/update-settings',
+        SETTINGS: (groupChatId: string) => `/group-chats/update-settings/${groupChatId}`,
         ARCHIVE: '/group-chats/archive',
         LEAVE: (groupChatId: string) => `/group-chats/${groupChatId}/participants/me`,
         ADD_PARTICIPANTS: {
