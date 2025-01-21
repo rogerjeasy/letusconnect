@@ -147,13 +147,29 @@ export const ChatList = ({
 
   // Process group chats with unread counts
   const processedGroupChats = useMemo(() => {
-    return groupChats.map((group) => ({
-      id: group.id,
-      name: group.name || 'Unnamed Group',
-      lastMessage: group.messages?.[group.messages.length - 1]?.content || '',
-      unreadCount: groupUnreadCounts[group.id] || 0
-    }));
-  }, [groupChats, groupUnreadCounts]);
+    const chatGroups = groupChats.map((group) => {
+      const lastMessageDate = group.messages?.length
+        ? new Date(group.messages[group.messages.length - 1].createdAt)
+        : null;
+  
+      return {
+        id: group.id,
+        name: group.name || 'Unnamed Group',
+        lastMessage: group.messages?.[group.messages.length - 1]?.content || '',
+        lastMessageDate,
+        unreadCount: groupUnreadCounts[group.id] || 0,
+      };
+    });
+  
+    return chatGroups.sort((a, b) => {
+      // Sort by unread count first, then by date
+    //   if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
+  
+      const aDate = a.lastMessageDate ? a.lastMessageDate.getTime() : 0;
+      const bDate = b.lastMessageDate ? b.lastMessageDate.getTime() : 0;
+      return bDate - aDate;
+    });
+  }, [groupChats, groupUnreadCounts]);  
 
   const handleChatSelect = useCallback(async (chatId: string, type: 'direct' | 'group') => {
     if (loadingChatId === chatId) return;
