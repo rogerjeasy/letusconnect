@@ -155,6 +155,8 @@ export const API_CONFIG = {
           TO_PROJECT: (projectId: string) => `/group-chats/projects/${projectId}/participants`,
         },
         REPORT: '/group-chats/report-message',
+        DELETE_GROUP_CHAT: (id: string) => `/group-chats/${id}`,
+        DELETE_MULTIPLE_GROUP_CHATS: '/group-chats/delete-multiple',
       },
     },
   } as const;

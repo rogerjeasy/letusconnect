@@ -286,3 +286,45 @@ export const processGroupChats = (
     };
   });
 };
+
+/**
+ * Delete a single group chat
+ * @param groupChatId ID of the group chat to delete
+ * @returns Promise<void>
+ */
+export const deleteGroupChat = async (groupChatId: string): Promise<void> => {
+  try {
+    await api.delete(API_CONFIG.ENDPOINTS.GROUP_CHATS.DELETE_GROUP_CHAT(groupChatId));
+    toast.success("Group chat deleted successfully");
+  } catch (error) {
+    const errorMessage = handleError(error);
+    if (errorMessage.includes("unauthorized")) {
+      toast.error("You don't have permission to delete this group chat");
+    } else {
+      toast.error(errorMessage || "Failed to delete group chat");
+    }
+    throw new Error(errorMessage || "Failed to delete group chat");
+  }
+};
+
+/**
+ * Delete multiple group chats at once
+ * @param groupChatIds Array of group chat IDs to delete
+ * @returns Promise<void>
+ */
+export const deleteMultipleGroupChats = async (groupChatIds: string[]): Promise<void> => {
+  try {
+    await api.delete(API_CONFIG.ENDPOINTS.GROUP_CHATS.DELETE_MULTIPLE_GROUP_CHATS, {
+      data: { chatIds: groupChatIds }
+    });
+    toast.success("Group chats deleted successfully");
+  } catch (error) {
+    const errorMessage = handleError(error);
+    if (errorMessage.includes("Unauthorized")) {
+      toast.error("You don't have permission to delete one or more group chats");
+    } else {
+      toast.error(errorMessage || "Failed to delete group chats");
+    }
+    throw new Error(errorMessage || "Failed to delete group chats");
+  }
+};
