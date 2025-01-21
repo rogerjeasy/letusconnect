@@ -1,3 +1,5 @@
+"use client";
+
 import {
     AlertDialog,
     AlertDialogContent,
@@ -6,16 +8,11 @@ import {
     AlertDialogFooter,
     AlertDialogCancel,
     AlertDialogAction,
-    AlertDialogDescription,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ChatSettingsProps } from "../types/chat";
-import { deleteGroupChat } from "@/services/groupchat.service";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 interface ExtendedChatSettingsProps extends ChatSettingsProps {
   groupId?: string;
@@ -27,29 +24,10 @@ export const ChatSettings = ({
   settings, 
   onUpdate,
   type,
-  groupId
 }: ExtendedChatSettingsProps) => {
-  const router = useRouter();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSettingChange = (key: keyof typeof settings, value: boolean) => {
     onUpdate({ [key]: value });
-  };
-
-  const handleDeleteGroup = async () => {
-    if (!groupId) return;
-    
-    try {
-      setIsDeleting(true);
-      await deleteGroupChat(groupId);
-      onClose();
-      router.push('/chats');
-    } catch (error) {
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
-    }
   };
 
   return (
@@ -120,16 +98,6 @@ export const ChatSettings = ({
                       }
                     />
                   </div>
-
-                    <div className="pt-4">
-                      <Button 
-                        variant="destructive" 
-                        className="w-full"
-                        onClick={() => setShowDeleteDialog(true)}
-                      >
-                        Delete Group Chat
-                      </Button>
-                    </div>
                 </>
               )}
 
@@ -146,27 +114,6 @@ export const ChatSettings = ({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction>Save Changes</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Group Chat</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this group chat? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteGroup}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

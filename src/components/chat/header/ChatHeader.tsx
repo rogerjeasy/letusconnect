@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
@@ -15,6 +16,7 @@ import { User, useUserStore } from "@/store/userStore";
 import { ParticipantsModal } from "./ParticipantsModal";
 import { Participants } from "@/store/project";
 import { getUserByUid } from '@/services/users.services';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 type ParticipantActionType = 'block' | 'remove' | 'change_role';
 
@@ -22,7 +24,9 @@ interface ExtendedChatHeaderProps extends ChatHeaderProps {
     participants?: Participants[];
     onParticipantAction?: (actionType: ParticipantActionType, participantId: string) => void;
     onLeaveGroup?: () => void;
+    onDeleteGroup?: (groupId: string) => Promise<void>;
     partnerId?: string;
+    groupId?: string;
 }
 
 export const ChatHeader = ({
@@ -35,11 +39,15 @@ export const ChatHeader = ({
     participants = [],
     onParticipantAction,
     onLeaveGroup,
-    partnerId
+    onDeleteGroup,
+    partnerId,
+    groupId
 }: ExtendedChatHeaderProps) => {
     const currentUser = useUserStore(state => state.user);
     const [isParticipantsModalOpen, setIsParticipantsModalOpen] = useState(false);
     const [partnerUser, setPartnerUser] = useState<User | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const currentUserRole = participants.find(
         p => p.userId === currentUser?.uid
@@ -58,6 +66,21 @@ export const ChatHeader = ({
             onLeaveGroup?.();
         } else {
             onParticipantAction?.('block', currentUser?.uid || '');
+        }
+    };
+
+    const handleDeleteGroup = async () => {
+        console.log('Deleting group:', groupId);
+        if (!groupId || !onDeleteGroup) return;
+        
+        try {
+            setIsDeleting(true);
+            await onDeleteGroup(groupId);
+        } catch (error) {
+            console.error('Error deleting group:', error);
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteDialog(false);
         }
     };
 
@@ -120,6 +143,17 @@ export const ChatHeader = ({
                                 Settings
                             </DropdownMenuItem>
                         )}
+                        {type === 'group' && isOwnerOrModerator && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                    onClick={() => setShowDeleteDialog(true)}
+                                    className="text-sm sm:text-base py-2 text-destructive cursor-pointer"
+                                >
+                                    Delete Group
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuItem 
                             onClick={handleGroupAction}
                             className="text-sm sm:text-base py-2 text-destructive cursor-pointer"
@@ -139,6 +173,28 @@ export const ChatHeader = ({
                     onParticipantAction={onParticipantAction}
                 />
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Group Chat</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {title} group chat? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteGroup}
+                            disabled={isDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };

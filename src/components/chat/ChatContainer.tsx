@@ -20,6 +20,7 @@ interface ChatProps {
   onCreateGroup?: (name: string, description: string) => Promise<void>;
   onLeaveGroup?: (groupId: string) => Promise<void>;
   onUpdateSettings?: (groupId: string, settings: Partial<GroupSettings>) => Promise<void>;
+  onDeleteGroup?: (groupId: string) => Promise<void>;
 }
 
 type SelectedChat = {
@@ -42,7 +43,8 @@ export const ChatContainer = ({
   onSendMessage,
   onCreateGroup,
   onLeaveGroup,
-  onUpdateSettings
+  onUpdateSettings,
+  onDeleteGroup
 }: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<SelectedChat>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -147,6 +149,27 @@ export const ChatContainer = ({
     return chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
   };
 
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await onDeleteGroup?.(groupId);
+      setSelectedChat(null);
+      setShowSettings(false);
+    } catch (error) {
+      console.error('Error deleting group chat:', error);
+    }
+  };
+
+  const handleLeaveGroup = async () => {
+    if (selectedChat?.type === 'group') {
+      try {
+        await onLeaveGroup?.(selectedChat.id);
+        setSelectedChat(null);
+      } catch (error) {
+        console.error('Error leaving group:', error);
+      }
+    }
+  };
+
   const renderSidebar = () => (
     <ChatSidebar
       directChats={[...pendingChats, ...directChats]}
@@ -198,6 +221,9 @@ export const ChatContainer = ({
                   : undefined
               }
               onSettingsClick={() => setShowSettings(true)}
+              onLeaveGroup={handleLeaveGroup}
+              onDeleteGroup={handleDeleteGroup}
+              groupId={selectedChat?.type === 'group' ? selectedChat.id : undefined}
             />
 
             <MessageList

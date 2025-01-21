@@ -19,6 +19,7 @@ import {
   updateGroupSettings,
   leaveGroupChat,
   processGroupChats,
+  deleteGroupChat,
 } from '@/services/groupchat.service';
 import { handleSendMessage } from './sendmessage/centralize.send.message';
 
@@ -157,6 +158,15 @@ export default function ChatContainerPage() {
     }
   };
 
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+        await deleteGroupChat(groupId);
+    }
+    catch (error) {
+        console.error('Error deleting group chat:', error);
+    }
+    };
+
   if (!user?.uid) {
     return (
       <ContainerWrapper>
@@ -197,6 +207,7 @@ export default function ChatContainerPage() {
         onCreateGroup={handleCreateGroup}
         onLeaveGroup={handleLeaveGroup}
         onUpdateSettings={handleUpdateSettings}
+        onDeleteGroup={handleDeleteGroup}
       />
     </ContainerWrapper>
   );
