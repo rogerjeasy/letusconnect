@@ -20,6 +20,7 @@ import { UserToChatWith } from "@/components/chat/sidebar/UserToChatWith";
 import { User } from '@/store/userStore';
 import { DirectMessage } from '@/store/message';
 import { ModalToCreateGroup } from './CreateGroupDialog';
+import { GroupChat } from '@/store/groupChat';
 
 const CreateGroupChatIcon = (props: SVGProps<SVGSVGElement>) => (
   <FaPlusCircle className="text-green-500 text-xl pointer-events-none flex-shrink-0" {...props} />
@@ -70,13 +71,15 @@ interface ChatManagementComponentProps {
   onNewDirectMessage?: (message: DirectMessage) => void;
   onChatSelect?: (chatId: string, type: 'direct' | 'group') => void;
   onTabChange?: (tab: 'direct' | 'groups') => void;
+  onGroupCreated?: (group: GroupChat) => void;
 }
 
 const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({ 
   currentUser,
   onNewDirectMessage,
   onChatSelect,
-  onTabChange
+  onTabChange,
+  onGroupCreated
 }) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
@@ -120,10 +123,17 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
         setIsDialogOpen(false);
         setTimeout(() => {
           setIsCreateGroupModalOpen(true);
-      }, 100);
+        }, 100);
     };
   
     const handleCreateGroupModalClose = () => {
+      setIsCreateGroupModalOpen(false);
+    };
+
+    const handleGroupCreated = (group: GroupChat) => {
+      onGroupCreated?.(group); 
+      onTabChange?.('groups'); 
+      onChatSelect?.(group.id, 'group');
       setIsCreateGroupModalOpen(false);
     };
 
@@ -187,10 +197,11 @@ const ChatManagementComponent: React.FC<ChatManagementComponentProps> = ({
         </DialogContent>
       </Dialog>
 
-        <ModalToCreateGroup 
-            isOpen={isCreateGroupModalOpen}
-            onClose={handleCreateGroupModalClose}
-        />
+      <ModalToCreateGroup 
+        isOpen={isCreateGroupModalOpen}
+        onClose={handleCreateGroupModalClose}
+        onGroupCreated={handleGroupCreated}
+      />
      </>
     );
 };

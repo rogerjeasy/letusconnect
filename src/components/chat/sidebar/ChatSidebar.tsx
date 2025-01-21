@@ -6,10 +6,12 @@ import { ChatSidebarProps } from "../types/chat";
 import { Message } from "@/store/message";
 import ChatManagementComponent from "../settings/ChatManagementComponent";
 import { useUserStore } from "@/store/userStore";
+import { GroupChat } from "@/store/groupChat";
 
 interface ExtendedChatSidebarProps extends ChatSidebarProps {
   onSidebarClose?: () => void;
   onNewDirectMessage?: (message: Message) => void;
+  onNewGroup?: (group: GroupChat) => void;
 }
 
 export const ChatSidebar = ({
@@ -20,16 +22,23 @@ export const ChatSidebar = ({
   activeTab = 'direct',
   onChatSelect,
   onTabChange,
-  onCreateGroup,
   onSidebarClose,
-  onNewDirectMessage
+  onNewDirectMessage,
+  onNewGroup
 }: ExtendedChatSidebarProps) => {
-  // Get current user from store
   const currentUser = useUserStore(state => state.user);
 
   const handleNewDirectMessage = (message: Message) => {
     if (onNewDirectMessage) {
       onNewDirectMessage(message);
+    }
+  };
+
+  const handleNewGroup = (group: GroupChat) => {
+    if (onNewGroup) {
+      onNewGroup(group);
+      onTabChange?.('groups');
+      onChatSelect?.(group.id, 'group');
     }
   };
 
@@ -52,6 +61,7 @@ export const ChatSidebar = ({
               onNewDirectMessage={handleNewDirectMessage}
               onChatSelect={handleChatSelect}
               onTabChange={handleTabChange}
+              onGroupCreated={handleNewGroup}
             />
           </div>
         </div>

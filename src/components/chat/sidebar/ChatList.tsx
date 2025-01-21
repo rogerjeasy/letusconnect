@@ -42,6 +42,7 @@ export const ChatList = ({
   const currentUser = useUserStore(state => state.user);
   const [recentlySelectedUser, setRecentlySelectedUser] = useState<string | null>(null);
   const [loadingChatId, setLoadingChatId] = useState<string | null>(null);
+  
 
   const {
     directUnreadCounts,

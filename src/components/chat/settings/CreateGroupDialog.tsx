@@ -6,7 +6,6 @@ import { api, handleError } from "@/helpers/api";
 import { Participants } from "@/store/project";
 import { User, useUserStore } from "@/store/userStore";
 import { toast } from "react-toastify";
-import { useChatEntitiesStore } from "@/store/chatEntitiesStore";
 import { getAllUsers } from "@/services/users.services";
 import { API_CONFIG } from "@/config/api.config";
 import {
@@ -23,15 +22,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { GroupChat } from "@/store/groupChat";
 
 interface ModalToCreateGroupProps {
   isOpen: boolean;
   onClose: () => void;
+  onGroupCreated?: (group: GroupChat) => void;
 }
 
 export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
   isOpen,
   onClose,
+  onGroupCreated
 }) => {
   const [name, setGroupName] = useState("");
   const [description, setGroupDescription] = useState("");
@@ -78,6 +80,7 @@ export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
     );
   };
 
+
   const handleCreateGroup = async () => {
     try {
       const groupData = {
@@ -86,6 +89,44 @@ export const ModalToCreateGroup: React.FC<ModalToCreateGroupProps> = ({
         participants: selectedUsers,
       };
       const response = await api.post(API_CONFIG.ENDPOINTS.GROUP_CHATS.BASE, groupData);
+      
+      if (onGroupCreated && response.data.groupId) {
+        const currentUserParticipant: Participants = {
+          userId: currentUser?.uid || '',
+          username: currentUser?.username || '',
+          email: currentUser?.email || '',
+          profilePicture: currentUser?.profilePicture || currentUser?.username?.charAt(0).toUpperCase() || 'U',
+          role: 'owner'
+        };
+
+        const newGroup: GroupChat = {
+            id: response.data.groupId,
+            projectId: response.data.projectId || '',
+            createdByUid: currentUser?.uid || '',
+            createdByName: currentUser?.username || '',
+            name: name,
+            description: description,
+            participants: [...selectedUsers, currentUserParticipant],
+            messages: [],
+            pinnedMessages: [],
+            isArchived: false,
+            notifications: {},
+            readStatus: {},
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            groupSettings: {
+              allowFileSharing: true,
+              allowPinning: true,
+              allowReactions: true,
+              allowReplies: true,
+              muteNotifications: false,
+              onlyAdminsCanPost: false
+            }
+          };
+        
+        onGroupCreated(newGroup);
+      }
+
       toast.success(response.data.message || "Group created successfully.");
       setGroupName("");
       setGroupDescription("");
