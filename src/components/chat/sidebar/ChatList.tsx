@@ -14,10 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { markMessagesAsRead } from '@/services/message.service';
 import { markGroupMessagesAsRead } from '@/services/groupchat.service';
 import React from 'react';
+import { useGroupChatStore } from '@/store/useGroupChatStore';
 
 interface ChatListProps {
   directChats: DirectMessage[];
-  groupChats: GroupChat[];
   selectedChatId?: string;
   currentUserId: string;
   activeTab?: 'direct' | 'groups';
@@ -28,7 +28,6 @@ interface ChatListProps {
 
 export const ChatList = ({
   directChats = [],
-  groupChats = [],
   selectedChatId,
   currentUserId,
   activeTab: initialTab = 'direct',
@@ -42,7 +41,8 @@ export const ChatList = ({
   const currentUser = useUserStore(state => state.user);
   const [recentlySelectedUser, setRecentlySelectedUser] = useState<string | null>(null);
   const [loadingChatId, setLoadingChatId] = useState<string | null>(null);
-  
+
+  const groupChats = useGroupChatStore((state) => state.groupChats);  
 
   const {
     directUnreadCounts,
@@ -148,9 +148,9 @@ export const ChatList = ({
   // Process group chats with unread counts
   const processedGroupChats = useMemo(() => {
     const chatGroups = groupChats.map((group) => {
-      const lastMessageDate = group.messages?.length
+        const lastMessageDate = group.messages?.length
         ? new Date(group.messages[group.messages.length - 1].createdAt)
-        : null;
+        : new Date(group.createdAt);
   
       return {
         id: group.id,

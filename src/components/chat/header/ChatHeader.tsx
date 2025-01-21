@@ -70,7 +70,6 @@ export const ChatHeader = ({
     };
 
     const handleDeleteGroup = async () => {
-        console.log('Deleting group:', groupId);
         if (!groupId || !onDeleteGroup) return;
         
         try {
