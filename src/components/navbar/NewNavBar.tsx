@@ -28,6 +28,7 @@ import { UserProfileDropdown } from "./UserProfileDropdown";
 import { MobileMenu } from "./MobileMenuComponent";
 import DevelopmentModal from "../utils/DevelopmentModal";
 import { useUnreadMessages } from '@/store/useUnreadMessageCounts';
+import { useRouter } from "next/navigation";
 
 interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
     title: string;
@@ -39,6 +40,7 @@ interface ListItemProps extends React.ComponentPropsWithoutRef<"a"> {
 const NewNavbar = () => {
   const { user, isAuthenticated } = useUserStore();
   const searchUnderDevelopment = true;
+  const router = useRouter();
 
   const { totalCount: unreadMessagesCount, loading: messagesLoading, error: messagesError } = useUnreadMessages({
     userId: user?.uid ?? '',
@@ -74,7 +76,7 @@ const NewNavbar = () => {
 
   const MessagesMenuItem = () => (
     <NavigationMenuItem>
-      <Link href="/chat" legacyBehavior passHref>
+      <Button variant="ghost" onClick={()=> router.push("/chat")}>
         <NavigationMenuLink
           className="relative text-black font-bold hover:text-black focus:text-black"
         >
@@ -85,7 +87,7 @@ const NewNavbar = () => {
             </span>
           )}
         </NavigationMenuLink>
-      </Link>
+      </Button>
     </NavigationMenuItem>
   );
 

@@ -240,7 +240,7 @@ const WelcomeComponent = () => {
               <Button 
                 size="lg"
                 className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                onClick={() => router.push('/settings')}
+                onClick={() => router.push('/profile-settings')}
               >
                 <Settings className="mr-2 h-5 w-5" />
                 Complete Profile

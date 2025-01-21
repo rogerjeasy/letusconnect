@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { menuOptions, DropdownContentItem } from "../../store/menuOptions";
 import ViewUserProfile from "../userprofile/ViewProfile";
 import Logout from "../userprofile/Logout";
-import { useFetchAddress } from "../../store/useFetchAddress";
+// import { useFetchAddress } from "../../store/useFetchAddress";
 import { useUserStore } from "@/store/userStore";
 
 type ProfileDropDownProps = {
@@ -37,9 +37,9 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
   const { logout } = useUserStore();
 
   // Address state management
-  const {
-    fetchAddress,
-  } = useFetchAddress();
+  // const {
+  //   fetchAddress,
+  // } = useFetchAddress();
 
   const handleViewProfile = () => {
     setProfileModalOpen(true);
@@ -62,7 +62,7 @@ const ProfileDropDown: React.FC<ProfileDropDownProps> = ({ type, userDetails }) 
   
 
   const handleSettingsRedirect = async () => {
-    await fetchAddress();
+    // await fetchAddress();
     router.push("/settings");
   };
 

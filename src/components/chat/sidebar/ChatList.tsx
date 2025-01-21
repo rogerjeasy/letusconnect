@@ -42,6 +42,7 @@ export const ChatList = ({
   const currentUser = useUserStore(state => state.user);
   const [recentlySelectedUser, setRecentlySelectedUser] = useState<string | null>(null);
   const [loadingChatId, setLoadingChatId] = useState<string | null>(null);
+  
 
   const {
     directUnreadCounts,
@@ -136,7 +137,7 @@ export const ChatList = ({
       if (b.isRecentlySelected) return 1;
       
       // Sort by unread count first, then by date
-      if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
+    //   if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
       
       const aDate = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
       const bDate = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
@@ -146,13 +147,29 @@ export const ChatList = ({
 
   // Process group chats with unread counts
   const processedGroupChats = useMemo(() => {
-    return groupChats.map((group) => ({
-      id: group.id,
-      name: group.name || 'Unnamed Group',
-      lastMessage: group.messages?.[group.messages.length - 1]?.content || '',
-      unreadCount: groupUnreadCounts[group.id] || 0
-    }));
-  }, [groupChats, groupUnreadCounts]);
+    const chatGroups = groupChats.map((group) => {
+      const lastMessageDate = group.messages?.length
+        ? new Date(group.messages[group.messages.length - 1].createdAt)
+        : null;
+  
+      return {
+        id: group.id,
+        name: group.name || 'Unnamed Group',
+        lastMessage: group.messages?.[group.messages.length - 1]?.content || '',
+        lastMessageDate,
+        unreadCount: groupUnreadCounts[group.id] || 0,
+      };
+    });
+  
+    return chatGroups.sort((a, b) => {
+      // Sort by unread count first, then by date
+    //   if (a.unreadCount !== b.unreadCount) return b.unreadCount - a.unreadCount;
+  
+      const aDate = a.lastMessageDate ? a.lastMessageDate.getTime() : 0;
+      const bDate = b.lastMessageDate ? b.lastMessageDate.getTime() : 0;
+      return bDate - aDate;
+    });
+  }, [groupChats, groupUnreadCounts]);  
 
   const handleChatSelect = useCallback(async (chatId: string, type: 'direct' | 'group') => {
     if (loadingChatId === chatId) return;
@@ -212,7 +229,7 @@ export const ChatList = ({
         <TabsTrigger value="direct" className="flex-1 relative">
           Direct Messages
           {totalUnreadCounts.direct > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 bg-blue-500 text-white">
               {totalUnreadCounts.direct}
             </Badge>
           )}
@@ -220,7 +237,7 @@ export const ChatList = ({
         <TabsTrigger value="groups" className="flex-1 relative">
           Groups
           {totalUnreadCounts.group > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 bg-green-500 text-white">
               {totalUnreadCounts.group}
             </Badge>
           )}

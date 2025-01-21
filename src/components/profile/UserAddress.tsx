@@ -22,10 +22,11 @@ import { UserAddress } from "@/store/userStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Address, AddressUpdateRequest } from '@/services/address.service';
 
 interface UserAddressProps {
-  address: UserAddress | null;
-  onUpdate: (data: UserAddress) => Promise<void>;
+  address: Address | null;
+  onUpdate: (id: string, data: AddressUpdateRequest) => Promise<void>;
 }
 
 const addressSchema = z.object({
@@ -35,8 +36,8 @@ const addressSchema = z.object({
   country: z.string().min(2, "Country is required"),
   postalCode: z.number().min(0, "Postal code is required"),
   houseNumber: z.number().min(0, "House number is required"),
-  apartment: z.string(),  // Changed from optional to required
-  region: z.string(),     // Changed from optional to required
+  apartment: z.string(),  
+  region: z.string(),  
 });
 
 const UserAddressComponent: React.FC<UserAddressProps> = ({
@@ -54,20 +55,17 @@ const UserAddressComponent: React.FC<UserAddressProps> = ({
       country: address?.country || "",
       postalCode: address?.postalCode || 0,
       houseNumber: address?.houseNumber || 0,
-      apartment: address?.apartment || "",  // Always provide an empty string as fallback
-      region: address?.region || "",        // Always provide an empty string as fallback
+      apartment: address?.apartment || "", 
+      region: address?.region || "",     
     },
   });
 
   const onSubmit = async (data: z.infer<typeof addressSchema>) => {
     try {
       setIsLoading(true);
-      await onUpdate({
-        ...data,
-        id: address?.id || '',
-      });
+      await onUpdate(address?.id || "", data);
     } catch (error) {
-      console.error('Error updating address:', error);
+      console.error("Error updating address:", error);
     } finally {
       setIsLoading(false);
     }

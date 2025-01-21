@@ -3,12 +3,15 @@
 import { Card } from "@/components/ui/card";
 import { ChatList } from "./ChatList";
 import { ChatSidebarProps } from "../types/chat";
-import ChatManagement from "@/components/messages/ChatManagement";
 import { Message } from "@/store/message";
+import ChatManagementComponent from "../settings/ChatManagementComponent";
+import { useUserStore } from "@/store/userStore";
+import { GroupChat } from "@/store/groupChat";
 
 interface ExtendedChatSidebarProps extends ChatSidebarProps {
   onSidebarClose?: () => void;
   onNewDirectMessage?: (message: Message) => void;
+  onNewGroup?: (group: GroupChat) => void;
 }
 
 export const ChatSidebar = ({
@@ -19,14 +22,32 @@ export const ChatSidebar = ({
   activeTab = 'direct',
   onChatSelect,
   onTabChange,
-  onCreateGroup,
   onSidebarClose,
-  onNewDirectMessage
+  onNewDirectMessage,
+  onNewGroup
 }: ExtendedChatSidebarProps) => {
+  const currentUser = useUserStore(state => state.user);
+
   const handleNewDirectMessage = (message: Message) => {
     if (onNewDirectMessage) {
       onNewDirectMessage(message);
     }
+  };
+
+  const handleNewGroup = (group: GroupChat) => {
+    if (onNewGroup) {
+      onNewGroup(group);
+      onTabChange?.('groups');
+      onChatSelect?.(group.id, 'group');
+    }
+  };
+
+  const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
+    onChatSelect?.(chatId, type);
+  };
+
+  const handleTabChange = (tab: 'direct' | 'groups') => {
+    onTabChange?.(tab);
   };
 
   return (
@@ -34,8 +55,14 @@ export const ChatSidebar = ({
       <div className="p-4 border-b flex justify-between items-center shrink-0">
         <h2 className="font-semibold">Messages</h2>
         <div className="relative isolate">
-          <div onClick={() => onSidebarClose?.()}>
-            <ChatManagement />
+          <div>
+            <ChatManagementComponent
+              currentUser={currentUser || undefined}
+              onNewDirectMessage={handleNewDirectMessage}
+              onChatSelect={handleChatSelect}
+              onTabChange={handleTabChange}
+              onGroupCreated={handleNewGroup}
+            />
           </div>
         </div>
       </div>
@@ -49,8 +76,8 @@ export const ChatSidebar = ({
           currentUserId={currentUserId}
           selectedChatId={selectedChatId}
           activeTab={activeTab}
-          onChatSelect={onChatSelect}
-          onTabChange={onTabChange}
+          onChatSelect={handleChatSelect}
+          onTabChange={handleTabChange}
           onNewDirectMessage={handleNewDirectMessage}
         />
       </div>

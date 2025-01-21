@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,16 +10,17 @@ import UserSchoolExperiences from './UserSchoolExperience';
 import UserWorkExperiences from './UserWorkExperience';
 import UserAddressComponent from './UserAddress';
 import UserDetails from './UserDetails';
-import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { AvatarFallback, AvatarImage, Avatar } from '../ui/avatar';
 import { updateUserPersonalInformation } from '@/services/users.services';
 import { toast } from 'react-toastify';
 import DevelopmentModal from '../utils/DevelopmentModal';
+import { Address, AddressUpdateRequest, createUserAddress, getUserAddresses, updateUserAddress } from '@/services/address.service';
 
 const UserProfileComponent = () => {
   const { user, loading: isUserLoading, setUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("personal");
+  const [addresses, setAddresses] = useState<Address[]>([]);
 
   // Track loading state for each section
   const [loadingStates, setLoadingStates] = useState({
@@ -35,6 +36,26 @@ const UserProfileComponent = () => {
       [tab]: loading
     }));
   };
+
+  const handleGetUserAddress = async () => {
+    setTabLoading("address", true);
+    try {
+      const address = await getUserAddresses();
+      setAddresses(address);
+    } catch (error) {
+      console.error("Error getting user address:", error);
+      toast.error("Failed to fetch addresses. Please try again.");
+    } finally {
+      setTabLoading("address", false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "address") {
+      handleGetUserAddress();
+    }
+  }, [activeTab]);
+
 
   const handlePersonalUpdate = async (data: Partial<User>) => {
     try {
@@ -55,9 +76,10 @@ const UserProfileComponent = () => {
     try {
       setTabLoading('education', true);
       // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+    //   await new Promise(resolve => setTimeout(resolve, 1000));
+        alert("Not implemented yet")
       
-      toast.success("Education history updated successfully");
+    //   toast.success("Education history updated successfully");
     } catch (error) {
       console.error('Error updating education history:', error);
       toast.error("Failed to update education history");
@@ -70,9 +92,10 @@ const UserProfileComponent = () => {
     try {
       setTabLoading('work', true);
       // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+    //   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      alert("Not implemented yet")
       
-      toast.success("Work history updated successfully")
+    //   toast.success("Work history updated successfully")
     } catch (error) {
       console.error('Error updating work history:', error);
       toast.error("Failed to update work history")
@@ -81,20 +104,29 @@ const UserProfileComponent = () => {
     }
   };
 
-  const handleAddressUpdate = async (data: UserAddress) => {
+  const handleAddressUpdate = async (id: string, data: AddressUpdateRequest) => {
     try {
-      setTabLoading('address', true);
-      // Implement your API call here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-      
+      setTabLoading("address", true);
+  
+      const updatedAddress = await updateUserAddress(id, data, (updatedData) => {
+        setAddresses((prevAddresses) => {
+          return prevAddresses.map((addr) => 
+            addr.id === id ? { ...addr, ...updatedData } : addr
+          );
+        });
+      });
+  
       toast.success("Address updated successfully");
     } catch (error) {
-      console.error('Error updating address:', error);
-      toast.error("Failed to update address");
+      console.error("Error updating address:", error);
+      toast.error("Failed to save address. Please try again.");
     } finally {
-      setTabLoading('address', false);
+      setTabLoading("address", false);
     }
   };
+  
+  
+  
 
   if (isUserLoading) {
     return (
@@ -206,14 +238,14 @@ const UserProfileComponent = () => {
 
             <TabsContent value="work" className="mt-0">
               <UserWorkExperiences 
-                workExperience={null} // Replace with actual data
+                workExperience={null} 
                 onUpdate={handleWorkUpdate}
               />
             </TabsContent>
 
             <TabsContent value="address" className="mt-0">
               <UserAddressComponent 
-                address={null} // Replace with actual data
+                address={addresses[0]}
                 onUpdate={handleAddressUpdate}
               />
             </TabsContent>
