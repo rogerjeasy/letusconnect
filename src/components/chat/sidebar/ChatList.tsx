@@ -212,7 +212,7 @@ export const ChatList = ({
         <TabsTrigger value="direct" className="flex-1 relative">
           Direct Messages
           {totalUnreadCounts.direct > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 bg-blue-500 text-white">
               {totalUnreadCounts.direct}
             </Badge>
           )}
@@ -220,7 +220,7 @@ export const ChatList = ({
         <TabsTrigger value="groups" className="flex-1 relative">
           Groups
           {totalUnreadCounts.group > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="secondary" className="ml-2 bg-green-500 text-white">
               {totalUnreadCounts.group}
             </Badge>
           )}

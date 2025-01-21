@@ -23,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Users, Briefcase, MessageSquare } from "lucide-react";
 import { Skill, getAllSkills } from "@/store/skills";
 import debounce from "lodash/debounce";
+import { ConnectionsResponse } from "@/store/userConnections";
+import { getUserConnections } from "@/services/connection.service";
 
 interface UserToChatWithProps {
   trigger?: React.ReactNode;
@@ -32,20 +34,22 @@ interface UserToChatWithProps {
 
 type UserRole = 'user' | 'staff' | 'lecture' | 'mentor';
 type MentorshipStatus = 'Looking for mentor' | 'Willing to mentor' | 'None';
+type ConnectionFilter = 'all' | 'connections_only';
 
 interface Filters {
-  role: UserRole | null;
-  mentorship: MentorshipStatus | null;
-  skill: Skill | null;
-  language: string | null;
-}
+    role: UserRole | null;
+    mentorship: MentorshipStatus | null;
+    skill: Skill | null;
+    language: string | null;
+    connection: ConnectionFilter;
+  }
 
-interface FilterOptions {
-  roles: UserRole[];
-  mentorship: MentorshipStatus[];
-  skills: Skill[];
-  languages: string[];
-}
+  interface FilterOptions {
+    roles: UserRole[];
+    mentorship: MentorshipStatus[];
+    skills: Skill[];
+    languages: string[];
+  }
 
 const DEFAULT_ROLES: UserRole[] = ['user', 'staff', 'lecture', 'mentor'];
 const DEFAULT_MENTORSHIP: MentorshipStatus[] = ['Looking for mentor', 'Willing to mentor', 'None'];
@@ -58,26 +62,34 @@ export const UserToChatWith = ({
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userConnections, setUserConnections] = useState<ConnectionsResponse | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<Filters>({
     role: null,
     mentorship: null,
     skill: null,
-    language: null
+    language: null,
+    connection: 'all'
   });
 
   // Fetch users
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const fetchedUsers = await getAllUsers();
+        const [fetchedUsers, connections] = await Promise.all([
+          getAllUsers(),
+          getUserConnections()
+        ]);
+
         const filteredUsers = currentUserId 
           ? (fetchedUsers ?? []).filter(user => user?.uid !== currentUserId)
           : (fetchedUsers ?? []);
+        
         setUsers(filteredUsers);
+        setUserConnections(connections);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching data:", error);
         setUsers([]);
       } finally {
         setLoading(false);
@@ -85,7 +97,7 @@ export const UserToChatWith = ({
     };
 
     if (open) {
-      fetchUsers();
+      fetchData();
     }
   }, [open, currentUserId]);
 
@@ -147,10 +159,15 @@ export const UserToChatWith = ({
       const matchesLanguage = !filters.language ||
         (Array.isArray(user.languages) && user.languages.includes(filters.language));
 
+        const matchesConnection = filters.connection === 'all' || 
+        (filters.connection === 'connections_only' && 
+         userConnections?.connections && 
+         Object.keys(userConnections.connections).includes(user.uid));
+
       return matchesSearch && matchesRole && matchesMentorship && 
-        matchesSkill && matchesLanguage;
+        matchesSkill && matchesLanguage && matchesConnection;
     });
-  }, [users, searchQuery, filters]);
+  }, [users, searchQuery, filters, userConnections]);
 
   const handleSearchChange = debounce((value: string) => {
     setSearchQuery(value);
@@ -163,6 +180,9 @@ export const UserToChatWith = ({
 
   const renderUserCard = (user: User) => {
     if (!user) return null;
+
+    const isConnection = userConnections?.connections && 
+      Object.keys(userConnections.connections).includes(user.uid);
 
     return (
       <div
@@ -179,16 +199,21 @@ export const UserToChatWith = ({
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-                <p className="font-medium truncate">
-                    {user.firstName || user.lastName 
-                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim() 
-                        : user.username}
-                </p>
+              <p className="font-medium truncate">
+                {user.firstName || user.lastName 
+                  ? `${user.firstName || ''} ${user.lastName || ''}`.trim() 
+                  : user.username}
+              </p>
               {Array.isArray(user.role) && user.role.map((role) => (
                 <Badge key={role} variant="secondary" className="text-xs">
                   {role}
                 </Badge>
               ))}
+              {isConnection && (
+                <Badge variant="outline" className="text-xs bg-green-50">
+                  Connection
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Briefcase className="h-3 w-3" />
@@ -228,6 +253,21 @@ export const UserToChatWith = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+              <Select
+                value={filters.connection}
+                onValueChange={(value: ConnectionFilter) => 
+                  setFilters(prev => ({ ...prev, connection: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Connection Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="connections_only">My Connections</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select
                 value={filters.role ?? "all"}
                 onValueChange={(value: string) => 
