@@ -23,6 +23,9 @@ interface ChatProps {
   onLeaveGroup?: (groupId: string) => Promise<void>;
   onUpdateSettings?: (groupId: string, settings: GroupSettings) => Promise<void>;
   onDeleteGroup?: (groupId: string) => Promise<void>;
+  initialChatType?: 'direct' | 'group';
+  initialChatId?: string;
+  onChatSelect: (type: 'direct' | 'group', chatId: string) => void;
 }
 
 type SelectedChat = {
@@ -45,7 +48,10 @@ export const ChatContainer = ({
   onCreateGroup,
   onLeaveGroup,
   onUpdateSettings,
-  onDeleteGroup
+  onDeleteGroup,
+  initialChatType,
+  initialChatId,
+  onChatSelect
 }: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<SelectedChat>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -66,6 +72,19 @@ export const ChatContainer = ({
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (initialChatType && initialChatId) {
+      setSelectedChat({ type: initialChatType, id: initialChatId });
+      setActiveTab(initialChatType === 'direct' ? 'direct' : 'groups');
+    } else if (initialChatType) {
+      setActiveTab(initialChatType === 'direct' ? 'direct' : 'groups');
+      setSelectedChat(null);
+    } else {
+      setActiveTab('direct');
+      setSelectedChat(null);
+    }
+  }, [initialChatType, initialChatId]);
 
   const getCurrentChat = (): DirectMessage | GroupChat | null => {
     if (!selectedChat || selectedChat.type !== activeTab.replace('s', '')) {
@@ -114,12 +133,14 @@ export const ChatContainer = ({
   const handleTabChange = (tab: 'direct' | 'groups') => {
     setActiveTab(tab);
     setSelectedChat(null);
+    onChatSelect(tab.replace('s', '') as 'direct' | 'group', '');
   };
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
     if ((type === 'direct' && activeTab === 'direct') || 
         (type === 'group' && activeTab === 'groups')) {
       setSelectedChat({ id: chatId, type });
+      onChatSelect(type, chatId);
     }
     if (isMobile) {
       setIsMobileOpen(false);
