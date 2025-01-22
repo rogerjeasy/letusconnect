@@ -8,11 +8,12 @@ import { MessageInput } from './message/MessageInput';
 import { ChatSettings } from './settings/ChatSettings';
 import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { AlertCircle, Menu } from 'lucide-react';
 import { DirectMessage, Message } from '@/store/message';
 import { GroupChat, GroupSettings } from '@/store/groupChat';
 import { useGroupChatStore } from '@/store/useGroupChatStore';
 import { toast } from 'react-toastify';
+import { IsUserAdminOrOwner } from './chatutils/chat.utils';
 
 interface ChatProps {
   currentUserId: string;
@@ -22,6 +23,9 @@ interface ChatProps {
   onLeaveGroup?: (groupId: string) => Promise<void>;
   onUpdateSettings?: (groupId: string, settings: GroupSettings) => Promise<void>;
   onDeleteGroup?: (groupId: string) => Promise<void>;
+  initialChatType?: 'direct' | 'group';
+  initialChatId?: string;
+  onChatSelect: (type: 'direct' | 'group', chatId: string) => void;
 }
 
 type SelectedChat = {
@@ -44,7 +48,10 @@ export const ChatContainer = ({
   onCreateGroup,
   onLeaveGroup,
   onUpdateSettings,
-  onDeleteGroup
+  onDeleteGroup,
+  initialChatType,
+  initialChatId,
+  onChatSelect
 }: ChatProps) => {
   const [selectedChat, setSelectedChat] = useState<SelectedChat>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -65,6 +72,19 @@ export const ChatContainer = ({
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (initialChatType && initialChatId) {
+      setSelectedChat({ type: initialChatType, id: initialChatId });
+      setActiveTab(initialChatType === 'direct' ? 'direct' : 'groups');
+    } else if (initialChatType) {
+      setActiveTab(initialChatType === 'direct' ? 'direct' : 'groups');
+      setSelectedChat(null);
+    } else {
+      setActiveTab('direct');
+      setSelectedChat(null);
+    }
+  }, [initialChatType, initialChatId]);
 
   const getCurrentChat = (): DirectMessage | GroupChat | null => {
     if (!selectedChat || selectedChat.type !== activeTab.replace('s', '')) {
@@ -113,12 +133,14 @@ export const ChatContainer = ({
   const handleTabChange = (tab: 'direct' | 'groups') => {
     setActiveTab(tab);
     setSelectedChat(null);
+    onChatSelect(tab.replace('s', '') as 'direct' | 'group', '');
   };
 
   const handleChatSelect = (chatId: string, type: 'direct' | 'group') => {
     if ((type === 'direct' && activeTab === 'direct') || 
         (type === 'group' && activeTab === 'groups')) {
       setSelectedChat({ id: chatId, type });
+      onChatSelect(type, chatId);
     }
     if (isMobile) {
       setIsMobileOpen(false);
@@ -257,10 +279,26 @@ export const ChatContainer = ({
               chatType={selectedChat?.type}
             />
 
-            <MessageInput
-              onSend={handleSendMessage}
-              onAttach={(files) => console.log('Attachments:', files)}
-            />
+            {IsUserAdminOrOwner(currentChat, currentUserId) ? (
+                <MessageInput
+                    onSend={handleSendMessage}
+                    onAttach={(files) => console.log('Attachments:', files)}
+                />
+                ) : (
+                    <div className="p-6 border-t bg-muted/10 backdrop-blur-sm">
+                    <div className="max-w-2xl mx-auto">
+                      <div className="flex items-center justify-center space-x-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4 shadow-sm border border-slate-200 dark:border-slate-800">
+                        <AlertCircle 
+                          className="h-5 w-5" 
+                          color="#6366f1"
+                        />
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Only administrators can send messages in this group
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">

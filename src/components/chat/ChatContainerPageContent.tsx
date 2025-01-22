@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { useUserStore } from '@/store/userStore';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { DirectMessage, Message, Messages } from '@/store/message';
 import { GroupChat, GroupSettings, BaseMessage } from '@/store/groupChat';
 import { toast } from 'react-toastify';
@@ -69,6 +70,12 @@ export default function ChatContainerPage() {
   const [directChats, setDirectChats] = useState<DirectMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [selectedChat, setSelectedChat] = useState<{ type: 'direct' | 'group', id: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'direct' | 'groups'>('direct');
+  const currentParam = searchParams.get('current');
+  const toParam = searchParams.get('to');
 
   const {
     groupChats,
@@ -76,6 +83,43 @@ export default function ChatContainerPage() {
     removeGroupChat,
     updateGroupSettings
   } = useGroupChatStore();
+
+  const updateURL = useCallback((type: 'direct' | 'group', chatId: string) => {
+    if (chatId) {
+      router.push(`/chat?current=${type}&to=${chatId}`);
+    } else {
+      const tabType = type === 'group' ? 'groups' : type;
+      router.push(`/chat?current=${tabType}`);
+    }
+  }, [router]);
+
+  const handleChatSelect = (type: 'direct' | 'group', id: string) => {
+    updateURL(type, id);
+  };
+
+  useEffect(() => {
+    if (!currentParam) {
+      router.push('/chat?current=direct');
+    }
+  }, [currentParam, router]);
+
+  useEffect(() => {
+    if (currentParam && toParam) {
+      if ((currentParam === 'direct' || currentParam === 'group')) {
+        setSelectedChat({ 
+          type: currentParam, 
+          id: toParam 
+        });
+        setActiveTab(currentParam === 'direct' ? 'direct' : 'groups');
+      }
+    } else if (currentParam) {
+      setSelectedChat(null);
+      setActiveTab(currentParam === 'groups' ? 'groups' : 'direct');
+    } else {
+      setSelectedChat(null);
+      setActiveTab('direct');
+    }
+  }, [currentParam, toParam]);
 
   const handleMarkMessagesAsRead = useCallback(async (userId: string) => {
     try {
@@ -111,7 +155,7 @@ export default function ChatContainerPage() {
       await Promise.all([
         fetchDirectChats(),
         fetchGroupChats(),
-        handleMarkMessagesAsRead(user.uid)
+        // handleMarkMessagesAsRead(user.uid)
       ]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load chat messages';
@@ -171,8 +215,6 @@ export default function ChatContainerPage() {
   const handleUpdateSettings = async (groupId: string, settings: GroupSettings) => {
     try {
       await updateAGivenGroupSettings(groupId, settings);
-
-      console.log("Updating group settings", groupId, settings);
       
       updateGroupSettings(groupId, settings);
       
@@ -235,6 +277,9 @@ export default function ChatContainerPage() {
         onLeaveGroup={handleLeaveGroup}
         onUpdateSettings={handleUpdateSettings}
         onDeleteGroup={handleDeleteGroup}
+        initialChatType={currentParam as 'direct' | 'group' | undefined}
+        initialChatId={toParam || undefined}
+        onChatSelect={handleChatSelect}
       />
     </ContainerWrapper>
   );

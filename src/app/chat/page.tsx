@@ -1,7 +1,15 @@
 "use client";
 
-// app/chat/page.tsx
-import ChatContainerPageContent from '@/components/chat/ChatContainerPageContent';
+import dynamic from 'next/dynamic';
+import LoadingPage from '@/components/loadingpage/LoadingPage';
+
+const ChatContainerPageContent = dynamic(
+    () => import('@/components/chat/ChatContainerPageContent'),
+    {
+      ssr: false,
+      loading: () => <LoadingPage />
+    }
+  );
 
 export default function ChatPage() {
   return <ChatContainerPageContent />;

@@ -32,10 +32,8 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
   const currentUser = useUserStore(state => state.user) || undefined;
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-  // Memoize the messages array to prevent unnecessary re-renders
   const messages = useMemo(() => rawMessages || [], [rawMessages]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (!scrollRef.current) return;
 
@@ -43,7 +41,6 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
       const scrollElement = scrollRef.current;
       if (!scrollElement) return;
 
-      // Get the scroll container (this might be different depending on your ScrollArea implementation)
       const scrollContainer = scrollElement.querySelector('[data-radix-scroll-area-viewport]');
       if (!scrollContainer) return;
 
@@ -55,16 +52,13 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
       scrollContainer.scrollTo(scrollOptions);
     };
 
-    // Use requestAnimationFrame to ensure DOM has updated
     requestAnimationFrame(scrollToBottom);
 
-    // After first load, set isFirstLoad to false
     if (isFirstLoad) {
       setIsFirstLoad(false);
     }
   }, [messages, isFirstLoad]);
 
-  // Fetch partner users' data
   useEffect(() => {
     let isMounted = true;
 
@@ -76,7 +70,6 @@ export const MessageList = ({ messages: rawMessages = null, currentUserId, chatT
         return;
       }
 
-      // Get unique partner IDs based on chat type and message sender
       const uniquePartnerIds = new Set(
         messages
           .filter(message => message !== null)
