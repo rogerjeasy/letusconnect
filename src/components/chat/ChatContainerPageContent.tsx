@@ -111,7 +111,7 @@ export default function ChatContainerPage() {
       await Promise.all([
         fetchDirectChats(),
         fetchGroupChats(),
-        handleMarkMessagesAsRead(user.uid)
+        // handleMarkMessagesAsRead(user.uid)
       ]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load chat messages';
@@ -171,8 +171,6 @@ export default function ChatContainerPage() {
   const handleUpdateSettings = async (groupId: string, settings: GroupSettings) => {
     try {
       await updateAGivenGroupSettings(groupId, settings);
-
-      console.log("Updating group settings", groupId, settings);
       
       updateGroupSettings(groupId, settings);
       

@@ -122,8 +122,6 @@ export const markMessagesAsRead = async (senderId: string): Promise<void> => {
   try {
     const data: MarkReadRequest = { senderId };
     const response = await api.patch(API_CONFIG.ENDPOINTS.MESSAGES.MARK_READ, data);
-
-    console.log(response.data);
     
     if (response.data?.success?.includes("No unread messages to mark as read.")) {
       return;

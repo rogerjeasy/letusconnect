@@ -33,11 +33,6 @@ interface RoleUpdateRequest {
   role: string;
 }
 
-interface GroupSettingsUpdateRequest {
-  groupId: string;
-  settings: Partial<GroupSettings>;
-}
-
 /**
  * Fetch all group chats for the current user
  * @returns Promise with array of GroupChat
@@ -234,7 +229,6 @@ export const updateAGivenGroupSettings = async (
 ): Promise<void> => {
   try {
     await api.put(API_CONFIG.ENDPOINTS.GROUP_CHATS.SETTINGS(groupId), settingsData);
-    console.log("Updating group settings from group service", groupId, settingsData);
   } catch (error) {
     const errorMessage = handleError(error);
     throw new Error(errorMessage || "Failed to update group settings");
