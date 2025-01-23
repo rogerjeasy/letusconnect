@@ -16,11 +16,26 @@ import { updateUserPersonalInformation } from '@/services/users.services';
 import { toast } from 'react-toastify';
 import DevelopmentModal from '../utils/DevelopmentModal';
 import { Address, AddressUpdateRequest, createUserAddress, getUserAddresses, updateUserAddress } from '@/services/address.service';
+import { useSchoolExperience } from "@/store/useUserSchoolExperience";
 
 const UserProfileComponent = () => {
   const { user, loading: isUserLoading, setUser } = useUserStore();
   const [activeTab, setActiveTab] = useState("personal");
   const [addresses, setAddresses] = useState<Address[]>([]);
+
+  const {
+    schoolExperience,
+    handleEducationUpdate,
+    handleUniversityUpdate,
+    handleUniversityDelete,
+    fetchSchoolExperience,
+    isLoading: isSchoolExperienceLoading
+  } = useSchoolExperience({
+    setTabLoading: (loading) => setLoadingStates(prev => ({
+      ...prev,
+      education: loading
+    }))
+  });
 
   // Track loading state for each section
   const [loadingStates, setLoadingStates] = useState({
@@ -54,8 +69,10 @@ const UserProfileComponent = () => {
     if (activeTab === "address") {
       handleGetUserAddress();
     }
+    if (activeTab === "education") {
+      fetchSchoolExperience();
+    }
   }, [activeTab]);
-
 
   const handlePersonalUpdate = async (data: Partial<User>) => {
     try {
@@ -69,22 +86,6 @@ const UserProfileComponent = () => {
       toast.error("Failed to update personal information");
     } finally {
       setTabLoading('personal', false);
-    }
-  };
-
-  const handleEducationUpdate = async (data: UserSchoolExperience) => {
-    try {
-      setTabLoading('education', true);
-      // Implement your API call here
-    //   await new Promise(resolve => setTimeout(resolve, 1000));
-        alert("Not implemented yet")
-      
-    //   toast.success("Education history updated successfully");
-    } catch (error) {
-      console.error('Error updating education history:', error);
-      toast.error("Failed to update education history");
-    } finally {
-      setTabLoading('education', false);
     }
   };
 
@@ -125,9 +126,6 @@ const UserProfileComponent = () => {
     }
   };
   
-  
-  
-
   if (isUserLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -231,8 +229,11 @@ const UserProfileComponent = () => {
 
             <TabsContent value="education" className="mt-0">
               <UserSchoolExperiences 
-                schoolExperience={null} // Replace with actual data
+                schoolExperience={schoolExperience}
                 onUpdate={handleEducationUpdate}
+                onUniversityUpdate={handleUniversityUpdate}
+                onUniversityDelete={handleUniversityDelete}
+                isLoading={isSchoolExperienceLoading}
               />
             </TabsContent>
 
