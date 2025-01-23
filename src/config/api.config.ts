@@ -1,7 +1,6 @@
 "use client";
 
 import { User } from "@/store/userStore";
-import { group } from "console";
 
 // config/api.config.ts
 export const API_CONFIG = {
@@ -51,6 +50,20 @@ export const API_CONFIG = {
         UPDATE: (id: string) => `/addresses/${id}`,
         GET_ALL: '/addresses',
         DELETE: (id: string) => `/addresses/${id}`,
+      },
+
+      SCHOOL_EXPERIENCES: {
+        BASE: '/school-experiences',
+        CREATE: '/school-experiences',
+        GET_ALL: '/school-experiences',
+        UNIVERSITIES: {  
+          BASE: '/school-experiences/universities',
+          GET_ALL: '/school-experiences/universities', 
+          ADD_ONE_UNIVERSITY: '/school-experiences/universities', 
+          ADD_BULK_UNIVERSITIES: '/school-experiences/universities/bulk', 
+          UPDATE: (id: string) => `/school-experiences/universities/${id}`, 
+          DELETE: (id: string) => `/school-experiences/universities/${id}`, 
+      }
       },
 
       FAQ: {

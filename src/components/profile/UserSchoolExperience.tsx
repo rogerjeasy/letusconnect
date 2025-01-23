@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -28,6 +28,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface UserSchoolExperiencesProps {
   schoolExperience: UserSchoolExperience | null;
   onUpdate: (data: UserSchoolExperience) => Promise<void>;
+  onUniversityUpdate: (id: string, updates: Partial<University>) => Promise<void>;
+  onUniversityDelete: (id: string) => Promise<void>;
+  isLoading: boolean;
 }
 
 const universitySchema = z.object({
@@ -52,9 +55,10 @@ type FormValues = z.infer<typeof schoolExperienceSchema>;
 const UserSchoolExperiences: React.FC<UserSchoolExperiencesProps> = ({
   schoolExperience,
   onUpdate,
+  onUniversityUpdate,
+  onUniversityDelete,
+  isLoading
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(schoolExperienceSchema),
     defaultValues: {
@@ -74,17 +78,31 @@ const UserSchoolExperiences: React.FC<UserSchoolExperiencesProps> = ({
     name: "universities",
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const handleDeleteUniversity = async (index: number, id: string | undefined) => {
+    if (id && schoolExperience?.universities[index]?.id) {
+      await onUniversityDelete(id);
+    }
+    remove(index);
+  };
+
+  const onSubmit = async (data: FormValues) => {    
     try {
-      setIsLoading(true);
       await onUpdate({
         uid: schoolExperience?.uid || '',
         universities: data.universities,
       });
+
+      // After bulk update, handle individual university updates if needed
+      if (schoolExperience?.universities) {
+        const existingIds = new Set(schoolExperience.universities.map(u => u.id));
+        for (const university of data.universities) {
+          if (existingIds.has(university.id)) {
+            await onUniversityUpdate(university.id, university);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error updating school experiences:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -110,7 +128,7 @@ const UserSchoolExperiences: React.FC<UserSchoolExperiencesProps> = ({
                     variant="ghost"
                     size="icon"
                     className="absolute top-2 right-2"
-                    onClick={() => remove(index)}
+                    onClick={() => handleDeleteUniversity(index, schoolExperience?.universities[index]?.id || undefined)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -224,7 +242,7 @@ const UserSchoolExperiences: React.FC<UserSchoolExperiencesProps> = ({
               className="w-full"
               onClick={() =>
                 append({
-                  id: crypto.randomUUID(),
+                  id: "",
                   name: "",
                   program: "",
                   country: "",
