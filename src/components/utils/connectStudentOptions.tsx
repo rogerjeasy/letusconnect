@@ -31,7 +31,7 @@ export const connectNonAuthComponents: ConnectOption[] = [
   },
   {
     title: "How to Connect",
-    href: "/connections/how-to",
+    href: "/connections/how-to-connect",
     description: "Learn the steps to effectively connect with fellow students and alumni.",
     icon: <FaComments className="text-green-500" />,
   },
