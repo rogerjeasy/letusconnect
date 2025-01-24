@@ -35,7 +35,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import WhyJoinGroup from './WhyJoinGroup';
 
 // TypeScript interfaces
 interface Category {
@@ -408,9 +407,6 @@ const ExploreGroupsPage: React.FC = () => {
           ))}
         </div>
       </motion.div>
-
-      {/* Why Join Section */}
-      <WhyJoinGroup/>
     </div>
   );
 };
