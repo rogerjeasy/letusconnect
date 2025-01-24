@@ -265,6 +265,7 @@ const HowToConnect = () => {
           </Button>
         </motion.div>
       </div>
+      {/* <AnimatedHowToConnectProcess/> */}
     </div>
   );
 };
