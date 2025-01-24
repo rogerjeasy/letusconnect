@@ -1,4 +1,4 @@
-import "./globals.css"; // Ensure global CSS is imported
+import "./globals.css"; 
 import { Metadata } from "next";
 import { ReactNode, Suspense } from "react";
 import { ThemeProvider } from "next-themes";
