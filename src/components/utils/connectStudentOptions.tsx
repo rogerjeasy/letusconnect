@@ -31,13 +31,13 @@ export const connectNonAuthComponents: ConnectOption[] = [
   },
   {
     title: "How to Connect",
-    href: "/connect/how-to",
+    href: "/connections/how-to",
     description: "Learn the steps to effectively connect with fellow students and alumni.",
     icon: <FaComments className="text-green-500" />,
   },
   {
     title: "Why Connect with Fellow Students?",
-    href: "/connect/why-connect",
+    href: "/connections/why-connect",
     description:
       "Discover the benefits of building a strong network with students and alumni.",
     icon: <FaBullseye className="text-blue-500" />,
