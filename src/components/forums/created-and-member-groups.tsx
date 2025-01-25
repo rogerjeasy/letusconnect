@@ -153,7 +153,7 @@ const MyGroupForums = () => {
           <TabsList className="mb-4">
             <TabsTrigger value="all">All Groups</TabsTrigger>
             <TabsTrigger value="owner">Groups I Own</TabsTrigger>
-            <TabsTrigger value="member">Groups I'm In</TabsTrigger>
+            <TabsTrigger value="member">Groups I&apos;m In</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="h-[calc(100vh-250px)]">
