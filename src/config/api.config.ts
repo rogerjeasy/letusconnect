@@ -172,6 +172,33 @@ export const API_CONFIG = {
         DELETE_GROUP_CHAT: (id: string) => `/group-chats/${id}`,
         DELETE_MULTIPLE_GROUP_CHATS: '/group-chats/delete-multiple',
       },
+
+      GROUP_FORUMS: {
+        BASE: '/group-forums',
+        CREATE: '/group-forums',
+        OWNER_MEMBER: '/group-forums/my-groups',
+        BY_ID: (id: string) => `/group-forums/${id}`,
+        LIST: '/group-forums',
+        SEARCH: '/group-forums/search',
+        MEMBERS: {
+          ADD: (id: string) => `/group-forums/${id}/members`,
+          REMOVE: (id: string, userId: string) => `/group-forums/${id}/members/${userId}`,
+        },
+        IMAGES: {
+          UPLOAD: (id: string) => `/group-forums/${id}/image`,
+        },
+        EVENTS: {
+          CREATE: (id: string) => `/group-forums/${id}/events`,
+          DELETE: (id: string, eventId: string) => `/group-forums/${id}/events/${eventId}`,
+        },
+        RESOURCES: {
+          ADD: (id: string) => `/group-forums/${id}/resources`, 
+          REMOVE: (id: string, resourceId: string) => `/group-forums/${id}/resources/${resourceId}`,
+        },
+        SETTINGS: {
+          UPDATE: (id: string) => `/group-forums/${id}/settings`,
+        }
+      },
     },
   } as const;
 

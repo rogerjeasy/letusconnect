@@ -1,7 +1,7 @@
 "use client";
 
-import LoadingPage from "@/components/loadingpage/LoadingPage";
+import MyGroupForums from "@/components/forums/created-and-member-groups";
 
 export default function Loading() {
-  return <LoadingPage />;
+  return <MyGroupForums />;
 }
