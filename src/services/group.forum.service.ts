@@ -3,85 +3,9 @@
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
 import { toast } from "react-toastify";
+import { GroupForum, Resource } from "@/store/groupForum";
 
-export interface GroupForum {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl?: string;
-  category: GroupCategory;
-  activityLevel: string;
-  createdAt: string;
-  updatedAt: string;
-  members: Member[];
-  topics: Topic[];
-  events: Event[];
-  resources: Resource[];
-  admins: User[];
-  privacy: string;
-  rules: Rule[];
-  featured: boolean;
-  size: string;
-}
 
-interface GroupCategory {
-  name: string;
-  icon: string;
-  description: string;
-  count: number;
-}
-
-interface Member {
-  userId: string;
-  groupId: string;
-  joinedAt: string;
-  role: string;
-  status: string;
-}
-
-interface Topic {
-  id: string;
-  name: string;
-  color: string;
-  description: string;
-}
-
-interface Event {
-  id: string;
-  groupId: string;
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  type: string;
-  attendees: User[];
-}
-
-interface Resource {
-  id: string;
-  groupId: string;
-  title: string;
-  type: string;
-  url: string;
-  description: string;
-  addedBy: string;
-  addedAt: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface Rule {
-  id: string;
-  groupId: string;
-  title: string;
-  description: string;
-  order: number;
-}
 
 export const createGroup = async (groupData: Partial<GroupForum>): Promise<GroupForum> => {
   try {
@@ -131,6 +55,16 @@ export const deleteGroup = async (id: string): Promise<void> => {
 export const listGroups = async (): Promise<GroupForum[]> => {
   try {
     const response = await api.get(API_CONFIG.ENDPOINTS.GROUP_FORUMS.LIST);
+    return response.data.data;
+  } catch (error) {
+    const errorMessage = handleError(error);
+    throw new Error(errorMessage || "Failed to fetch groups");
+  }
+};
+
+export const listOwnerAndMemberGroups = async (): Promise<GroupForum[]> => {
+  try {
+    const response = await api.get(API_CONFIG.ENDPOINTS.GROUP_FORUMS.OWNER_MEMBER);
     return response.data.data;
   } catch (error) {
     const errorMessage = handleError(error);

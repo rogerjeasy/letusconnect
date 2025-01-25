@@ -176,6 +176,7 @@ export const API_CONFIG = {
       GROUP_FORUMS: {
         BASE: '/group-forums',
         CREATE: '/group-forums',
+        OWNER_MEMBER: '/group-forums/my-groups',
         BY_ID: (id: string) => `/group-forums/${id}`,
         LIST: '/group-forums',
         SEARCH: '/group-forums/search',
