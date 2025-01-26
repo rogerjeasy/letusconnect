@@ -7,19 +7,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CalendarDays, Users, BookOpen, Shield, ScrollText, AlertCircle } from 'lucide-react';
+import { CalendarDays, Users, BookOpen, ScrollText } from 'lucide-react';
 import { format } from 'date-fns';
-import { useParams, useRouter } from 'next/navigation';
 
 interface GroupDetailsProps {
   group: GroupForum;
 }
 
 const GroupDetails = ({ group }: GroupDetailsProps) => {
+  const memberCount = (group.members?.length || 0) + (group.admins?.length || 0);
+  const eventCount = group.events?.length || 0;
+  const resourceCount = group.resources?.length || 0;
 
-  const params = useParams();
-  const groupdId = params.id;
-  const router = useRouter();
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       {/* Header Section */}
@@ -38,23 +37,23 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
           <div className="bg-background rounded-lg p-4 shadow-lg mb-4 md:mb-0">
             <h1 className="text-2xl md:text-3xl font-bold">{group.name}</h1>
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant="secondary">{group.category.name}</Badge>
-              <Badge variant="outline">{group.privacy}</Badge>
-              <Badge className="bg-primary/10">{group.size}</Badge>
+              {group.category?.name && <Badge variant="secondary">{group.category.name}</Badge>}
+              {group.privacy && <Badge variant="outline">{group.privacy}</Badge>}
+              {group.size && <Badge className="bg-primary/10">{group.size}</Badge>}
             </div>
           </div>
           
           <div className="flex gap-4 items-center bg-background rounded-lg p-4 shadow-lg">
             <div className="text-center">
-              <p className="text-2xl font-bold">{group.members.length}</p>
+              <p className="text-2xl font-bold">{memberCount}</p>
               <p className="text-sm text-muted-foreground">Members</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{group.events.length}</p>
+              <p className="text-2xl font-bold">{eventCount}</p>
               <p className="text-sm text-muted-foreground">Events</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold">{group.resources.length}</p>
+              <p className="text-2xl font-bold">{resourceCount}</p>
               <p className="text-sm text-muted-foreground">Resources</p>
             </div>
           </div>
@@ -79,23 +78,27 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">{group.description}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="font-semibold">Category</p>
-                  <div className="flex items-center gap-2">
-                    <Badge>{group.category.name}</Badge>
-                    <span className="text-sm text-muted-foreground">{group.category.description}</span>
+                {group.category && (
+                  <div className="space-y-2">
+                    <p className="font-semibold">Category</p>
+                    <div className="flex items-center gap-2">
+                      <Badge>{group.category.name}</Badge>
+                      <span className="text-sm text-muted-foreground">{group.category.description}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="font-semibold">Topics</p>
-                  <div className="flex flex-wrap gap-2">
-                    {group.topics.map(topic => (
-                      <Badge key={topic.id} style={{ backgroundColor: topic.color }}>
-                        {topic.name}
-                      </Badge>
-                    ))}
+                )}
+                {group.topics && group.topics.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="font-semibold">Topics</p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.topics.map(topic => (
+                        <Badge key={topic.id} style={{ backgroundColor: topic.color }}>
+                          {topic.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -104,16 +107,16 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
         <TabsContent value="members">
           <Card>
             <CardHeader>
-              <CardTitle>Members ({group.members.length})</CardTitle>
+              <CardTitle>Members ({memberCount})</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {group.admins.map(admin => (
+                  {group.admins?.map(admin => (
                     <div key={admin.uid} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/10">
                       <Avatar>
                         <AvatarImage src={admin.profilePicture} />
-                        <AvatarFallback>{admin.username.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{admin.username?.charAt(0) || 'A'}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{admin.username}</p>
@@ -121,7 +124,7 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
                       </div>
                     </div>
                   ))}
-                  {group.members.map(member => (
+                  {group.members?.map(member => (
                     <div key={member.userId} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/5">
                       <Avatar>
                         <AvatarFallback>M</AvatarFallback>
@@ -143,12 +146,12 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
         <TabsContent value="events">
           <Card>
             <CardHeader>
-              <CardTitle>Upcoming Events ({group.events.length})</CardTitle>
+              <CardTitle>Upcoming Events ({eventCount})</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
                 <div className="space-y-4">
-                  {group.events.map(event => (
+                  {group.events?.map(event => (
                     <Card key={event.id}>
                       <CardContent className="pt-6">
                         <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -163,7 +166,7 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
                             </div>
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4" />
-                              <span>{event.attendees.length} attendees</span>
+                              <span>{event.attendees?.length || 0} attendees</span>
                             </div>
                           </div>
                         </div>
@@ -179,12 +182,12 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
         <TabsContent value="resources">
           <Card>
             <CardHeader>
-              <CardTitle>Resources ({group.resources.length})</CardTitle>
+              <CardTitle>Resources ({resourceCount})</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {group.resources.map(resource => (
+                  {group.resources?.map(resource => (
                     <Card key={resource.id}>
                       <CardContent className="pt-6">
                         <div className="flex items-start gap-4">
@@ -213,7 +216,7 @@ const GroupDetails = ({ group }: GroupDetailsProps) => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {group.rules.map(rule => (
+                {group.rules?.map(rule => (
                   <div key={rule.id} className="flex gap-4 p-4 rounded-lg bg-secondary/5">
                     <ScrollText className="h-5 w-5 text-primary shrink-0" />
                     <div>
