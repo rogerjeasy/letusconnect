@@ -19,7 +19,7 @@ export const createGroup = async (groupData: Partial<GroupForum>): Promise<Group
   }
 };
 
-export const getGroup = async (id: string): Promise<GroupForum> => {
+export const getGroupById = async (id: string): Promise<GroupForum> => {
   try {
     const response = await api.get(API_CONFIG.ENDPOINTS.GROUP_FORUMS.BY_ID(id));
     return response.data.data;

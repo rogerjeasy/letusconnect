@@ -1,13 +1,22 @@
 "use client";
 
-import ImageZoom from "../forms/ImageZoom";
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
-import { FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter
+} from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Mail, Linkedin, Twitter } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TeamMember {
   name: string;
@@ -22,6 +31,10 @@ interface TeamMember {
 interface Department {
   name: string;
   members: TeamMember[];
+}
+
+interface TeamMemberCardProps {
+  member: TeamMember;
 }
 
 const departments: Department[] = [
@@ -164,93 +177,85 @@ const departments: Department[] = [
   },
 ];
 
+function TeamMemberCard({ member }: TeamMemberCardProps) {
+  return (
+    <Card className="h-full">
+      <CardHeader className="text-center">
+        <Avatar className="w-24 h-24 mx-auto mb-4">
+          <AvatarImage src={member.image} alt={member.name} />
+          <AvatarFallback>{member.name[0]}</AvatarFallback>
+        </Avatar>
+        <div className="space-y-1">
+          <h4 className="text-xl font-semibold">{member.name}</h4>
+          <p className="text-sm text-muted-foreground">{member.role}</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-center text-muted-foreground">{member.bio}</p>
+      </CardContent>
+      <CardFooter className="flex justify-center gap-4">
+        {member.linkedin && (
+          <Button variant="ghost" size="icon" asChild>
+            <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+              <Linkedin className="h-5 w-5" />
+            </a>
+          </Button>
+        )}
+        {member.twitter && (
+          <Button variant="ghost" size="icon" asChild>
+            <a href={member.twitter} target="_blank" rel="noopener noreferrer">
+              <Twitter className="h-5 w-5" />
+            </a>
+          </Button>
+        )}
+        {member.email && (
+          <Button variant="ghost" size="icon" asChild>
+            <a href={`mailto:${member.email}`}>
+              <Mail className="h-5 w-5" />
+            </a>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
 export default function MeetTheTeam() {
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-        <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-center">
+    <section className="py-8 md:py-12 w-full bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-8 md:mb-12 text-center">
           Meet the Team Behind the Platform
         </h2>
 
         {departments.map((department, deptIndex) => (
-          <div key={deptIndex} className="mb-16">
-            <h3 className="text-2xl font-bold mb-6 text-center text-teal-600">
+          <div key={deptIndex} className="mb-12 md:mb-16">
+            <h3 className="text-xl md:text-2xl font-bold mb-6 text-center text-primary">
               {department.name}
             </h3>
 
             {department.members.length === 1 ? (
               <div className="flex justify-center">
-                {department.members.map((member, index) => (
-                  <Card key={index} className="rounded-lg shadow-lg overflow-hidden w-80">
-                    <CardHeader className="flex justify-center p-4">
-                      <div className="w-32 h-32">
-                        <ImageZoom src={member.image} alt={member.name} className="rounded-full w-full h-full object-cover" />
-                      </div>
-                    </CardHeader>
-                    <CardBody className="p-6 text-center">
-                      <h4 className="text-xl font-bold mb-2">{member.name}</h4>
-                      <h5 className="text-lg text-gray-500 mb-4">{member.role}</h5>
-                      <p className="text-gray-700 mb-6">{member.bio}</p>
-                      {/* Social Icons */}
-                      <div className="flex justify-center gap-4">
-                        {member.linkedin && (
-                          <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-                            <FaLinkedin size={24} className="text-blue-600 hover:text-blue-800" />
-                          </a>
-                        )}
-                        {member.twitter && (
-                          <a href={member.twitter} target="_blank" rel="noopener noreferrer">
-                            <FaTwitter size={24} className="text-blue-400 hover:text-blue-600" />
-                          </a>
-                        )}
-                        {member.email && (
-                          <a href={`mailto:${member.email}`}>
-                            <FaEnvelope size={24} className="text-gray-600 hover:text-gray-800" />
-                          </a>
-                        )}
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
+                <TeamMemberCard member={department.members[0]} />
               </div>
             ) : (
-              <Swiper modules={[Navigation, Pagination]} spaceBetween={20} slidesPerView={3} navigation pagination={{ clickable: true }}>
-                {department.members.map((member, index) => (
-                  <SwiperSlide key={index}>
-                    <Card className="rounded-lg shadow-lg overflow-hidden w-80">
-                      <CardHeader className="flex justify-center p-4">
-                        <div className="w-32 h-32">
-                          <ImageZoom src={member.image} alt={member.name} className="rounded-full w-full h-full object-cover" />
-                        </div>
-                      </CardHeader>
-                      <CardBody className="p-6 text-center">
-                        <h4 className="text-xl font-bold mb-2">{member.name}</h4>
-                        <h5 className="text-lg text-gray-500 mb-4">{member.role}</h5>
-                        <p className="text-gray-700 mb-6">{member.bio}</p>
-
-                        {/* Social Icons */}
-                        <div className="flex justify-center gap-4">
-                          {member.linkedin && (
-                            <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-                              <FaLinkedin size={24} className="text-blue-600 hover:text-blue-800" />
-                            </a>
-                          )}
-                          {member.twitter && (
-                            <a href={member.twitter} target="_blank" rel="noopener noreferrer">
-                              <FaTwitter size={24} className="text-blue-400 hover:text-blue-600" />
-                            </a>
-                          )}
-                          {member.email && (
-                            <a href={`mailto:${member.email}`}>
-                              <FaEnvelope size={24} className="text-gray-600 hover:text-gray-800" />
-                            </a>
-                          )}
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {department.members.map((member, index) => (
+                    <CarouselItem key={index} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                      <TeamMemberCard member={member} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex" />
+                <CarouselNext className="hidden md:flex" />
+              </Carousel>
             )}
           </div>
         ))}
