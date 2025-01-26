@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { GroupForum } from '@/store/groupForum';
 import { listOwnerAndMemberGroups } from '@/services/group.forum.service';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus } from 'lucide-react';
+import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,9 +14,11 @@ import { useUserStore } from '@/store/userStore';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from '@/components/ui/badge';
+import GroupDetails from "@/components/forums/group-forum-details";
 
 const MyGroupForums = () => {
   const [groups, setGroups] = useState<GroupForum[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<GroupForum | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -44,7 +48,7 @@ const MyGroupForums = () => {
       default:
         return groups;
     }
-  }, [groups, activeFilter]);
+  }, [groups, activeFilter, currentUser]);
 
   const getPrivacyIcon = (privacy: string | undefined) => {
     switch (privacy) {
@@ -55,61 +59,68 @@ const MyGroupForums = () => {
     }
   };
 
-  const renderGroupCard = (group: GroupForum) => (
-    <Card key={group.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-medium">{group.name || 'Untitled Group'}</CardTitle>
-            <Badge variant="secondary" className="mt-1">
-              {group.category?.name || 'Uncategorized'}
-            </Badge>
-          </div>
-          {getPrivacyIcon(group.privacy)}
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        <p className="text-sm mb-4 line-clamp-2 text-muted-foreground">
-          {group.description || 'No description available'}
-        </p>
-        
-        <div className="grid grid-cols-3 gap-2 text-sm">
-            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-                <Users className="h-4 w-4" />
-                <span>{(group.admins?.length || 0) + (group.members ? group.members.length : 0)} Members</span>
+  const renderGroupCard = (group: GroupForum) => {
+    const handleViewGroup = () => {
+      setSelectedGroup(group);
+      router.push(`/groups/${group.id}`);
+    };
+
+    return (
+      <Card key={group.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-lg font-medium">{group.name || 'Untitled Group'}</CardTitle>
+              <Badge variant="secondary" className="mt-1">
+                {group.category?.name || 'Uncategorized'}
+              </Badge>
             </div>
-          <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-            <Calendar className="h-4 w-4" />
-            <span>{group.events?.length || 0} Events</span>
+            {getPrivacyIcon(group.privacy)}
           </div>
-          <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-            <BookOpen className="h-4 w-4" />
-            <span>{group.resources?.length || 0} Resources</span>
+        </CardHeader>
+        
+        <CardContent>
+          <p className="text-sm mb-4 line-clamp-2 text-muted-foreground">
+            {group.description || 'No description available'}
+          </p>
+          
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
+              <Users className="h-4 w-4" />
+              <span>{(group.admins?.length || 0) + (group.members ? group.members.length : 0)} Members</span>
+            </div>
+            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
+              <Calendar className="h-4 w-4" />
+              <span>{group.events?.length || 0} Events</span>
+            </div>
+            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
+              <BookOpen className="h-4 w-4" />
+              <span>{group.resources?.length || 0} Resources</span>
+            </div>
           </div>
-        </div>
-      </CardContent>
-      
-      <CardFooter className="pt-4 flex gap-2">
-        <Button
-          className="flex-1"
-          variant="default"
-          onClick={() => router.push(`/groups/${group.id}`)}
-        >
-          View Group
-        </Button>
-        {group.admins?.some(admin => admin.uid === currentUser?.uid) && (
-        <Button
+        </CardContent>
+        
+        <CardFooter className="pt-4 flex gap-2">
+          <Button
             className="flex-1"
-            variant="outline"
-            onClick={() => router.push(`/groups/${group.id}/edit`)}
-        >
-            Edit Group
-        </Button>
-        )}
-      </CardFooter>
-    </Card>
-  );
+            variant="default"
+            onClick={handleViewGroup}
+          >
+            View Group
+          </Button>
+          {group.admins?.some(admin => admin.uid === currentUser?.uid) && (
+            <Button
+              className="flex-1"
+              variant="outline"
+              onClick={() => router.push(`/groups/${group.id}/edit`)}
+            >
+              Edit Group
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    );
+  };
 
   const SidebarContent = () => (
     <div className="h-screen p-4 space-y-4">
@@ -168,6 +179,22 @@ const MyGroupForums = () => {
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      </div>
+    );
+  }
+
+  if (selectedGroup) {
+    return (
+      <div className="flex flex-col">
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-2 w-fit mb-4"
+          onClick={() => setSelectedGroup(null)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Groups
+        </Button>
+        <GroupDetails group={selectedGroup} />
       </div>
     );
   }
