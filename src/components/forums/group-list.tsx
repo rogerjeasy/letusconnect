@@ -61,7 +61,6 @@ const GroupList = () => {
     try {
       const data = await listGroups();
       setGroups(data);
-      // Extract unique categories
       const uniqueCategories = Array.from(
         new Set(data.map(group => group.category?.name))
       ).filter(Boolean);
@@ -83,7 +82,6 @@ const GroupList = () => {
   useEffect(() => {
     let result = [...groups];
 
-    // Apply search filter
     if (searchTerm) {
       result = result.filter(group =>
         group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,17 +89,14 @@ const GroupList = () => {
       );
     }
 
-    // Apply category filter
     if (selectedCategory !== 'all') {
       result = result.filter(group => group.category?.name === selectedCategory);
     }
 
-    // Apply privacy filter
     if (selectedPrivacy !== 'all') {
       result = result.filter(group => group.privacy === selectedPrivacy);
     }
 
-    // Apply sorting
     result = result.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -216,11 +211,6 @@ const GroupList = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <Button onClick={() => router.push('/groups/create')} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Group
-          </Button>
         </div>
       </div>
 
