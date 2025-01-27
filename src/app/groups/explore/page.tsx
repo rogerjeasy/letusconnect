@@ -1,9 +1,7 @@
 "use client";
 
-import ExploreGroupsPage from "@/components/forums/ExploreGroupForum";
+import GroupList from "@/components/forums/group-list";
 
-const ExploreGroups = () => {
-  return <ExploreGroupsPage />;
-};
-
-export default ExploreGroups;
+export default function GroupListPage() {
+  return <GroupList />;
+}
