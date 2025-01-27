@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { GroupForum } from '@/store/groupForum';
-import { listOwnerAndMemberGroups } from '@/services/group.forum.service';
+import { deleteGroup, listOwnerAndMemberGroups } from '@/services/group.forum.service';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus, ArrowLeft } from 'lucide-react';
+import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus, ArrowLeft, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from '@/components/ui/badge';
 import GroupDetails from "@/components/forums/group-forum-details";
+import DeleteGroupButton from './delete-group-button-dialog';
 
 const MyGroupForums = () => {
   const [groups, setGroups] = useState<GroupForum[]>([]);
@@ -65,6 +66,16 @@ const MyGroupForums = () => {
       router.push(`/groups/${group.id}`);
     };
 
+    const handleDeleteGroup = async (id: string) => {
+        try {
+          await deleteGroup(id);
+          setGroups(groups.filter(g => g.id !== id));
+        } catch (error) {
+          console.error('Failed to delete group:', error);
+        }
+    };
+    
+
     return (
       <Card key={group.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
         <CardHeader className="pb-2">
@@ -109,13 +120,17 @@ const MyGroupForums = () => {
             View Group
           </Button>
           {group.admins?.some(admin => admin.uid === currentUser?.uid) && (
-            <Button
-              className="flex-1"
-              variant="outline"
-              onClick={() => router.push(`/groups/${group.id}/edit`)}
-            >
-              Edit Group
-            </Button>
+            <>
+                <Button
+                    className="flex-1"
+                    variant="outline"
+                    onClick={() => router.push(`/groups/${group.id}/edit`)}
+                >
+                  Edit Group
+                </Button>
+                <DeleteGroupButton onDelete={() => handleDeleteGroup(group.id)} />
+            </>
+            
           )}
         </CardFooter>
       </Card>
