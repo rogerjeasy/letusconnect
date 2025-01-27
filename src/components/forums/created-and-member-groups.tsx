@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { GroupForum } from '@/store/groupForum';
-import { listOwnerAndMemberGroups } from '@/services/group.forum.service';
+import { deleteGroup, listOwnerAndMemberGroups } from '@/services/group.forum.service';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus, ArrowLeft } from 'lucide-react';
+import { Users, Calendar, BookOpen, Lock, Globe, ShieldAlert, Plus, ArrowLeft, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,6 +15,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from '@/components/ui/badge';
 import GroupDetails from "@/components/forums/group-forum-details";
+import DeleteGroupButton from './delete-group-button-dialog';
+import GroupCard from './group-card';
 
 const MyGroupForums = () => {
   const [groups, setGroups] = useState<GroupForum[]>([]);
@@ -65,61 +67,29 @@ const MyGroupForums = () => {
       router.push(`/groups/${group.id}`);
     };
 
+    const handleEditGroup = (groupId: string) => {
+        router.push(`/groups/${groupId}/edit`);
+      };
+
+    const handleDeleteGroup = async (id: string) => {
+        try {
+          await deleteGroup(id);
+          setGroups(groups.filter(g => g.id !== id));
+        } catch (error) {
+          console.error('Failed to delete group:', error);
+        }
+    };
+
     return (
-      <Card key={group.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-lg font-medium">{group.name || 'Untitled Group'}</CardTitle>
-              <Badge variant="secondary" className="mt-1">
-                {group.category?.name || 'Uncategorized'}
-              </Badge>
-            </div>
-            {getPrivacyIcon(group.privacy)}
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <p className="text-sm mb-4 line-clamp-2 text-muted-foreground">
-            {group.description || 'No description available'}
-          </p>
-          
-          <div className="grid grid-cols-3 gap-2 text-sm">
-            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-              <Users className="h-4 w-4" />
-              <span>{(group.admins?.length || 0) + (group.members ? group.members.length : 0)} Members</span>
-            </div>
-            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-              <Calendar className="h-4 w-4" />
-              <span>{group.events?.length || 0} Events</span>
-            </div>
-            <div className="flex items-center gap-2 bg-secondary/20 rounded-md p-2">
-              <BookOpen className="h-4 w-4" />
-              <span>{group.resources?.length || 0} Resources</span>
-            </div>
-          </div>
-        </CardContent>
-        
-        <CardFooter className="pt-4 flex gap-2">
-          <Button
-            className="flex-1"
-            variant="default"
-            onClick={handleViewGroup}
-          >
-            View Group
-          </Button>
-          {group.admins?.some(admin => admin.uid === currentUser?.uid) && (
-            <Button
-              className="flex-1"
-              variant="outline"
-              onClick={() => router.push(`/groups/${group.id}/edit`)}
-            >
-              Edit Group
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-    );
+        <GroupCard
+          key={group.id}
+          group={group}
+          currentUser={currentUser}
+          onView={handleViewGroup}
+          onEdit={handleEditGroup}
+          onDelete={handleDeleteGroup}
+        />
+      );
   };
 
   const SidebarContent = () => (
@@ -234,9 +204,9 @@ const MyGroupForums = () => {
 
           <ScrollArea className="h-[calc(100vh-200px)]">
             {filteredGroups.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredGroups.map(renderGroupCard)}
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 md:gap-6">
+              {filteredGroups.map(renderGroupCard)}
+            </div>
             ) : (
               <Card className="text-center p-8">
                 <CardContent className="space-y-4">
