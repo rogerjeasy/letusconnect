@@ -77,6 +77,7 @@ export default function ChatContainerPage() {
   const currentParam = searchParams.get('current');
   const toParam = searchParams.get('to');
 
+
   const {
     groupChats,
     addGroupChat,
@@ -283,4 +284,8 @@ export default function ChatContainerPage() {
       />
     </ContainerWrapper>
   );
+}
+
+function useNewWebSocket(arg0: string): { messages: any; sendDirectMessage: any; connectionStatus: any; } {
+  throw new Error('Function not implemented.');
 }

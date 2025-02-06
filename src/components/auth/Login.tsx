@@ -95,6 +95,8 @@ const LoginPageComponent = () => {
         loading: false,
         hasChecked: true
       });
+
+      localStorage.setItem('userLocal', JSON.stringify(user));
       
       toast.success("Login successful!");
       handleSuccessfulLogin();
@@ -106,6 +108,7 @@ const LoginPageComponent = () => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        localStorage.removeItem("userLocal");
       }
       delete api.defaults.headers.common['Authorization'];
     } finally {

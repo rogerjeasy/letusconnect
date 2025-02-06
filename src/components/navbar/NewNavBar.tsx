@@ -91,6 +91,18 @@ const NewNavbar = () => {
     </NavigationMenuItem>
   );
 
+  const JobTrackerMenuItem = () => (
+    <NavigationMenuItem>
+      <Button variant="ghost" onClick={()=> router.push("/job-tracker")}>
+        <NavigationMenuLink
+          className="relative text-black font-bold hover:text-black focus:text-black"
+        >
+          Job Tracker
+        </NavigationMenuLink>
+      </Button>
+    </NavigationMenuItem>
+  );
+
   const NavContent = () => (
     <NavigationMenu className="hidden lg:flex max-w-max">
       <NavigationMenuList className="gap-2">
@@ -224,6 +236,9 @@ const NewNavbar = () => {
 
         {/* Add Message for a authentificated user */}
         {isAuthenticated && <MessagesMenuItem />}
+
+        {/* Add Job Tracker for a user */}
+        <JobTrackerMenuItem />
 
         {/* Add Jobs Navigation Menu */}
         {/* <NavigationMenuItem>

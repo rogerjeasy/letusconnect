@@ -197,3 +197,7 @@ export const ChatHeader = ({
         </>
     );
 };
+
+function useNewWebSocket(arg0: string): { connectionStatus: any; } {
+    throw new Error('Function not implemented.');
+}

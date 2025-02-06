@@ -74,6 +74,12 @@ export const connectAuthComponents: ConnectOption[] = [
     icon: <FaHandshake className="text-green-500" />,
   },
   {
+    title: "Messages & Chats",
+    href: "/new-chat",
+    description: "Start a conversation with your connections or join group chats.",
+    icon: <FaComments className="text-blue-500" />,
+  },
+  {
     title: "Find Students & Alumni",
     href: "/users-directory",
     description:
