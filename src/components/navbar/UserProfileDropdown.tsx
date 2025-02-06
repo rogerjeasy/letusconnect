@@ -38,14 +38,21 @@ import ModalPopup from "@/components/forms/ModalPopup";
 
 export function UserProfileDropdown() {
   const router = useRouter();
-  const { user, logout } = useUserStore();
+  const { logout } = useUserStore();
+  const user = useUserStore((state) => state.user);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const getLocalUser = localStorage.getItem("userLocal");
+  const localUser = getLocalUser ? JSON.parse(getLocalUser) : null;
+
 
   const handleLogoutConfirm = async () => {
     await logout();
     setShowLogoutConfirmation(false);
+    localStorage.removeItem("userLocal");
+    localStorage.removeItem("token");
     router.push("/");
   };
+
 
   const navigateToProfile = () => {
     router.push(`/profile/${user?.uid}`);
@@ -57,16 +64,16 @@ export function UserProfileDropdown() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.profilePicture} alt={user?.username} />
-              <AvatarFallback>{user?.username?.charAt(0) || "U"}</AvatarFallback>
+              <AvatarImage src={localUser?.profilePicture} alt={localUser?.username} />
+              <AvatarFallback>{localUser?.username?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-72" align="end">
           <div className="flex items-center gap-2 p-2">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user?.profilePicture} alt={user?.username} />
-              <AvatarFallback>{user?.username?.charAt(0) || "U"}</AvatarFallback>
+              <AvatarImage src={localUser?.profilePicture} alt={localUser?.username} />
+              <AvatarFallback>{localUser?.username?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col space-y-0.5">
               <p className="text-sm font-medium">{user?.username}</p>

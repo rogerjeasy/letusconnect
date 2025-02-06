@@ -3,7 +3,6 @@
 import { api, handleError } from "@/helpers/api";
 import { API_CONFIG } from "@/config/api.config";
 import { User } from "@/store/userStore";
-import { to } from "@react-spring/web";
 
 interface ProfileCompletion {
   completionPercentage: number;

@@ -65,7 +65,7 @@ export const JobTrackerNoAuth: React.FC = () => {
           Revolutionize Your Job Search Strategy
         </h1>
         <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
-          A cutting-edge platform designed to transform your job application process from overwhelming to optimized, giving you a competitive edge in today's dynamic job market.
+          A cutting-edge platform designed to transform your job application process from overwhelming to optimized, giving you a competitive edge in today&apos;s dynamic job market.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button 
