@@ -107,6 +107,20 @@ export const API_CONFIG = {
         GET_ONE: (id: string) => `/notifications/${id}`,
       },
 
+      JOBS: {
+        BASE: "/jobs",
+        CREATE: "/jobs",
+        GET_ALL: "/jobs",
+        GET_BY_ID: (id: string) => `/jobs/${id}`,
+        UPDATE: (id: string) => `/jobs/${id}`,
+        DELETE: (id: string) => `/jobs/${id}`,
+        GET_BY_STATUS: (status: string) => `/jobs/status/${status}`,
+        INTERVIEWS: {
+          ADD: (id: string) => `/jobs/${id}/interviews`,
+          REMOVE: (id: string, roundNumber: string) => `/jobs/${id}/interviews/${roundNumber}`,
+        },
+      },
+
       MESSAGES: {
         BASE: '/messages',
         SEND: '/messages/send',
