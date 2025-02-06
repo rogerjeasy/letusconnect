@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Enums for consistent validation
 export const JobStatusEnum = z.enum([
-  'APPLIED', 'INTERVIEWING', 'OFFERED', 'REJECTED', 'WITHDRAWN'
+  'APPLIED', 'INTERVIEWING', 'OFFERED', 'REJECTED', 'WITHDRAWN', 'HIRED', 'ARCHIVED', "IN_REVIEW"
 ]);
 
 export const InterviewTypeEnum = z.enum([
