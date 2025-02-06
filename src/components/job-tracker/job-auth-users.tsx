@@ -8,10 +8,7 @@ import {
   Briefcase,
   PlusCircle,
   Filter,
-  Search,
-  Watch,
-  CheckCircle2,
-  XCircle
+  Search
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { useJobStatusStore } from '@/store/useJobStatusStore';
 import { JobStatusIcons } from "@/components/icons/job-status-icon";
+import CreateJobDialog from './create-job-dialog';
 
 const JobTrackerAuth: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -43,9 +41,7 @@ const JobTrackerAuth: React.FC = () => {
             Streamline your job search, track applications, and manage your career journey with precision and ease.
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-4">
-            <Button className="w-full md:w-auto" size="lg" variant="default">
-              <PlusCircle className="mr-2" /> Add New Application
-            </Button>
+            <CreateJobDialog />
             <Button className="w-full md:w-auto" size="lg" variant="outline">
               <Search className="mr-2" /> Explore Opportunities
             </Button>
