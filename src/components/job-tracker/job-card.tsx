@@ -55,6 +55,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
             >
               <StatusIcon className="w-3.5 h-3.5" />
               {job.status.charAt(0) + job.status.slice(1).toLowerCase().replace('_', ' ')}
+            
             </Badge>
             <AlertDialog>
               <AlertDialogTrigger asChild>

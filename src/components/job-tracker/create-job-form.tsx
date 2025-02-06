@@ -38,8 +38,10 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSuccess, onClose }) => 
       position: formData.get('position')?.toString() || '',
       location: formData.get('location')?.toString(),
       status: (formData.get('status')?.toString() || 'APPLIED') as z.infer<typeof JobStatusEnum>,
-      applicationDate: new Date(),
-      referral: '',
+      applicationDate: formData.get('applicationDate') ? 
+        new Date(formData.get('applicationDate')!.toString()) : 
+        new Date(),
+      referral: formData.get('referral')?.toString(),
       salaryRange: formData.get('salaryRange')?.toString(),
       jobType: formData.get('jobType')?.toString(),
       jobDescription: formData.get('jobDescription')?.toString(),
