@@ -121,7 +121,7 @@ const JobTrackerAuth: React.FC = () => {
           </div>
         </TabsContent>
         <JobApplications />
-        <AnalyticsDashboard />
+        {/* <AnalyticsDashboard /> */}
       </Tabs>
     </div>
   );

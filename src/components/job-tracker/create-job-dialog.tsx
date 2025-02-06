@@ -44,7 +44,7 @@ const CreateJobDialog = () => {
                 Create New Application
               </DialogTitle>
               <DialogDescription className="text-base">
-                Choose how you'd like to create your job application
+                Choose how you&apos;d like to create your job application
               </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
