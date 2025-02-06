@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import {
   Card,
@@ -8,10 +10,7 @@ import {
   Briefcase,
   PlusCircle,
   Filter,
-  Search,
-  Watch,
-  CheckCircle2,
-  XCircle
+  Search
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -22,33 +21,16 @@ import {
   SheetTitle,
   SheetTrigger 
 } from "@/components/ui/sheet";
+import { useJobStatusStore } from '@/store/useJobStatusStore';
+import { JobStatusIcons } from "@/components/icons/job-status-icon";
+import CreateJobDialog from './create-job-dialog';
+import JobApplications from './job-application';
+import AnalyticsDashboard from './job-analytics';
 
 const JobTrackerAuth: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const jobStatuses = [
-    {
-      name: 'Applied',
-      icon: <PlusCircle className="text-blue-500 mr-2" />,
-      count: 15
-    },
-    {
-      name: 'In Review',
-      icon: <Watch className="text-yellow-500 mr-2" />,
-      count: 5
-    },
-    {
-      name: 'Interview',
-      icon: <CheckCircle2 className="text-green-500 mr-2" />,
-      count: 3
-    },
-    {
-      name: 'Rejected',
-      icon: <XCircle className="text-red-500 mr-2" />,
-      count: 2
-    }
-  ];
+  const { statusCounts } = useJobStatusStore();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -63,9 +45,7 @@ const JobTrackerAuth: React.FC = () => {
             Streamline your job search, track applications, and manage your career journey with precision and ease.
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-4">
-            <Button className="w-full md:w-auto" size="lg" variant="default">
-              <PlusCircle className="mr-2" /> Add New Application
-            </Button>
+            <CreateJobDialog />
             <Button className="w-full md:w-auto" size="lg" variant="outline">
               <Search className="mr-2" /> Explore Opportunities
             </Button>
@@ -121,21 +101,27 @@ const JobTrackerAuth: React.FC = () => {
         <TabsContent value="overview">
           {/* Responsive Job Status Overview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {jobStatuses.map((status) => (
-              <Card key={status.name} className="w-full">
-                <CardContent className="flex items-center justify-between p-4 md:p-6">
-                  <div className="flex items-center">
-                    {status.icon}
-                    <span className="font-semibold text-sm md:text-base">{status.name}</span>
-                  </div>
-                  <Badge variant="secondary" className="text-sm md:text-lg">
-                    {status.count}
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+            {Object.entries(statusCounts).map(([statusKey, status]) => {
+              const Icon = JobStatusIcons[statusKey as keyof typeof JobStatusIcons];
+
+              return (
+                <Card key={status.name} className="w-full">
+                  <CardContent className="flex items-center justify-between p-4 md:p-6">
+                    <div className="flex items-center gap-2">
+                    <Icon className="w-5 h-5 md:w-6 md:h-6" />
+                      <span className="font-semibold text-sm md:text-base">{status.name}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-sm md:text-lg">
+                      {status.count}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </TabsContent>
+        <JobApplications />
+        {/* <AnalyticsDashboard /> */}
       </Tabs>
     </div>
   );

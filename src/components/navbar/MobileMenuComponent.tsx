@@ -144,6 +144,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
             </>
           )}
 
+          <Link
+            href="/job-tracker"
+            className="flex items-center gap-4 px-4 py-2 text-sm font-medium rounded-md hover:bg-accent"
+            onClick={handleClose}
+          >
+            Job Tracker
+          </Link>
+
+
           <MenuSection
             title="Connect"
             items={isAuthenticated ? connectAuthComponents : connectNonAuthComponents}

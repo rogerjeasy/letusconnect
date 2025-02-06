@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { z } from 'zod';
 import { JobSchema, JobCreateSchema, JobStatusEnum, InterviewRoundSchema } from "@/store/jobStore";
 import * as JobService from '@/services/job.service';
+import { useJobStatusStore } from './useJobStatusStore';
 
 type JobState = {
   jobs: z.infer<typeof JobSchema>[];
@@ -31,6 +32,16 @@ export const useJobStore = create<JobState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const jobs = await JobService.getAllJobs();
+      
+      // Calculate status counts
+      const statusCounts = jobs.reduce((acc, job) => {
+        acc[job.status] = (acc[job.status] || 0) + 1;
+        return acc;
+      }, {} as Record<z.infer<typeof JobStatusEnum>, number>);
+      
+      // Set initial status counts
+      useJobStatusStore.getState().setInitialStatusCounts(statusCounts);
+      
       set({ jobs, loading: false });
     } catch (err) {
       set({ 
@@ -70,6 +81,8 @@ export const useJobStore = create<JobState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const newJob = await JobService.createJob(jobData);
+      useJobStatusStore.getState().updateStatusCount(newJob.status, 1);
+
       set(state => ({ 
         jobs: [...state.jobs, newJob], 
         loading: false 
@@ -86,6 +99,16 @@ export const useJobStore = create<JobState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const updatedJob = await JobService.updateJob(jobId, jobData);
+
+      // Find the original job to compare status
+      const originalJob = get().jobs.find(job => job.id === jobId);
+        
+      // Update status counts if status changed
+      if (originalJob && originalJob.status !== updatedJob.status) {
+        useJobStatusStore.getState().updateStatusCount(originalJob.status, -1);
+        useJobStatusStore.getState().updateStatusCount(updatedJob.status, 1);
+    }
+
       set(state => ({ 
         jobs: state.jobs.map(job => job.id === jobId ? updatedJob : job),
         selectedJob: updatedJob,
@@ -102,7 +125,13 @@ export const useJobStore = create<JobState>((set, get) => ({
   deleteJob: async (jobId) => {
     set({ loading: true, error: null });
     try {
+      const jobToDelete = get().jobs.find(job => job.id === jobId);
       await JobService.deleteJob(jobId);
+
+      if (jobToDelete) {
+        useJobStatusStore.getState().updateStatusCount(jobToDelete.status, -1);
+      }
+
       set(state => ({ 
         jobs: state.jobs.filter(job => job.id !== jobId),
         selectedJob: null,
