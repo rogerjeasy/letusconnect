@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import {
   Dialog,
@@ -10,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Bot, PenLine } from "lucide-react";
 import CreateJobForm from './create-job-form';
+import CreateJobWithAI from './create-job-ai';
 
 const CreateJobDialog = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -87,21 +90,13 @@ const CreateJobDialog = () => {
         )}
         {mode === 'ai' && (
           <>
-            <DialogHeader className="space-y-3">
-              <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+            <DialogHeader className="mb-6 text-center">
+            <DialogTitle className="text-2xl font-bold flex items-center justify-center gap-3">
                 <Bot className="w-7 h-7" />
                 AI Auto-Complete
-              </DialogTitle>
-              <DialogDescription className="text-base">
-                Paste the job posting URL and let AI extract the details
-              </DialogDescription>
+            </DialogTitle>
             </DialogHeader>
-            {/* AI Form Component would go here */}
-            <div className="flex justify-end gap-4 mt-6">
-              <Button variant="outline" onClick={() => setMode('select')}>
-                Back
-              </Button>
-            </div>
+            <CreateJobWithAI onClose={handleClose} />
           </>
         )}
       </DialogContent>
