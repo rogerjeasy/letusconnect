@@ -38,6 +38,8 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSuccess, onClose }) => 
       position: formData.get('position')?.toString() || '',
       location: formData.get('location')?.toString(),
       status: (formData.get('status')?.toString() || 'APPLIED') as z.infer<typeof JobStatusEnum>,
+      applicationDate: new Date(),
+      referral: '',
       salaryRange: formData.get('salaryRange')?.toString(),
       jobType: formData.get('jobType')?.toString(),
       jobDescription: formData.get('jobDescription')?.toString(),
@@ -47,6 +49,8 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSuccess, onClose }) => 
 
     try {
       await createJob(jobData);
+
+      console.log('Job created:', jobData);
       form.reset();
       onSuccess?.();
     } catch (error) {
@@ -141,6 +145,26 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ onSuccess, onClose }) => 
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1.5 md:space-y-2">
+              <Label htmlFor="applicationDate" className="text-sm md:text-base">Application Date</Label>
+              <Input
+                id="applicationDate"
+                name="applicationDate"
+                type="date"
+                className="text-sm md:text-base"
+              />
+            </div>
+
+            <div className="space-y-1.5 md:space-y-2">
+              <Label htmlFor="referral" className="text-sm md:text-base">Referral</Label>
+              <Input
+                id="referral"
+                name="referral"
+                placeholder="Enter referral name"
+                className="text-sm md:text-base"
+              />
             </div>
 
             <div className="space-y-1.5 md:space-y-2">

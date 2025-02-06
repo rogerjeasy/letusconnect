@@ -24,6 +24,7 @@ import {
 import { useJobStatusStore } from '@/store/useJobStatusStore';
 import { JobStatusIcons } from "@/components/icons/job-status-icon";
 import CreateJobDialog from './create-job-dialog';
+import JobApplications from './job-application';
 
 const JobTrackerAuth: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -118,6 +119,7 @@ const JobTrackerAuth: React.FC = () => {
             })}
           </div>
         </TabsContent>
+        <JobApplications />
       </Tabs>
     </div>
   );

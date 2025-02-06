@@ -54,5 +54,4 @@ export const JobSchema = z.object({
 export const JobCreateSchema = JobSchema.omit({ 
   id: true, 
   userId: true, 
-  applicationDate: true 
 }).partial();
