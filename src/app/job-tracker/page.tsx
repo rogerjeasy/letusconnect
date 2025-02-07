@@ -1,7 +1,19 @@
-"use client";
+'use client';
 
-import { JobTrackerMain } from "@/components/job-tracker/job-main";
+import dynamic from 'next/dynamic';
+import LoadingPage from '@/components/loadingpage/LoadingPage';
 
-export default function JobTrackerPage() {
+const JobTrackerMain = dynamic(
+  () => import('@/components/job-tracker/job-main'),
+  {
+    ssr: false,
+    loading: () => <LoadingPage />
+  }
+);
+
+const JobTrackerPage = () => {
   return <JobTrackerMain />;
-}
+};
+
+export default JobTrackerPage;
+
