@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -14,10 +14,39 @@ import {
   TrendingUp,
   Clock
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
+// import LinkedInButton from '@/components/linkedin/linkedin-button';
 
 export const JobTrackerNoAuth: React.FC = () => {
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check for authentication token
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+
+    // Handle authentication messages
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+
+    if (success) {
+      toast({
+        title: "Successfully connected with LinkedIn",
+        description: "Welcome to your job tracking dashboard!",
+      });
+    }
+
+    if (error) {
+      toast({
+        title: "Authentication Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [searchParams]);
 
   const featureHighlights = [
     {
@@ -68,7 +97,11 @@ export const JobTrackerNoAuth: React.FC = () => {
         <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
           A cutting-edge platform designed to transform your job application process from overwhelming to optimized, giving you a competitive edge in today&apos;s dynamic job market.
         </p>
+        <p className="text-sm md:text-xl text-blue-800 mb-6">
+          Connect with LinkedIn to start tracking your job applications
+        </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
+          {/* <LinkedInButton /> */}
           <Button 
             size="lg" 
             onClick={() => router.push("/login")} 

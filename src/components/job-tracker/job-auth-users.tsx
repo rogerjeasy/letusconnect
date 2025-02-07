@@ -27,7 +27,7 @@ import CreateJobDialog from './create-job-dialog';
 import JobApplications from './job-application';
 import AnalyticsDashboard from './job-analytics';
 
-const JobTrackerAuth: React.FC = () => {
+const JobTrackerContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { statusCounts } = useJobStatusStore();
@@ -120,11 +120,21 @@ const JobTrackerAuth: React.FC = () => {
             })}
           </div>
         </TabsContent>
-        <JobApplications />
-        {/* <AnalyticsDashboard /> */}
+        <TabsContent value="applications">
+            <JobApplications />
+        </TabsContent>
+        <TabsContent value="analytics">
+            <AnalyticsDashboard />
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
+
+const JobTrackerAuth: React.FC = () => {
+    return (
+        <JobTrackerContent />
+    );
+  };
 
 export default JobTrackerAuth;
