@@ -274,6 +274,7 @@ const GetStartedWithJobTracker = () => {
         <Button 
           size="lg"
           className="bg-blue-500 hover:bg-blue-600 text-white"
+          onClick={handleStartTracking}
         >
           Get Started Now
           <ChevronRight className="ml-2 w-5 h-5" />
@@ -282,6 +283,7 @@ const GetStartedWithJobTracker = () => {
 
       {/* Dialogs */}
       <LoginDialog 
+        title= "Please login or register to start tracking your job applications"
         isOpen={showLoginDialog} 
         onClose={() => setShowLoginDialog(false)} 
       />
