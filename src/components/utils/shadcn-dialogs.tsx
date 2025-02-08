@@ -11,11 +11,12 @@ import { Button } from "../ui/button";
 import { PlusCircle } from "lucide-react";
 
 interface LoginDialogProps {
+  title: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose }) => {
+export const LoginDialog: React.FC<LoginDialogProps> = ({ title, isOpen, onClose }) => {
   const router = useRouter();
 
   const handleLogin = () => {
@@ -34,7 +35,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose }) => 
         <DialogHeader className="space-y-2">
           <DialogTitle>Authentication Required</DialogTitle>
           <DialogDescription>
-            Please login or register to start tracking your job applications
+            {title}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
