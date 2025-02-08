@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -26,11 +26,29 @@ import { JobStatusIcons } from "@/components/icons/job-status-icon";
 import CreateJobDialog from './create-job-dialog';
 import JobApplications from './job-application';
 import AnalyticsDashboard from './job-analytics';
+import { useJobStore } from '@/store/useJobStore';
+import { useUserStore } from '@/store/userStore';
 
 const JobTrackerContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { statusCounts } = useJobStatusStore();
+  const { statusCounts, setInitialStatusCounts } = useJobStatusStore();
+  const { jobs } = useJobStore();
+  const currentUser = useUserStore(state => state.user);
+
+  useEffect(() => {
+    if (currentUser && jobs.length > 0) {
+      // Calculate counts from jobs array
+      const counts = jobs.reduce((acc, job) => {
+        const status = job.status;
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Set the initial counts in the store
+      setInitialStatusCounts(counts);
+    }
+  }, [currentUser, jobs, setInitialStatusCounts]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">

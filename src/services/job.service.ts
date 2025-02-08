@@ -157,3 +157,44 @@ export const removeInterviewRound = async (jobId: string, roundNumber: string): 
     throw new Error(errorMessage || "Failed to remove interview round");
   }
 };
+
+/**
+ * Update an interview round for a job
+ * @param jobId ID of the job
+ * @param roundNumber Number of the interview round to update
+ * @param interviewData Updated interview round data
+ * @returns Promise with updated Job
+ */
+export const updateInterviewRound = async (
+    jobId: string,
+    roundNumber: string,
+    interviewData: Partial<z.infer<typeof InterviewRoundSchema>>
+  ): Promise<z.infer<typeof JobSchema>> => {
+    try {
+      const response = await api.put<JobCreateResponse>(
+        API_CONFIG.ENDPOINTS.JOBS.UPDATE_INTERVIEW_ROUND(jobId, roundNumber),
+        interviewData
+      );
+      
+      toast.success("Interview round updated successfully");
+      return response.data.data;
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error("Failed to update interview round: " + errorMessage);
+      throw new Error(errorMessage || "Failed to update interview round");
+    }
+  };
+
+  export const validateInterviewData = (
+    data: Partial<z.infer<typeof InterviewRoundSchema>>
+  ): z.infer<typeof InterviewRoundSchema> => {
+    try {
+      return InterviewRoundSchema.parse(data);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+        throw new Error(`Invalid interview data: ${errorMessage}`);
+      }
+      throw error;
+    }
+  };

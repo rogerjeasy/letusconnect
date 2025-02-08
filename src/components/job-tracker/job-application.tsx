@@ -7,9 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TabsContent } from "@/components/ui/tabs";
 import { Briefcase } from "lucide-react";
 import CreateJobDialog from './create-job-dialog';
+import { useUserStore } from '@/store/userStore';
 
 const JobApplications = () => {
   const { jobs, fetchJobs, selectJob } = useJobStore();
+  const currentUser = useUserStore(state => state.user);
 
   useEffect(() => {
     fetchJobs();

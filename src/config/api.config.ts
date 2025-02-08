@@ -113,6 +113,7 @@ export const API_CONFIG = {
         GET_ALL: "/jobs",
         GET_BY_ID: (id: string) => `/jobs/${id}`,
         UPDATE: (id: string) => `/jobs/${id}`,
+        UPDATE_INTERVIEW_ROUND: (id: string, roundNumber: string) => `/jobs/${id}/interviews/${roundNumber}`,
         DELETE: (id: string) => `/jobs/${id}`,
         GET_BY_STATUS: (status: string) => `/jobs/status/${status}`,
         INTERVIEWS: {
