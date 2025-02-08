@@ -11,17 +11,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   UserPlus,
   UserCircle2,
@@ -189,7 +180,7 @@ const GetStartedPage: React.FC = () => {
                     Our platform bridges the gap between students, alumni, and industry experts by 
                     fostering mentorship, collaboration, and career growth opportunities. Whether 
                     you&rsquo;re looking to find a mentor, collaborate on projects, or expand your 
-                    professional network, LetUsConnect is here to make it happen.
+                    professional network, Let Us Connect is here to make it happen.
                 </p>
                 </div>
               </div>
@@ -311,8 +302,8 @@ const GetStartedPage: React.FC = () => {
             <Card className="bg-white/50 backdrop-blur">
               <CardContent className="pt-6">
                 <p className="text-lg text-muted-foreground italic">
-                  "LetUsConnect has been instrumental in helping me find the right
-                  mentors and collaborate on exciting projects."
+                &quot;Let Us Connect has been instrumental in helping me find the right
+                  mentors and collaborate on exciting projects.&ldquo;
                 </p>
                 <p className="text-sm font-semibold mt-4">— Jane Doe</p>
               </CardContent>
