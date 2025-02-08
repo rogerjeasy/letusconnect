@@ -23,10 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { JobSchema, JobStatusEnum } from '@/store/jobStore';
+import { InterviewRoundSchema, JobSchema, JobStatusEnum } from '@/store/jobStore';
 import { useJobStore } from '@/store/useJobStore';
 import { Building2, Briefcase, MapPin, Link, DollarSign, Calendar } from 'lucide-react';
 import type { z } from 'zod';
+import InterviewCardForm from './interview-card-form';
 
 interface JobDetailsDialogProps {
   isOpen: boolean;
@@ -41,10 +42,18 @@ const JobDetailsDialog: React.FC<JobDetailsDialogProps> = ({
   onClose,
   jobId
 }) => {
-  const { selectedJob, loading, updateJob, fetchJobById } = useJobStore();
+  const { selectedJob, loading, updateJob, fetchJobById, addInterviewRound, removeInterviewRound, updateInterviewRound } = useJobStore();
   const [activeTab, setActiveTab] = React.useState('details');
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState<Partial<z.infer<typeof JobSchema>>>({});
+  const [isAddingInterview, setIsAddingInterview] = React.useState(false);
+  const defaultInterviewRound: z.infer<typeof InterviewRoundSchema> = {
+    roundNumber: (selectedJob?.interviews?.length || 0) + 1,
+    date: new Date(),
+    interviewType: 'PHONE',
+    reminder: 'NONE'
+  };
+  const [newInterviewData, setNewInterviewData] = React.useState<z.infer<typeof InterviewRoundSchema>>(defaultInterviewRound);
 
   React.useEffect(() => {
     if (isOpen && jobId) {
@@ -78,10 +87,112 @@ const JobDetailsDialog: React.FC<JobDetailsDialogProps> = ({
     }
   };
 
-  const handleClose = () => {
+  const handleInterviewUpdate = async (index: number, data: Partial<z.infer<typeof InterviewRoundSchema>>) => {
+    if (!selectedJob?.id || !selectedJob.interviews?.[index]) return;
+    
+    try {
+      const currentInterview = selectedJob.interviews[index];
+      const updatedData: z.infer<typeof InterviewRoundSchema> = {
+        ...currentInterview,
+        ...data,
+        roundNumber: currentInterview.roundNumber, // Preserve round number
+        date: data.date || currentInterview.date,
+        interviewType: data.interviewType || currentInterview.interviewType,
+        reminder: data.reminder || currentInterview.reminder
+      };
+
+      await updateInterviewRound(
+        selectedJob.id,
+        currentInterview.roundNumber.toString(),
+        updatedData
+      );
+    } catch (error) {
+      console.error('Failed to update interview:', error);
+    }
+  };
+
+  const handleInterviewDelete = async (index: number) => {
+    if (!selectedJob?.id || !selectedJob.interviews?.[index]) return;
+    
+    try {
+      await removeInterviewRound(
+        selectedJob.id,
+        selectedJob.interviews[index].roundNumber.toString()
+      );
+    } catch (error) {
+      console.error('Failed to delete interview:', error);
+    }
+  };
+
+  const handleInterviewSubmit = async (data: Partial<z.infer<typeof InterviewRoundSchema>>) => {
+    if (!selectedJob?.id) return;
+    
+    try {
+      // Ensure all required fields are present
+      const completeData: z.infer<typeof InterviewRoundSchema> = {
+        roundNumber: data.roundNumber || newInterviewData.roundNumber,
+        date: data.date || new Date(),
+        interviewType: data.interviewType || 'PHONE',
+        reminder: data.reminder || 'NONE',
+        time: data.time,
+        location: data.location,
+        interviewer: data.interviewer,
+        description: data.description,
+        meetingLink: data.meetingLink,
+        notes: data.notes
+      };
+
+      await addInterviewRound(selectedJob.id, completeData);
+      setIsAddingInterview(false);
+      setNewInterviewData(defaultInterviewRound);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to add interview:', error);
+    }
+  };
+
+  const handleAddInterview = () => {
+    const nextRoundNumber = (selectedJob?.interviews?.length || 0) + 1;
+    setNewInterviewData({
+      ...defaultInterviewRound,
+      roundNumber: nextRoundNumber,
+    });
+    setIsAddingInterview(true);
+  };
+
+  const handleDetailsSubmit = async () => {
+    if (!selectedJob?.id) return;
+    
+    try {
+      await updateJob(selectedJob.id, formData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update job:', error);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (activeTab === 'details') {
+      await handleDetailsSubmit();
+    } else if (activeTab === 'interviews' && newInterviewData) {
+      await handleInterviewSubmit(newInterviewData);
+    }
+  };
+
+    const handleClose = () => {
+        onClose();
+        setIsEditing(false);
+        setIsAddingInterview(false);
+    };
+
+  const handleCancel = () => {
+    if (activeTab === 'details') {
+      setFormData(selectedJob || {});
+    } else {
+      setIsAddingInterview(false);
+      setNewInterviewData(defaultInterviewRound);
+    }
     setIsEditing(false);
-    setFormData({});
-    onClose();
   };
 
   if (!selectedJob) return null;
@@ -273,33 +384,51 @@ const JobDetailsDialog: React.FC<JobDetailsDialogProps> = ({
           </TabsContent>
 
           <TabsContent
-            value="interviews"
-            className="flex-1 overflow-y-auto px-1 data-[state=inactive]:hidden"
-          >
-            <div className="space-y-4 py-4">
-              {selectedJob.interviews?.map((interview, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Round {interview.roundNumber}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <p><strong>Date:</strong> {interview.date.toLocaleDateString()}</p>
-                    <p><strong>Type:</strong> {interview.interviewType}</p>
-                    {interview.time && <p><strong>Time:</strong> {interview.time}</p>}
-                    {interview.location && <p><strong>Location:</strong> {interview.location}</p>}
-                    {interview.interviewer && <p><strong>Interviewer:</strong> {interview.interviewer}</p>}
-                  </div>
-                  {interview.notes && (
-                    <div className="mt-2">
-                      <strong>Notes:</strong>
-                      <p className="mt-1">{interview.notes}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(!selectedJob.interviews || selectedJob.interviews.length === 0) && (
-                <p className="text-center text-muted-foreground">No interviews scheduled yet</p>
-              )}
-            </div>
-          </TabsContent>
+          value="interviews"
+          className="flex-1 overflow-y-auto px-1 data-[state=inactive]:hidden"
+        >
+          <div className="space-y-4 py-4">
+            {isAddingInterview && (
+              <InterviewCardForm
+                interview={newInterviewData}
+                roundNumber={newInterviewData.roundNumber}
+                isEditing={true}
+                onSave={handleInterviewSubmit}
+                onCancel={() => {
+                  setIsAddingInterview(false);
+                  setNewInterviewData(defaultInterviewRound);
+                }}
+              />
+            )}
+            
+            {selectedJob.interviews?.map((interview, index) => (
+              <InterviewCardForm
+                key={index}
+                interview={interview}
+                roundNumber={interview.roundNumber}
+                isEditing={isEditing}
+                onSave={(data) => handleInterviewUpdate(index, data)}
+                onDelete={() => handleInterviewDelete(index)}
+                onCancel={isEditing ? () => setIsEditing(false) : undefined}
+              />
+            ))}
+            
+            {isEditing && !isAddingInterview && (
+              <Button
+                onClick={handleAddInterview}
+                className="w-full"
+              >
+                Add Interview Round
+              </Button>
+            )}
+            
+            {(!selectedJob.interviews?.length && !isAddingInterview) && (
+              <p className="text-center text-muted-foreground">
+                No interviews scheduled yet. {isEditing && 'Click the button above to add one.'}
+              </p>
+            )}
+          </div>
+        </TabsContent>
         </Tabs>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
@@ -310,20 +439,17 @@ const JobDetailsDialog: React.FC<JobDetailsDialogProps> = ({
           >
             Close
           </Button>
-          {isEditing ? (
+          {isEditing || isAddingInterview ? (
             <>
               <Button
                 variant="outline"
-                onClick={() => {
-                  setFormData(selectedJob);
-                  setIsEditing(false);
-                }}
+                onClick={handleCancel}
                 disabled={loading}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleSave}
+                onClick={handleSaveChanges}
                 disabled={loading}
               >
                 Save Changes
