@@ -10,7 +10,8 @@ import {
   Briefcase,
   PlusCircle,
   Filter,
-  Search
+  Search,
+  InfoIcon
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import { useJobStore } from '@/store/useJobStore';
 import { useUserStore } from '@/store/userStore';
 import { JobStatusEnum } from '@/store/jobStore';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 
 const JobTrackerContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -37,6 +39,7 @@ const JobTrackerContent: React.FC = () => {
   const { statusCounts, setInitialStatusCounts } = useJobStatusStore();
   const { jobs } = useJobStore();
   const currentUser = useUserStore(state => state.user);
+  const router = useRouter();
 
   useEffect(() => {
     if (currentUser && Array.isArray(jobs) && jobs.length > 0) {
@@ -64,6 +67,13 @@ const JobTrackerContent: React.FC = () => {
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-4">
             <CreateJobDialog />
+            <Button className="w-full md:w-auto"
+             size="lg" 
+             variant="destructive"
+             onClick={() => router.push('/job-tracker/get-started')}
+            >
+              <InfoIcon className="mr-2" /> Learn More
+            </Button>
             <Button className="w-full md:w-auto" size="lg" variant="outline">
               <Search className="mr-2" /> Explore Opportunities
             </Button>
