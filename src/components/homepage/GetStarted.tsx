@@ -1,276 +1,333 @@
 "use client";
 
-import { Card, CardHeader, CardBody, CardFooter, Button } from "@nextui-org/react";
-import { FaUserPlus, FaIdBadge, FaRocket, FaUsers, FaBriefcase, FaComments, FaCalendarAlt, FaHandsHelping } from "react-icons/fa";
+import { useState } from "react";
 import Link from "next/link";
-import { useUserStore } from "@/store/userStore";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ModalPopup from "@/components/forms/ModalPopup";
+import { motion } from "framer-motion";
+import { useUserStore } from "@/store/userStore";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  UserPlus,
+  UserCircle2,
+  Rocket,
+  Users,
+  Briefcase,
+  MessagesSquare,
+  Calendar,
+  HandshakeIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
+import { ReactNode } from "react";
+import { LoginDialog } from "../utils/shadcn-dialogs";
 
-export default function GetStartedPage() {
+interface AnimationProps {
+  initial: { opacity: number; y: number };
+  animate: { opacity: number; y: number };
+  transition: { duration: number; delay?: number };
+}
+
+const fadeIn: AnimationProps = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+interface StepCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  actionButton?: ReactNode;
+  color?: string;
+}
+
+const StepCard: React.FC<StepCardProps> = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  actionButton, 
+  color = "blue" 
+}) => (
+  <Card className="transition-all duration-300 hover:shadow-lg">
+    <CardHeader>
+      <div className={cn(
+        "w-16 h-16 rounded-full mx-auto flex items-center justify-center",
+        `bg-${color}-100 text-${color}-600`
+      )}>
+        <Icon className="w-8 h-8" />
+      </div>
+      <CardTitle className="text-xl text-center mt-4">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-muted-foreground text-center">{description}</p>
+    </CardContent>
+    {actionButton && (
+      <CardFooter className="flex justify-center pb-6">
+        {actionButton}
+      </CardFooter>
+    )}
+  </Card>
+);
+
+interface FeatureCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  color?: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  color = "blue" 
+}) => (
+  <Card className="transition-all duration-300 hover:shadow-md">
+    <CardHeader>
+      <div className={cn(
+        "w-12 h-12 rounded-full mx-auto flex items-center justify-center",
+        `bg-${color}-100 text-${color}-600`
+      )}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <CardTitle className="text-lg text-center mt-2">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-sm text-muted-foreground text-center">{description}</p>
+    </CardContent>
+  </Card>
+);
+
+
+const GetStartedPage: React.FC = () => {
   const { user, isAuthenticated } = useUserStore();
   const router = useRouter();
-  const [showModal, setShowModal] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState<boolean>(false);
 
-  const handleCompleteProfileClick = () => {
+  const handleCompleteProfile = (): void => {
     if (isAuthenticated && user) {
       router.push("/settings");
     } else {
-      setShowModal(true);
+      setShowAuthDialog(true);
     }
   };
 
-  const handleModalRegister = () => {
-    router.push("/register");
-  };
-
-  const handleModalLogin = () => {
-    router.push("/login");
-  };
-
-  const handleRegisterNowClick = () => {
-    router.push("/register");
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  }
-  
   return (
-    <section className="bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-50 via-white to-blue-50 py-20">
-        <div className="container mx-auto px-6 lg:px-20 flex flex-col-reverse md:flex-row items-center gap-16">
-            {/* Text Content */}
-            <div className="md:w-1/2 h-full flex flex-col justify-center text-center md:text-left">
-            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-800 leading-tight mb-6">
-                Welcome to <span className="text-blue-600">LetUsConnect</span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-8 max-w-md mx-auto md:mx-0">
+      <section className="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div 
+              {...fadeIn}
+              className="text-center lg:text-left"
+            >
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+                Welcome to <span className="text-blue-600">Let Us Connect</span>
+              </h1>
+              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto lg:mx-0">
                 Empowering students, alumni, and professionals to build meaningful 
                 connections, advance careers, and foster collaboration. Join the 
                 community that helps you thrive and achieve your goals.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-4">
+              </p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                 <Link href="/register">
-                    <button
-                    className="bg-blue-600 text-white font-bold px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition"
-                    >
-                    Register
-                    </button>
+                  <Button size="lg" className="font-semibold">
+                    Register Now
+                  </Button>
                 </Link>
                 <Link href="/login">
-                    <button
-                    className="bg-white text-blue-600 font-bold px-6 py-3 rounded-lg text-lg hover:bg-gray-100 transition"
-                    >
+                  <Button size="lg" variant="outline" className="font-semibold">
                     Login
-                    </button>
+                  </Button>
                 </Link>
-            </div>
-            </div>
-
-            {/* Visual Content */}
-            <div className="md:w-1/2 h-full flex justify-center relative">
-            <div className="absolute inset-0 bg-blue-100 w-[24rem] h-[24rem] rounded-full opacity-50 -z-10 blur-lg animate-pulse"></div>
-            <img
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              {...fadeIn}
+              transition={{ delay: 0.2 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 bg-blue-200 rounded-full opacity-20 blur-3xl" />
+              <img
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
-                alt="Collaboration Illustration"
-                className="rounded-xl shadow-lg w-[90%] h-auto object-cover md:w-[28rem]"
-            />
-            </div>
+                alt="Collaboration"
+                className="relative rounded-lg shadow-2xl w-full max-w-2xl mx-auto"
+              />
+            </motion.div>
+          </div>
+          <motion.div 
+            {...fadeIn} 
+            transition={{ delay: 0.4 }}
+            className="mt-16"
+          >
+            <Card className="border-2">
+              {/* Additional Context Section */}
+              <div className="mt-10 text-center px-2 lg:px-14">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
+                  What Makes Let Us Connect Unique?
+                </h2>
+                <div>
+                <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
+                    Our platform bridges the gap between students, alumni, and industry experts by 
+                    fostering mentorship, collaboration, and career growth opportunities. Whether 
+                    you&rsquo;re looking to find a mentor, collaborate on projects, or expand your 
+                    professional network, LetUsConnect is here to make it happen.
+                </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         </div>
+      </section>
 
-        {/* Additional Context Section */}
-        <div className="mt-16 text-center px-6 lg:px-20">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-            What Makes LetUsConnect Unique?
-            </h2>
-            <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6 lg:p-10">
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-                Our platform bridges the gap between students, alumni, and industry experts by 
-                fostering mentorship, collaboration, and career growth opportunities. Whether 
-                you&rsquo;re looking to find a mentor, collaborate on projects, or expand your 
-                professional network, LetUsConnect is here to make it happen.
-            </p>
-            </div>
-        </div>
-      </div>
+      {/* Getting Started Steps */}
+        <div className="container mx-auto max-w-7xl">
+          <motion.h2 
+            {...fadeIn}
+            className="text-3xl font-bold text-center mb-12"
+          >
+            Getting Started is Easy
+          </motion.h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <motion.div {...fadeIn} transition={{ delay: 0.2 }}>
+              <StepCard
+                icon={UserPlus}
+                title="Step 1: Register"
+                description="Sign up with your details to gain access to personalized features and explore the community."
+                actionButton={
+                  <Link href="/register">
+                    <Button>Register Now</Button>
+                  </Link>
+                }
+              />
+            </motion.div>
 
-
-
-
-      {/* Enhanced Onboarding Steps */}
-      <div className="container mx-auto px-6 lg:px-20 mt-16">
-        <h2 className="text-3xl font-bold text-center mb-8">Getting Started is Easy</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Step 1 */}
-          <Card isHoverable className="transition-transform hover:scale-105 shadow-lg">
-            <CardHeader className="flex justify-center items-center text-blue-600">
-              <FaUserPlus size={50} />
-            </CardHeader>
-            <CardBody className="text-center">
-              <h3 className="text-xl font-bold mb-2">Step 1: Register</h3>
-              <p className="text-gray-600">
-                Sign up with your details to gain access to personalized features and explore the community.
-              </p>
-            </CardBody>
-            <CardFooter className="flex justify-center">
-                <Button
-                    className="bg-blue-600 text-white font-bold hover:bg-blue-700"
-                    size="sm"
-                    onClick={handleRegisterNowClick}
-                >
-                    Register Now
-                </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Step 2 */}
-          <Card isHoverable className="transition-transform hover:scale-105 shadow-lg">
-            <CardHeader className="flex justify-center items-center text-green-600">
-              <FaIdBadge size={50} />
-            </CardHeader>
-            <CardBody className="text-center">
-              <h3 className="text-xl font-bold mb-2">Step 2: Complete Profile</h3>
-              <p className="text-gray-600">
-                Add a profile picture, your skills, and interests to help others connect with you easily.
-              </p>
-            </CardBody>
-            <CardFooter className="flex justify-center">
-                <Button
-                    className="bg-green-600 text-white font-bold hover:bg-green-700"
-                    size="sm"
-                    onClick={handleCompleteProfileClick}
-                >
+            <motion.div {...fadeIn} transition={{ delay: 0.3 }}>
+              <StepCard
+                icon={UserCircle2}
+                title="Step 2: Complete Profile"
+                description="Add a profile picture, your skills, and interests to help others connect with you easily."
+                actionButton={
+                  <Button onClick={handleCompleteProfile}>
                     Complete Profile
+                  </Button>
+                }
+                color="green"
+              />
+            </motion.div>
+          </div>
+
+          {/* Explore Features */}
+          <motion.div 
+            {...fadeIn} 
+            transition={{ delay: 0.4 }}
+            className="mt-16"
+          >
+            <Card className="border-2">
+              <CardHeader>
+                <div className="flex items-center justify-center mb-4">
+                  <Rocket className="w-12 h-12 text-blue-600" />
+                </div>
+                <CardTitle className="text-2xl text-center">
+                  Step 3: Start Exploring
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <FeatureCard
+                    icon={Users}
+                    title="Connect"
+                    description="Find peers, alumni, and mentors filtered by skills and interests."
+                    color="blue"
+                  />
+                  <FeatureCard
+                    icon={Briefcase}
+                    title="Job Tracker"
+                    description="Track your job applications and manage your career journey."
+                    color="purple"
+                  />
+                  <FeatureCard
+                    icon={HandshakeIcon}
+                    title="Collaborate"
+                    description="Join projects and find like-minded individuals to work with."
+                    color="green"
+                  />
+                  <FeatureCard
+                    icon={MessagesSquare}
+                    title="Mentorship"
+                    description="Find or become a mentor, fostering meaningful guidance."
+                    color="yellow"
+                  />
+                  
+                  <FeatureCard
+                    icon={Calendar}
+                    title="Events"
+                    description="Join webinars, networking sessions, and skill-building workshops."
+                    color="pink"
+                  />
+                  <FeatureCard
+                    icon={Users}
+                    title="Groups"
+                    description="Join interest-based groups for discussions and networking."
+                    color="teal"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-center pb-6">
+                <Button size="lg" className="font-semibold">
+                  Start Exploring
                 </Button>
-            </CardFooter>
-          </Card>
+              </CardFooter>
+            </Card>
+          </motion.div>
         </div>
-        
 
-        {/* Step 3 - Expanded Start Exploring */}
-        <Card isHoverable className="transition-transform hover:scale-105 shadow-lg mt-8">
-          <CardHeader className="flex justify-center items-center text-teal-600">
-            <FaRocket size={50} />
-          </CardHeader>
-          <CardBody>
-            <h3 className="text-xl font-bold text-center mb-6">Step 3: Start Exploring</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Connect */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-blue-600">
-                  <FaUsers size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Connect</h4>
-                  <p className="text-gray-600">
-                    Search for peers, alumni, or mentors using filters like skills, interests, and programs.
-                  </p>
-                </CardBody>
-              </Card>
-
-              {/* Collaborate */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-green-600">
-                  <FaHandsHelping size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Collaborate</h4>
-                  <p className="text-gray-600">
-                    Join or post collaborative projects and find like-minded individuals to work with.
-                  </p>
-                </CardBody>
-              </Card>
-
-              {/* Mentorship */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-yellow-600">
-                  <FaComments size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Mentorship</h4>
-                  <p className="text-gray-600">
-                    Explore the mentorship portal to find or become a mentor, fostering meaningful guidance.
-                  </p>
-                </CardBody>
-              </Card>
-
-              {/* Opportunities */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-teal-600">
-                  <FaBriefcase size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Opportunities</h4>
-                  <p className="text-gray-600">
-                    Browse the job board for internships, jobs, or freelance gigs shared by alumni and companies.
-                  </p>
-                </CardBody>
-              </Card>
-
-              {/* Events */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-purple-600">
-                  <FaCalendarAlt size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Events</h4>
-                  <p className="text-gray-600">
-                    Participate in webinars, networking sessions, and competitions to grow your skills and network.
-                  </p>
-                </CardBody>
-              </Card>
-
-              {/* Groups */}
-              <Card isHoverable className="shadow-lg">
-                <CardHeader className="flex justify-center items-center text-pink-600">
-                  <FaUsers size={40} />
-                </CardHeader>
-                <CardBody className="text-center">
-                  <h4 className="text-lg font-bold mb-2">Groups</h4>
-                  <p className="text-gray-600">
-                    Join or create interest-based groups for discussions, resource sharing, and networking.
-                  </p>
-                </CardBody>
-              </Card>
-            </div>
-          </CardBody>
-          <CardFooter className="flex justify-center">
-            <Button className="bg-teal-600 text-white font-bold hover:bg-teal-700" size="lg">
-              Start Exploring
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-
-      {/* Call to Action */}
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 py-16 mt-20">
-        <div className="container mx-auto px-6 lg:px-20 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">
-            Hear from Our Community
-        </h2>
-        <p className="text-gray-600 italic">
-            &ldquo;LetUsConnect has been instrumental in helping me find the right
-            mentors and collaborate on exciting projects.&rdquo;
-        </p>
-        <p className="text-gray-800 font-bold mt-4">&mdash; Jane Doe</p>
+      {/* Testimonial Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <motion.div {...fadeIn}>
+            <h2 className="text-3xl font-bold mb-8">
+              Hear from Our Community
+            </h2>
+            <Card className="bg-white/50 backdrop-blur">
+              <CardContent className="pt-6">
+                <p className="text-lg text-muted-foreground italic">
+                  "LetUsConnect has been instrumental in helping me find the right
+                  mentors and collaborate on exciting projects."
+                </p>
+                <p className="text-sm font-semibold mt-4">— Jane Doe</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-      </div>
-      {/* Modal */}
-      <ModalPopup
-        isOpen={showModal}
-        title="Complete Step 1 First"
-        content="Please register or log in to complete your profile."
-        confirmLabel="Register"
-        cancelLabel="Close"
-        onConfirm={handleModalRegister}
-        onCancel={handleCloseModal}
-        confirmColor="primary"
-        cancelColor="danger"
-        showCancelButton
+      </section>
+
+      <LoginDialog
+        title="Complete Step 1 First to Complete Your Profile" 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)} 
       />
-    </section>
+    </div>
   );
-}
+};
+
+export default GetStartedPage;
