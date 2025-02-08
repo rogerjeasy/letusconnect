@@ -13,6 +13,20 @@ export const ReminderTypeEnum = z.enum([
   'EMAIL', 'SMS', 'NONE'
 ]);
 
+// Custom URL validator that allows empty strings
+const flexibleUrl = z.string().refine(
+  (val) => {
+    if (!val) return true; // Allow empty strings
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: "Invalid URL format" }
+);
+
 // Interview Round Schema
 export const InterviewRoundSchema = z.object({
   roundNumber: z.number().int().min(1),
@@ -39,8 +53,8 @@ export const JobSchema = z.object({
   salaryRange: z.string().optional(),
   jobType: z.string().optional(),
   jobDescription: z.string().optional(),
-  jobPostLink: z.string().url().optional(),
-  companyWebsite: z.string().url().optional(),
+  jobPostLink: flexibleUrl.optional(),
+  companyWebsite: flexibleUrl.optional(),
   referral: z.string().optional(),
   interviews: z.array(InterviewRoundSchema).optional(),
   offerDetails: z.string().optional(),
@@ -51,7 +65,7 @@ export const JobSchema = z.object({
 });
 
 // Job Create/Update Form Schema (can be more lenient)
-export const JobCreateSchema = JobSchema.omit({ 
-  id: true, 
-  userId: true, 
+export const JobCreateSchema = JobSchema.omit({
+  id: true,
+  userId: true,
 }).partial();

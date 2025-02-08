@@ -28,6 +28,8 @@ import JobApplications from './job-application';
 import AnalyticsDashboard from './job-analytics';
 import { useJobStore } from '@/store/useJobStore';
 import { useUserStore } from '@/store/userStore';
+import { JobStatusEnum } from '@/store/jobStore';
+import { z } from 'zod';
 
 const JobTrackerContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -37,19 +39,17 @@ const JobTrackerContent: React.FC = () => {
   const currentUser = useUserStore(state => state.user);
 
   useEffect(() => {
-    if (currentUser && jobs.length > 0) {
-      // Calculate counts from jobs array
+    if (currentUser && Array.isArray(jobs) && jobs.length > 0) {
       const counts = jobs.reduce((acc, job) => {
-        const status = job.status;
-        acc[status] = (acc[status] || 0) + 1;
+        if (job && job.status && Object.values(JobStatusEnum.Values).includes(job.status)) {
+          acc[job.status] = (acc[job.status] || 0) + 1;
+        }
         return acc;
-      }, {} as Record<string, number>);
-
-      // Set the initial counts in the store
+      }, {} as Record<z.infer<typeof JobStatusEnum>, number>);
+  
       setInitialStatusCounts(counts);
     }
   }, [currentUser, jobs, setInitialStatusCounts]);
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       {/* Responsive Hero Section */}
