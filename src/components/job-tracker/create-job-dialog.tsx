@@ -43,18 +43,6 @@ const CreateJobDialog = () => {
     setMode('review');
   };
 
-  const handleJobCreation = async (jobData: z.infer<typeof JobCreateSchema>) => {
-    setIsSubmitting(true);
-    try {
-      await createJob(jobData);
-      resetDialog();
-    } catch (error) {
-      // Error handling is managed by the CreateJobForm component
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !isSubmitting && setIsOpen(open)}>
       <DialogTrigger asChild>
