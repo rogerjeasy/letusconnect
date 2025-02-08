@@ -12,11 +12,12 @@ import {
   Bell, 
   FileSpreadsheet,
   TrendingUp,
-  Clock
+  Clock,
+  ChevronRight,
+  ArrowRight
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-// import LinkedInButton from '@/components/linkedin/linkedin-button';
 
 export const JobTrackerNoAuth: React.FC = () => {
   const router = useRouter();
@@ -24,11 +25,9 @@ export const JobTrackerNoAuth: React.FC = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Check for authentication token
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
 
-    // Handle authentication messages
     const success = searchParams.get('success');
     const error = searchParams.get('error');
 
@@ -100,26 +99,62 @@ export const JobTrackerNoAuth: React.FC = () => {
         <p className="text-sm md:text-xl text-blue-800 mb-6">
           Connect with LinkedIn to start tracking your job applications
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          {/* <LinkedInButton /> */}
-          <Button 
-            size="lg" 
-            onClick={() => router.push("/login")} 
-            className="w-full sm:w-auto"
+
+        {/* Enhanced Button Group */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-3 md:gap-4 max-w-3xl mx-auto px-4">
+          {/* Primary CTA Button */}
+          <Button
+            size="lg"
+            onClick={() => router.push("/job-tracker/get-started")}
+            className="relative w-full lg:w-auto min-w-[200px] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-semibold px-8 py-7 h-auto rounded-2xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] flex items-center justify-center group overflow-hidden"
           >
-            <LogIn className="mr-2 h-5 w-5" />
-            Login
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-transparent w-[200%] animate-shimmer"></div>
+            <div className="flex items-center gap-3 z-10">
+              <Briefcase className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+              <span className="text-lg font-bold">Get Started</span>
+              <ArrowRight className="w-5 h-5 transform transition-all duration-300 group-hover:translate-x-1" />
+            </div>
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            onClick={() => router.push("/register")} 
-            className="w-full sm:w-auto"
-          >
-            <UserPlus className="mr-2 h-5 w-5" />
-            Register
-          </Button>
+
+          {/* Secondary Buttons Container */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            {/* Login Button */}
+            <Button
+              size="lg"
+              onClick={() => router.push("/login")}
+              className="w-full sm:flex-1 lg:w-auto bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200/80 px-8 py-7 h-auto rounded-xl flex items-center justify-center gap-3 hover:shadow-lg hover:border-blue-200 transition-all duration-300 group"
+            >
+              <LogIn className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
+              <span className="font-semibold">Login</span>
+            </Button>
+
+            {/* Register Button */}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => router.push("/register")}
+              className="w-full sm:flex-1 lg:w-auto bg-gray-50/50 hover:bg-white text-gray-700 border-2 border-gray-200/80 px-8 py-7 h-auto rounded-xl flex items-center justify-center gap-3 hover:shadow-lg hover:border-purple-200 transition-all duration-300 group"
+            >
+              <UserPlus className="w-5 h-5 text-purple-600 group-hover:scale-110 transition-transform duration-300" />
+              <span className="font-semibold">Register</span>
+            </Button>
+          </div>
         </div>
+
+        {/* Shimmer Animation Style */}
+        <style jsx>{`
+          @keyframes shimmer {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(0);
+            }
+          }
+          .animate-shimmer {
+            animation: shimmer 2.5s infinite;
+          }
+        `}</style>
       </div>
 
       {/* Core Feature Highlights */}
@@ -188,13 +223,15 @@ export const JobTrackerNoAuth: React.FC = () => {
         <Button
           variant="secondary"
           size="lg"
-          className="bg-white text-blue-700 hover:bg-gray-100 w-full sm:w-auto"
+          className="bg-white text-blue-700 hover:bg-gray-100 w-full sm:w-auto group px-8 py-6 h-auto rounded-xl transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
           onClick={() => router.push("/register")}
         >
-          <UserPlus className="mr-2 h-5 w-5" />
-          Start Your Journey Now
+          <UserPlus className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+          <span className="font-semibold">Start Your Journey Now</span>
         </Button>
       </div>
     </div>
   );
 };
+
+export default JobTrackerNoAuth;
