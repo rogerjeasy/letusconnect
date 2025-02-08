@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardBody } from "@nextui-org/react";
+import { Briefcase, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function HeroSection() {
@@ -8,7 +9,7 @@ export default function HeroSection() {
     <Card
       isFooterBlurred
       radius="none"
-      className="relative w-screen max-w-full h-[500px] md:h-[650px] border-none overflow-hidden text-white"
+      className="relative w-screen max-w-full h-[600px] md:h-[750px] border-none overflow-hidden text-white"
     >
       {/* Background Image Slider */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
@@ -39,14 +40,16 @@ export default function HeroSection() {
 
       <CardBody className="relative flex flex-col items-center justify-center text-center px-6 py-12 md:py-16 space-y-6 z-10">
         {/* Hero Title */}
-        <h1 className="text-3xl md:text-4xl font-bold">
-          Connecting Students and Alumni for Lifelong Learning and Professional Growth
-        </h1>
 
-        {/* Hero Subtitle */}
-        <p className="text-lg md:text-xl text-white/80 max-w-2xl">
-          Join a thriving community of students, alumni, and experts to advance your career, share knowledge, and build lasting connections.
-        </p>
+        <div className="space-y-4">
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+            Connecting Students and Alumni for Lifelong Learning and Professional Growth
+            <span className="block text-blue-400">While Tracking Your Career Journey</span>
+          </h1>
+          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+            Join a thriving community of students and alumni while managing your job search journey with our intelligent tracking system.
+          </p>
+        </div>
 
         {/* Buttons */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
@@ -61,6 +64,13 @@ export default function HeroSection() {
                   ➔
                 </span>
               </span>
+            </button>
+          </Link>
+
+          <Link href="/job-tracker">
+            <button className="rounded-lg px-6 py-3 text-lg font-bold bg-white text-blue-600 hover:bg-blue-50 w-full md:w-auto group transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <Briefcase className="w-5 h-5" />
+              Track Your Applications
             </button>
           </Link>
 
