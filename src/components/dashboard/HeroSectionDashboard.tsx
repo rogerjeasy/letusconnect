@@ -1,6 +1,6 @@
 "use client";
 import { Button, Tooltip } from "@nextui-org/react";
-import { FaUserFriends, FaProjectDiagram, FaBriefcase } from "react-icons/fa";
+import { FaUserFriends, FaProjectDiagram, FaBriefcase, FaClipboardList } from "react-icons/fa";
 import { useUserStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -128,25 +128,32 @@ export default function HeroSectionDashboard() {
             {/* CTA Buttons */}
             <div className="mt-6 flex flex-wrap gap-4 justify-center md:justify-start">
               <Button
-                className="bg-blue-600 text-white hover:bg-blue-700 font-bold"
+                className="bg-blue-600 text-white hover:bg-blue-700 font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                 size="lg"
                 onPress={() => router.push("/users-directory")}
               >
                 <FaUserFriends className="mr-2" /> Find Connections
               </Button>
               <Button
-                className="bg-green-600 text-white hover:bg-green-700 font-bold"
+                className="bg-green-600 text-white hover:bg-green-700 font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                 size="lg"
                 onPress={() => router.push("/projects/explore")}
               >
                 <FaProjectDiagram className="mr-2" /> Explore Projects
               </Button>
               <Button
-                className="bg-teal-600 text-white hover:bg-teal-700 font-bold"
+                className="bg-teal-600 text-white hover:bg-teal-700 font-bold transition-all duration-200 shadow-md hover:shadow-lg"
                 size="lg"
                 onPress={() => router.push("/jobs")}
               >
                 <FaBriefcase className="mr-2" /> Browse Jobs
+              </Button>
+              <Button
+                className="bg-purple-600 text-white hover:bg-purple-700 font-bold transition-all duration-200 shadow-md hover:shadow-lg"
+                size="lg"
+                onPress={() => router.push("/job-tracker")}
+              >
+                <FaClipboardList className="mr-2" /> Job Tracker
               </Button>
             </div>
           </div>
