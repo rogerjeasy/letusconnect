@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { z } from 'zod';
 import { JobStatusEnum } from "@/store/jobStore";
+import { useUserStore } from './userStore';
 
 // Define the status count type
 type StatusCount = {
