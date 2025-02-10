@@ -42,7 +42,7 @@ const JobTrackerContent: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (currentUser && Array.isArray(jobs) && jobs.length > 0) {
+    if (currentUser?.uid && Array.isArray(jobs) && jobs.length > 0) {
       const counts = jobs.reduce((acc, job) => {
         if (job && job.status && Object.values(JobStatusEnum.Values).includes(job.status)) {
           acc[job.status] = (acc[job.status] || 0) + 1;
@@ -52,7 +52,7 @@ const JobTrackerContent: React.FC = () => {
   
       setInitialStatusCounts(counts);
     }
-  }, [currentUser, jobs, setInitialStatusCounts]);
+  }, [currentUser?.uid, jobs, setInitialStatusCounts]);
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       {/* Responsive Hero Section */}
