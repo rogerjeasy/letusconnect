@@ -85,6 +85,20 @@ export default function ChatContainerPage() {
     updateGroupSettings
   } = useGroupChatStore();
 
+  // In your ChatContainerPage.tsx
+// useEffect(() => {
+//   if (user?.uid) {
+//     websocketService.connect(user.uid).catch(error => {
+//       console.error('Failed to connect:', error);
+//       toast.error('Failed to connect to chat server');
+//     });
+
+//     return () => {
+//       websocketService.disconnect();
+//     };
+//   }
+// }, [user?.uid]);
+
   const updateURL = useCallback((type: 'direct' | 'group', chatId: string) => {
     if (chatId) {
       router.push(`/chat?current=${type}&to=${chatId}`);
@@ -284,8 +298,4 @@ export default function ChatContainerPage() {
       />
     </ContainerWrapper>
   );
-}
-
-function useNewWebSocket(arg0: string): { messages: any; sendDirectMessage: any; connectionStatus: any; } {
-  throw new Error('Function not implemented.');
 }
