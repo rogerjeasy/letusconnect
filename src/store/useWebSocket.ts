@@ -1,208 +1,233 @@
-// hooks/useWebSocket.ts
-import { useEffect, useCallback, useRef, useState } from 'react';
-import { websocketService } from '@/services/websocket.service';
-import { DirectMessage } from '@/store/message';
-import { BaseMessage } from '@/store/groupChat';
-import { toast } from 'react-toastify';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useUserStore } from './userStore';
 
-export type WebSocketMessageType =
-  | 'chat_message'
-  | 'user_connected'
-  | 'user_disconnected'
-  | 'typing'
-  | 'read_receipt'
-  | 'message_edited'
-  | 'message_deleted';
-
-interface WebSocketMessage {
-  type: WebSocketMessageType;
-  userId: string;
-  content?: any;
-  metadata?: {
-    recipientId?: string;
-    groupId?: string;
-  };
-  timestamp: number;
+interface WebSocketOptions {
+    onMessage?: (data: any) => void;
+    onConnect?: () => void;
+    onDisconnect?: () => void;
+    onError?: (error: Event) => void;
+    reconnectInterval?: number;
+    reconnectAttempts?: number;
+    enabled?: boolean;
 }
 
-interface UseWebSocketProps {
-  userId: string;
-  onNewMessage?: (message: DirectMessage | BaseMessage) => void;
-  onUserConnected?: (userId: string) => void;
-  onUserDisconnected?: (userId: string) => void;
-  onTyping?: (userId: string) => void;
-  onReadReceipt?: (messageId: string, userId: string) => void;
-  onMessageEdited?: (messageId: string, newContent: string) => void;
-  onMessageDeleted?: (messageId: string) => void;
+interface WebSocketStatus {
+    isConnected: boolean;
+    status: 'Connected' | 'Disconnected' | 'Connecting' | 'Error';
+    lastPing?: number;
 }
 
-export const useWebSocket = ({
-  userId,
-  onNewMessage,
-  onUserConnected,
-  onUserDisconnected,
-  onTyping,
-  onReadReceipt,
-  onMessageEdited,
-  onMessageDeleted
-}: UseWebSocketProps) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-  const handlersRef = useRef<Array<() => void>>([]);
-  const messageQueueRef = useRef<WebSocketMessage[]>([]);
+export const useWebSocket = (baseUrl: string, options: WebSocketOptions = {}) => {
+    const {
+        onMessage,
+        onConnect,
+        onDisconnect,
+        onError,
+        reconnectInterval = 3000,
+        reconnectAttempts = Infinity,
+        enabled = true,
+    } = options;
 
-  const setupMessageHandlers = useCallback(() => {
-    const handlers: Array<[WebSocketMessageType, (message: WebSocketMessage) => void]> = [];
+    const [wsStatus, setWsStatus] = useState<WebSocketStatus>({
+        isConnected: false,
+        status: 'Disconnected'
+    });
+    const ws = useRef<WebSocket | null>(null);
+    const reconnectCount = useRef(0);
+    const reconnectTimeoutId = useRef<NodeJS.Timeout | null>(null);
+    const pingIntervalId = useRef<NodeJS.Timeout | null>(null);
 
-    // Chat message handler
-    if (onNewMessage) {
-      const handler = (message: WebSocketMessage) => {
-        if (!message.content) return;
+    const startPingInterval = useCallback(() => {
+        if (pingIntervalId.current) {
+            clearInterval(pingIntervalId.current);
+        }
+
+        pingIntervalId.current = setInterval(() => {
+            if (ws.current?.readyState === WebSocket.OPEN) {
+                try {
+                    ws.current.send(JSON.stringify({
+                        type: 'ping',
+                        content: { timestamp: Date.now() },
+                        from: useUserStore.getState().user?.uid,
+                        time: Math.floor(Date.now() / 1000)
+                    }));
+                } catch (error) {
+                    console.error('Error sending ping:', error);
+                }
+            }
+        }, 30000); // Ping every 30 seconds
+
+        return () => {
+            if (pingIntervalId.current) {
+                clearInterval(pingIntervalId.current);
+            }
+        };
+    }, []);
+
+    const connect = useCallback(async () => {
+        if (!enabled || !baseUrl || reconnectCount.current >= reconnectAttempts) {
+            setWsStatus({
+                isConnected: false,
+                status: 'Disconnected',
+                lastPing: undefined
+            });
+            return;
+        }
         
+        if (ws.current?.readyState === WebSocket.CONNECTING) {
+            return; // Already connecting
+        }
+    
+        if (ws.current?.readyState === WebSocket.OPEN) {
+            setWsStatus({
+                isConnected: true,
+                status: 'Connected',
+                lastPing: Date.now()
+            });
+            return;
+        }
+
+        setWsStatus(prev => ({ ...prev, status: 'Connecting' }));
+    
         try {
-          if (message.metadata?.groupId) {
-            onNewMessage(message.content as BaseMessage);
-          } else {
-            onNewMessage(message.content as DirectMessage);
-          }
+            const token = useUserStore.getState().token;
+            if (!token) {
+                throw new Error('No authentication token available');
+            }
+    
+            const wsUrl = `${baseUrl}?token=${token}`;
+            console.log(`Connecting to WebSocket at ${wsUrl}`);
+            
+            if (ws.current) {
+                ws.current.close(1000, 'Reconnecting');
+            }
+    
+            ws.current = new WebSocket(wsUrl);
+    
+            ws.current.addEventListener('open', () => {
+                console.log('WebSocket connection established');
+                setWsStatus({
+                    isConnected: true,
+                    status: 'Connected',
+                    lastPing: Date.now()
+                });
+                reconnectCount.current = 0;
+                startPingInterval();
+                onConnect?.();
+            });
+    
+            ws.current.addEventListener('close', (event) => {
+                console.log(`WebSocket closed: ${event.code}`, {
+                    wasClean: event.wasClean,
+                    reason: event.reason
+                });
+                
+                setWsStatus({
+                    isConnected: false,
+                    status: 'Disconnected',
+                    lastPing: undefined
+                });
+                
+                if (pingIntervalId.current) {
+                    clearInterval(pingIntervalId.current);
+                }
+
+                onDisconnect?.();
+    
+                if (enabled && reconnectCount.current < reconnectAttempts) {
+                    const backoffTime = Math.min(1000 * Math.pow(2, reconnectCount.current), 30000);
+                    console.log(`Scheduling reconnection in ${backoffTime}ms`);
+                    
+                    reconnectTimeoutId.current = setTimeout(() => {
+                        reconnectCount.current += 1;
+                        console.log(`Reconnecting... Attempt ${reconnectCount.current}`);
+                        connect();
+                    }, backoffTime);
+                }
+            });
+    
+            ws.current.addEventListener('error', (event) => {
+                console.error('WebSocket Error:', event);
+                setWsStatus(prev => ({ ...prev, status: 'Error' }));
+                onError?.(event);
+            });
+    
+            ws.current.addEventListener('message', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'pong') {
+                        setWsStatus(prev => ({ ...prev, lastPing: Date.now() }));
+                    } else {
+                        onMessage?.(data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
+            });
+    
         } catch (error) {
-          console.error('Error processing new message:', error);
+            console.error('WebSocket connection error:', error);
+            setWsStatus({
+                isConnected: false,
+                status: 'Error',
+                lastPing: undefined
+            });
+
+            if (enabled && reconnectCount.current < reconnectAttempts) {
+                const backoffTime = Math.min(1000 * Math.pow(2, reconnectCount.current), 30000);
+                console.log(`Scheduling reconnection after error in ${backoffTime}ms`);
+                
+                reconnectTimeoutId.current = setTimeout(() => {
+                    reconnectCount.current += 1;
+                    connect();
+                }, backoffTime);
+            }
         }
-      };
-      websocketService.on('chat_message', handler);
-      handlers.push(['chat_message', handler]);
-    }
+    }, [baseUrl, enabled, reconnectAttempts]);
 
-    // Connection status handlers
-    if (onUserConnected) {
-      const handler = (message: WebSocketMessage) => {
-        onUserConnected(message.userId);
-        setIsConnected(true);
-      };
-      websocketService.on('user_connected', handler);
-      handlers.push(['user_connected', handler]);
-    }
-
-    if (onUserDisconnected) {
-      const handler = (message: WebSocketMessage) => {
-        onUserDisconnected(message.userId);
-        setIsConnected(false);
-      };
-      websocketService.on('user_disconnected', handler);
-      handlers.push(['user_disconnected', handler]);
-    }
-
-    // Typing indicator handler
-    if (onTyping) {
-      const handler = (message: WebSocketMessage) => {
-        if (message.metadata?.recipientId === userId) {
-          onTyping(message.userId);
-        }
-      };
-      websocketService.on('typing', handler);
-      handlers.push(['typing', handler]);
-    }
-
-    // Read receipt handler
-    if (onReadReceipt) {
-      const handler = (message: WebSocketMessage) => {
-        if (message.content?.messageId && message.userId) {
-          onReadReceipt(message.content.messageId, message.userId);
-        }
-      };
-      websocketService.on('read_receipt', handler);
-      handlers.push(['read_receipt', handler]);
-    }
-
-    // Message edited handler
-    if (onMessageEdited) {
-      const handler = (message: WebSocketMessage) => {
-        if (message.content?.messageId && message.content?.newContent) {
-          onMessageEdited(message.content.messageId, message.content.newContent);
-        }
-      };
-      websocketService.on('message_edited', handler);
-      handlers.push(['message_edited', handler]);
-    }
-
-    // Message deleted handler
-    if (onMessageDeleted) {
-      const handler = (message: WebSocketMessage) => {
-        if (message.content?.messageId) {
-          onMessageDeleted(message.content.messageId);
-        }
-      };
-      websocketService.on('message_deleted', handler);
-      handlers.push(['message_deleted', handler]);
-    }
-
-    // Store cleanup functions
-    handlersRef.current = handlers.map(([type, handler]) => 
-      () => websocketService.off(type, handler)
-    );
-  }, [userId, onNewMessage, onUserConnected, onUserDisconnected, onTyping, 
-      onReadReceipt, onMessageEdited, onMessageDeleted]);
-
-  const processMessageQueue = useCallback(() => {
-    while (messageQueueRef.current.length > 0 && isConnected) {
-      const message = messageQueueRef.current.shift();
-      if (message) {
-        websocketService.sendMessage(message);
-      }
-    }
-  }, [isConnected]);
-
-  const sendMessage = useCallback((message: WebSocketMessage) => {
-    if (!isConnected) {
-      messageQueueRef.current.push(message);
-      return false;
-    }
-    return websocketService.sendMessage(message);
-  }, [isConnected]);
-
-  const sendTyping = useCallback((recipientId: string) => {
-    if (!isConnected) return false;
-    return websocketService.sendTyping(recipientId);
-  }, [isConnected]);
-
-  useEffect(() => {
-    const connect = async () => {
-      if (!userId) return;
-
-      try {
-        await websocketService.connect(userId);
-        setIsConnected(true);
-        setupMessageHandlers();
-        processMessageQueue();
-      } catch (error) {
-        console.error('WebSocket connection error:', error);
-        setIsConnected(false);
-        
-        // Clear any existing reconnection timeout
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
+    const sendMessage = useCallback((type: string, content: any, to?: string) => {
+        if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+            console.warn('WebSocket is not open. Message not sent.');
+            return;
         }
 
-        // Set up reconnection
-        reconnectTimeoutRef.current = setTimeout(connect, 3000);
-      }
+        try {
+            const message = {
+                type,
+                content,
+                to,
+                from: useUserStore.getState().user?.uid,
+                time: Math.floor(Date.now() / 1000),
+            };
+            ws.current.send(JSON.stringify(message));
+            console.log('Message sent:', message);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (enabled && baseUrl) {
+            connect();
+        }
+
+        return () => {
+            if (reconnectTimeoutId.current) {
+                clearTimeout(reconnectTimeoutId.current);
+            }
+            if (pingIntervalId.current) {
+                clearInterval(pingIntervalId.current);
+            }
+            if (ws.current) {
+                ws.current.close(1000, 'Component unmounted');
+            }
+        };
+    }, [connect, enabled, baseUrl]);
+
+    return {
+        isConnected: wsStatus.isConnected,
+        status: wsStatus.status,
+        lastPing: wsStatus.lastPing,
+        sendMessage
     };
-
-    connect();
-
-    return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      handlersRef.current.forEach(cleanup => cleanup());
-      websocketService.disconnect();
-      setIsConnected(false);
-    };
-  }, [userId, setupMessageHandlers, processMessageQueue]);
-
-  return {
-    sendMessage,
-    sendTyping,
-    isConnected
-  };
 };
