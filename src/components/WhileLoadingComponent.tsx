@@ -13,6 +13,7 @@ import {
   FiTrendingUp,
   FiGlobe 
 } from "react-icons/fi";
+import NewNavbar from "./navbar/NewNavBar";
 
 const SessionCheck = ({ onRetry }: { onRetry: () => void }) => {
   const [isTakingLong, setIsTakingLong] = useState(false);
@@ -91,7 +92,7 @@ const SessionCheck = ({ onRetry }: { onRetry: () => void }) => {
 
   return (
     <div className="relative min-h-screen w-full bg-gray-50 flex flex-col">
-      <TopNav />
+      <NewNavbar />
       {/* Content */}
       <div className="flex-grow flex items-center justify-center mt-16 sm:mt-20 md:mt-24 lg:mt-28">
         <Card className="max-w-2xl w-full mx-4 p-8 shadow-lg bg-white/70 backdrop-blur-sm">

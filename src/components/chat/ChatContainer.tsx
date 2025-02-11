@@ -37,10 +37,6 @@ const isGroupChat = (chat: DirectMessage | GroupChat): chat is GroupChat => {
   return 'participants' in chat;
 };
 
-const isDirectChat = (chat: any): chat is DirectMessage => {
-  return 'receiverId' in chat && 'senderId' in chat;
-};
-
 export const ChatContainer = ({
   currentUserId,
   directChats,
